@@ -8,9 +8,9 @@ import Compiler.Util
 import Either exposing (Either(..))
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
-import Scripta.Language exposing (Language)
 import Parser.Line exposing (PrimitiveBlockType(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
+import Scripta.Language exposing (Language)
 
 
 l0Empty =

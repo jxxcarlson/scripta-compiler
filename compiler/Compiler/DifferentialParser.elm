@@ -8,9 +8,9 @@ import Markup
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock)
 import Parser.BlockUtil
-import Scripta.Language exposing (Language(..))
 import Parser.Line exposing (PrimitiveBlockType(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
+import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
 import XMarkdown.Expression
 

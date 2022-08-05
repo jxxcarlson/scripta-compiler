@@ -3,7 +3,7 @@ module Render.Graphics exposing (image, quiver, svg, tikz)
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
 import Dict
-import Element exposing (Element, alignLeft, alignRight, centerX, column, el,rgb255, px, spacing)
+import Element exposing (Element, alignLeft, alignRight, centerX, column, el, px, rgb255, spacing)
 import Element.Font as Font
 import Parser.Expr exposing (Expr)
 import Render.Msg exposing (MarkupMsg)
@@ -12,10 +12,10 @@ import Render.Utility
 import SvgParser
 
 
-
 red : Element.Color
 red =
     rgb255 255 0 0
+
 
 type alias ImageParameters msg =
     { caption : Element msg

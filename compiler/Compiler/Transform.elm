@@ -1,8 +1,8 @@
 module Compiler.Transform exposing (transform)
 
 import MicroLaTeX.Parser.Transform
-import Scripta.Language exposing (Language(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
+import Scripta.Language exposing (Language(..))
 import XMarkdown.Transform
 
 

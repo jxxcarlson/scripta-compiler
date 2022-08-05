@@ -13,8 +13,8 @@ module Parser.PrimitiveBlock exposing
 
 import List.Extra
 import MicroLaTeX.Parser.TransformLaTeX
-import Scripta.Language exposing (Language(..))
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..), isEmpty, isNonEmptyBlank)
+import Scripta.Language exposing (Language(..))
 
 
 {-| -}

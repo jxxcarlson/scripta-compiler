@@ -21,9 +21,9 @@ import Parser.Block exposing (ExpressionBlock)
 import Parser.BlockUtil
 import Parser.Expr exposing (Expr(..))
 import Parser.Forest exposing (Forest)
-import Scripta.Language exposing (Language(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Parser.Tree
+import Scripta.Language exposing (Language(..))
 import Tree
 import XMarkdown.Expression
 

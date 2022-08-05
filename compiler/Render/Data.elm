@@ -14,7 +14,8 @@ import Render.Settings exposing (Settings)
 import Render.Utility
 
 
-red = Element.rgb255 255 0 0
+red =
+    Element.rgb255 255 0 0
 
 
 type alias Options =
@@ -29,12 +30,13 @@ type alias Options =
     }
 
 
-
 type alias Range =
     { lowest : Maybe Float, highest : Maybe Float }
 
 
-fontWidth = 10
+fontWidth =
+    10
+
 
 chart : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
 chart count acc settings args id str =

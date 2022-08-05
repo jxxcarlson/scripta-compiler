@@ -1,11 +1,9 @@
 module Button exposing (ButtonData, template)
 
-
-
 import Element exposing (..)
 import Element.Background as Background
-import Element.Font as Font
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import Html.Attributes
 
@@ -18,7 +16,8 @@ template buttonData =
             , label = addTooltip buttonData.tooltipPlacement buttonData.tooltipText (el [ centerX, centerY, Font.size 14 ] (text buttonData.label))
             }
         ]
-        
+
+
 type alias ButtonData msg =
     { tooltipText : String
     , tooltipPlacement : Element msg -> Attribute msg
@@ -26,15 +25,18 @@ type alias ButtonData msg =
     , msg : msg
     , label : String
     }
-        
+
+
 darkRed : Color
 darkRed =
     rgb255 140 0 0
-            
+
+
 addTooltip placement label element =
     el
         [ tooltip placement (myTooltip label) ]
         element
+
 
 tooltip : (Element msg -> Attribute msg) -> Element Never -> Attribute msg
 tooltip usher tooltip_ =
@@ -66,8 +68,6 @@ myTooltip str =
         (text str)
 
 
-
-    
 buttonStyle : List (Element.Attr () msg)
 buttonStyle =
     [ Font.color (Element.rgb255 255 255 255)

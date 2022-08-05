@@ -7,11 +7,11 @@ import Markup
 import Parser.Block exposing (ExpressionBlock)
 import Parser.BlockUtil as BlockUtil
 import Parser.Forest exposing (Forest)
-import Scripta.Language exposing (Language)
 import Parser.Settings
 import Render.Block
 import Render.Msg exposing (MarkupMsg)
 import Render.Settings exposing (Settings)
+import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 
 

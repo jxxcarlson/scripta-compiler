@@ -16,7 +16,6 @@ import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings
 import Render.Utility
 import Tree
-import Either
 
 
 view : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> Element Render.Msg.MarkupMsg
@@ -75,8 +74,8 @@ prepareTOC count acc settings ast =
         headings =
             getHeadings ast
 
-        banner :  Element MarkupMsg
-        banner  =
+        banner : Element MarkupMsg
+        banner =
             Compiler.ASTTools.banner ast
                 |> Maybe.map (Parser.Block.setName "banner_")
                 |> Maybe.map (Render.Block.render count acc settings)
@@ -97,7 +96,7 @@ prepareTOC count acc settings ast =
 
         subtitle =
             headings.subtitle
-                |>  (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
+                |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
 
         spaceBelow k =
             Element.el [ Element.paddingEach { bottom = k, top = 0, left = 0, right = 0 } ] (Element.text " ")
@@ -106,7 +105,7 @@ prepareTOC count acc settings ast =
         banner :: title :: subtitle :: []
 
     else
-       banner :: title :: subtitle :: spaceBelow 8 :: toc
+        banner :: title :: subtitle :: spaceBelow 8 :: toc
 
 
 prepareFrontMatter : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)
@@ -125,7 +124,7 @@ prepareFrontMatter count acc settings ast =
             Render.Utility.elementAttribute "id" "title"
 
         title =
-           headings.title
+            headings.title
                 |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ titleSize, idAttr ])
 
         subtitle =
@@ -148,31 +147,34 @@ tocIndentAux args =
             String.toInt str |> Maybe.withDefault 0 |> (\x -> 12 * (x - 1))
 
 
-getHeadings : Forest ExpressionBlock -> { title : List Expr, subtitle :  List Expr }
+getHeadings : Forest ExpressionBlock -> { title : List Expr, subtitle : List Expr }
 getHeadings ast =
     let
         data =
             ast |> Compiler.ASTTools.titleTOC |> Compiler.ASTTools.toExprRecord
 
-        flattened = List.map Tree.flatten ast |> List.concat
+        flattened =
+            List.map Tree.flatten ast |> List.concat
 
-        title_ = Compiler.ASTTools.filterBlocksOnName "title" (List.map Tree.flatten ast |> List.concat) |> Debug.log "!! TITLE"
+        title_ =
+            Compiler.ASTTools.filterBlocksOnName "title" (List.map Tree.flatten ast |> List.concat) |> Debug.log "!! TITLE"
 
         title : List Expr
-        title = flattened
-            |> Compiler.ASTTools.filterBlocksOnName "title"
-            |> List.map (Parser.Block.getContent )
-            |> List.concat
+        title =
+            flattened
+                |> Compiler.ASTTools.filterBlocksOnName "title"
+                |> List.map Parser.Block.getContent
+                |> List.concat
 
-            --data
-            --    |> List.filter (\item -> item.blockType == OrdinaryBlock [ "title" ])
-            --    |> List.head
-            --    |> Maybe.map .content
-
+        --data
+        --    |> List.filter (\item -> item.blockType == OrdinaryBlock [ "title" ])
+        --    |> List.head
+        --    |> Maybe.map .content
         subtitle : List Expr
-        subtitle = flattened
-                    |> Compiler.ASTTools.filterBlocksOnName "subtitle"
-                    |> List.map (Parser.Block.getContent )
-                    |> List.concat
+        subtitle =
+            flattened
+                |> Compiler.ASTTools.filterBlocksOnName "subtitle"
+                |> List.map Parser.Block.getContent
+                |> List.concat
     in
     { title = title, subtitle = subtitle }

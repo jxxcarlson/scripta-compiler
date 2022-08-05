@@ -29,8 +29,8 @@ import Markup
 import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Block exposing (ExpressionBlock)
 import Parser.Forest exposing (Forest)
-import Scripta.Language exposing (Language(..))
 import Parser.PrimitiveBlock as PrimitiveBlock exposing (PrimitiveBlock)
+import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
 
 

@@ -1,45 +1,46 @@
 module Scripta.API exposing
     ( DisplaySettings
     , EditRecord
-    , render
-    , makeSettings
+    , export
     , init
+    , makeSettings
+    , render
     , update
     )
 
-
-import Render.Msg
-import Parser.Block exposing (ExpressionBlock)
-import Parser.Forest exposing (Forest)
-import Compiler.Transform
+import Compiler.AbstractDifferentialParser
+import Compiler.Acc
 import Compiler.DifferentialParser
+import Compiler.Transform
+import Dict exposing (Dict)
+import Element exposing (..)
 import L0.Parser.Expression
 import MicroLaTeX.Parser.Expression
-import Parser.Block exposing (ExpressionBlock)
+import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.BlockUtil
 import Parser.Expr exposing (Expr(..))
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Parser.Tree
+import Render.Export.LaTeX
 import Render.Markup
-import Compiler.Acc
-import Compiler.AbstractDifferentialParser
-import Scripta.TOC
-import Tree
+import Render.Msg
 import Render.Settings
+import Scripta.Language exposing (Language(..))
+import Scripta.TOC
+import Time
 import Tree
 import XMarkdown.Expression
-import Compiler.DifferentialParser
-import Element exposing(..)
-import Dict exposing(Dict)
-import Scripta.Language exposing(Language(..))
-import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
+
 
 init : Dict String String -> Language -> String -> Compiler.DifferentialParser.EditRecord
-init = Compiler.DifferentialParser.init
+init =
+    Compiler.DifferentialParser.init
+
 
 update : EditRecord -> String -> EditRecord
-update = Compiler.DifferentialParser.update
+update =
+    Compiler.DifferentialParser.update
 
 
 type alias EditRecord =
@@ -54,47 +55,65 @@ type alias DisplaySettings =
     , scale : Float
     }
 
+
+
 -- VIEW
 
+
 makeSettings : String -> Maybe String -> Float -> Int -> Render.Settings.Settings
-makeSettings  id selectedSlug scale width =
-   { width = round (scale * toFloat width)
-   , titleSize = 30
-   , paragraphSpacing = 28
-   , showTOC = True
-   , showErrorMessages = False
-   , selectedId = id
-   , selectedSlug = selectedSlug
-   , backgroundColor = Element.rgb 1 1 1
-   , titlePrefix = ""
-   , isStandaloneDocument = False
-   }
+makeSettings id selectedSlug scale width =
+    { width = round (scale * toFloat width)
+    , titleSize = 30
+    , paragraphSpacing = 28
+    , showTOC = True
+    , showErrorMessages = False
+    , selectedId = id
+    , selectedSlug = selectedSlug
+    , backgroundColor = Element.rgb 1 1 1
+    , titlePrefix = ""
+    , isStandaloneDocument = False
+    }
+
 
 renderSettings : DisplaySettings -> Render.Settings.Settings
 renderSettings ds =
     Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
 
 
-type alias Config = { titleSize: Int}
+type alias Config =
+    { titleSize : Int }
 
-config = {titleSize = 18}
 
+config =
+    { titleSize = 18 }
 
 
 render : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
 render displaySettings editRecord =
-  let
-    settings = renderSettings displaySettings
-  in
-  (Scripta.TOC.view displaySettings.counter  editRecord.accumulator (renderSettings displaySettings) editRecord.parsed ) ::  (renderBody displaySettings.counter settings editRecord)
+    let
+        settings =
+            renderSettings displaySettings
+    in
+    Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.parsed :: renderBody displaySettings.counter settings editRecord
 
 
-renderBody : Int ->  Render.Settings.Settings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
-renderBody count settings editRecord  = Render.Markup.renderFromAST  count editRecord.accumulator settings (body editRecord)
+renderBody : Int -> Render.Settings.Settings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
+renderBody count settings editRecord =
+    Render.Markup.renderFromAST count editRecord.accumulator settings (body editRecord)
+
+
+
+-- EXPORT
+
+
+export : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> String
+export =
+    Render.Export.LaTeX.export
 
 
 
 -- PARSER INTERFACE
+
 
 {-| -}
 parse : Language -> String -> Forest ExpressionBlock
@@ -164,5 +183,3 @@ isVerbatimLine str =
 body : { a | parsed : Forest ExpressionBlock } -> Forest ExpressionBlock
 body editRecord =
     editRecord.parsed
-
-

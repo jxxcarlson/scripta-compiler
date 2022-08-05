@@ -16,14 +16,16 @@ import Maybe.Extra
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr(..))
 import Parser.Forest exposing (Forest)
-import Scripta.Language exposing (Language)
 import Parser.MathMacro
 import Parser.Meta exposing (Meta)
 import Parser.Settings
+import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
+
 
 indentationQuantum =
     2
+
 
 type alias Accumulator =
     { headingIndex : Vector

@@ -15,8 +15,8 @@ module Compiler.Util exposing
     )
 
 import Parser exposing ((|.), (|=), Parser, Step(..), loop, map, oneOf, spaces, succeed)
-import Scripta.Language exposing (Language(..))
 import Regex
+import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
 
 
