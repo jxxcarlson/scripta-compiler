@@ -19,6 +19,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Render.Msg exposing (MarkupMsg)
 import Scripta.API
+import Scripta.PDF
 import Scripta.Language exposing (Language(..))
 import Task
 import Text
