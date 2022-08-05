@@ -7,6 +7,7 @@ module Main exposing (main)
 -}
 
 import Browser
+import File.Download
 import Browser.Dom
 import Button
 import Dict
@@ -21,6 +22,7 @@ import Scripta.API
 import Scripta.Language exposing (Language(..))
 import Task
 import Text
+import Time
 
 
 main =
@@ -38,6 +40,7 @@ type alias Model =
     , editRecord : Scripta.API.EditRecord
     , language : Language
     , documentType : DocumentType
+    , currentTime : Time.Posix
     }
 
 
@@ -52,6 +55,7 @@ type Msg
     | Render MarkupMsg
     | SetLanguage Language
     | Info
+    | Export
 
 
 type alias Flags =
@@ -74,8 +78,9 @@ init flags =
       , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Text.microLaTeXDemo
       , language = MicroLaTeXLang
       , documentType = Example
+      , currentTime = Time.millisToPosix 0
       }
-    , Cmd.none
+    , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
     )
 
 
@@ -135,11 +140,24 @@ update msg model =
             , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
             )
 
+        Export ->
+            let
+                defaultSettings = Scripta.API.defaultSettings
+                exportSettings = { defaultSettings | isStandaloneDocument = True }
+
+                exportText = Scripta.API.export model.currentTime exportSettings model.editRecord.parsed
+
+                fileName = Scripta.API.fileNameForExport model.editRecord.parsed 
+            in
+            (model, download fileName exportText)
+
         Render _ ->
             ( model, Cmd.none )
 
 
-
+download : String -> String -> Cmd msg
+download fileName fileContents =
+  File.Download.string fileName "application/x-tex" fileContents
 --
 -- VIEW
 --
@@ -188,6 +206,7 @@ controls model =
         , setLanguageButton "MicroLaTeX" model.documentType MicroLaTeXLang model.language
         , setLanguageButton "XMarkdown" model.documentType XMarkdownLang model.language
         , el [ paddingXY 0 40 ] (infoButton model.documentType)
+        , exportButton
         ]
 
 
@@ -251,6 +270,17 @@ jumpToTop id =
 
 buttonWidth =
     105
+
+
+exportButton :  Element Msg
+exportButton  =
+    Button.template
+        { tooltipText = "Export text to standard LaTeX"
+        , tooltipPlacement = above
+        , attributes = [ Font.color white, Background.color gray, width (px buttonWidth) ]
+        , msg = Export
+        , label = "Export"
+        }
 
 
 infoButton : DocumentType -> Element Msg

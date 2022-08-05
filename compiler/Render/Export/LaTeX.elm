@@ -3,7 +3,7 @@ module Render.Export.LaTeX exposing (export, exportExpr, rawExport)
 import Compiler.ASTTools as ASTTools
 import Compiler.TextMacro as Lambda
 import Dict exposing (Dict)
-import Effect.Time
+import Time
 import Either exposing (Either(..))
 import List.Extra
 import Maybe.Extra
@@ -27,7 +27,7 @@ counterValue ast =
         |> Maybe.andThen String.toInt
 
 
-export : Effect.Time.Posix -> Settings -> Forest ExpressionBlock -> String
+export : Time.Posix -> Settings -> Forest ExpressionBlock -> String
 export currentTime settings_ ast =
     let
         rawBlockNames =
@@ -49,7 +49,7 @@ export currentTime settings_ ast =
         ++ "\n\n\\end{document}\n"
 
 
-frontMatter : Effect.Time.Posix -> Forest ExpressionBlock -> String
+frontMatter : Time.Posix -> Forest ExpressionBlock -> String
 frontMatter currentTime ast =
     let
         dict =
@@ -90,7 +90,7 @@ frontMatter currentTime ast =
         ++ "\\maketitle\n\n"
 
 
-today : Effect.Time.Posix -> String
+today : Time.Posix -> String
 today currenTime =
     "currentTime: not implemented"
 

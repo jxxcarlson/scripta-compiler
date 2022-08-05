@@ -90,7 +90,7 @@ microLaTeXDemo =
 \\title{Demo (MicroLaTeX)}
 
 | banner
-\\link{Scrpta.io https://scripta.io}
+\\link{Scripta.io https://scripta.io}
 
 \\contents
 

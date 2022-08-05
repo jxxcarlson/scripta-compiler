@@ -4,12 +4,18 @@ module Scripta.API exposing
     , export
     , init
     , makeSettings
+    , defaultSettings
     , render
+    , fileNameForExport
+
+
     , update
     )
 
+import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
+import Regex
 import Compiler.DifferentialParser
 import Compiler.Transform
 import Dict exposing (Dict)
@@ -111,6 +117,39 @@ export =
     Render.Export.LaTeX.export
 
 
+
+fileNameForExport : Forest ExpressionBlock -> String
+fileNameForExport ast =
+    ast
+      |> Compiler.ASTTools.title
+      |> compressWhitespace
+      |> String.replace " " "-"
+      |> removeNonAlphaNum
+      |> (\s -> s ++ ".tex")
+
+
+
+
+compressWhitespace : String -> String
+compressWhitespace string =
+    userReplace "\\s\\s+" (\_ -> " ") string
+
+removeNonAlphaNum : String -> String
+removeNonAlphaNum string = userReplace "[^A-Za-z0-9\\-]" (\_ -> "") string
+
+userReplace : String -> (Regex.Match -> String) -> String -> String
+userReplace userRegex replacer string =
+    case Regex.fromString userRegex of
+        Nothing ->
+            string
+
+        Just regex ->
+            Regex.replace regex replacer string
+
+
+
+defaultSettings =
+            Render.Settings.defaultSettings
 
 -- PARSER INTERFACE
 
