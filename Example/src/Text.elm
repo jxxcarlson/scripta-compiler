@@ -5,12 +5,45 @@ info = """
 | title
 About the Scripta compiler
 
-| banner
+[tags jxxcarlson:about-the-scripta-compiler]
+
+| runninghead
 [link Scripta.io https://scripta.io]
 
-| contents
+The Scripta compiler transforms source text to HTML, where
+the source text is one of the following markup languages:
+
+| item
+L0 — an experimental language with syntax inspired by Lisp.
+Can render LaTeX-style
+mathematical text.  This document is written in L0.
+
+| item
+MicroLaTeX — a cousin of LaTeX.  Source text can be exported
+to standard LaTeX
+
+| item
+XMarkdown — a cousin of Markdown.  Can render LaTeX-style
+mathematical text.
 
 
+The Scripta compiler features real-time, fault-tolerant
+parsing and rendering, and so is suitable for an interactive
+editing system in which (a) changes to the source text 
+are rendered "instantly," that is, with no perceptible delay,
+and (b) syntax errors are handled gracefully, marked as such 
+in the rendered text, and with the following text rendered
+properly to the greatest extent possible.
+
+The Scripta compiler is open-source, and can be found at 
+[link github.com/jxxcarlson/scripta-compiler  https://github.com/jxxcarlson/scripta-compiler].  In the Example
+folder, you will find a small demo app.  It is hosted online
+at [link Github https://jxxcarlson.github.io/app/scripta-compiler-demo/assets/index.html].
+
+The Scripta compiler is used to power 
+[link Scripta.io https://scripta.io].  It features
+interactive editing, a searchable store of documents, 
+and facilities for collaboration and web publishing.
 """
 
 microLaTeXDemo = """
