@@ -147,7 +147,7 @@ update msg model =
 
                 exportText = Scripta.API.export model.currentTime exportSettings model.editRecord.parsed
 
-                fileName = Scripta.API.fileNameForExport model.editRecord.parsed 
+                fileName = Scripta.API.fileNameForExport model.editRecord.parsed
             in
             (model, download fileName exportText)
 
