@@ -1,0 +1,3 @@
+scripts:
+
+  compile: elm-make src
