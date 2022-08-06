@@ -1,4 +1,4 @@
-module Button exposing (ButtonData, template)
+module Button exposing (ButtonData, template, simpleTemplate)
 
 import Element exposing (..)
 import Element.Background as Background
@@ -14,6 +14,14 @@ template buttonData =
         [ Input.button buttonStyle
             { onPress = Just buttonData.msg
             , label = addTooltip buttonData.tooltipPlacement buttonData.tooltipText (el [ centerX, centerY, Font.size 14 ] (text buttonData.label))
+            }
+        ]
+simpleTemplate : List (Attribute msg) -> msg -> String -> Element msg
+simpleTemplate attrList msg label_ =
+    row ([ bgGray 0.2, pointer, mouseDown [ Background.color darkRed ] ] ++ attrList)
+        [ Input.button buttonStyle
+            { onPress = Just msg
+            , label = el [ centerX, centerY, Font.size 14 ] (text label_)
             }
         ]
 

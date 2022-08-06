@@ -1,4 +1,4 @@
-module Scripta.PDF exposing (gotLink, printCmd)
+module Scripta.PDF exposing (gotLink, printCmd, PDFMsg(..), PrintingState(..))
 
 import Compiler.ASTTools as ASTTools
 import Process
@@ -18,13 +18,16 @@ import Scripta.API
 type PDFMsg = ChangePrintingState PrintingState | GotPdfLink (Result Http.Error String)
 
 type PrintingState
-    = PrintProcessing
+    = PrintWaiting
+    | PrintProcessing
     | PrintReady
 
+printCmd :  Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 printCmd currentTime settings forest =
      Cmd.batch
-        [ generatePdf currentTime settings forest
-        , Process.sleep 1 |> Task.perform (always (ChangePrintingState PrintProcessing))
+        [
+         Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
+        , generatePdf currentTime settings forest
         ]
 
 generatePdf : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
@@ -54,7 +57,7 @@ generatePdf currentTime settings syntaxTree =
         [ Http.request
             { method = "POST"
             , headers = [ Http.header "Content-Type" "application/json" ]
-            , url = "pdfServer" ++ "/pdf"
+            , url = "https://pdfserv.app/pdf"
             , body = Http.jsonBody (encodeForPDF fileName contentForExport imageUrls)
             , expect = Http.expectString GotPdfLink
             , timeout = Nothing

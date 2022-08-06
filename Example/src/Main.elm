@@ -2,11 +2,12 @@ module Main exposing (main)
 
 {- This is a starter app which presents a text label, text field, and a button.
    What you enter in the text field is echoed in the label.  When you press the
-   button, the text in the label is reverse.
+   button, the text in the label is revers
    This version uses `mdgriffith/elm-ui` for the view functions.
 -}
 
 import Browser
+import Element.Events
 import File.Download
 import Browser.Dom
 import Button
@@ -17,9 +18,11 @@ import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes
+import Http
+import Color
 import Render.Msg exposing (MarkupMsg)
 import Scripta.API
-import Scripta.PDF
+import Scripta.PDF exposing(PDFMsg(..))
 import Scripta.Language exposing (Language(..))
 import Task
 import Text
@@ -34,6 +37,10 @@ main =
         , subscriptions = subscriptions
         }
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Time.every 1000 Tick
+
 
 type alias Model =
     { input : String
@@ -42,6 +49,9 @@ type alias Model =
     , language : Language
     , documentType : DocumentType
     , currentTime : Time.Posix
+    , printingState : Scripta.PDF.PrintingState
+    , message : String
+    , ticks : Int
     }
 
 
@@ -54,15 +64,21 @@ type Msg
     = NoOp
     | InputText String
     | Render MarkupMsg
+    | PDF PDFMsg
     | SetLanguage Language
     | Info
     | Export
+    | PrintToPDF
+    | GotPdfLink (Result Http.Error String)
+    | ChangePrintingState Scripta.PDF.PrintingState
+    | Tick Time.Posix
 
 
 type alias Flags =
     {}
 
 
+settings : a -> { windowWidth : number, counter : a, selectedId : String, selectedSlug : Maybe b, scale : Float }
 settings counter =
     { windowWidth = 500
     , counter = counter
@@ -80,13 +96,13 @@ init flags =
       , language = MicroLaTeXLang
       , documentType = Example
       , currentTime = Time.millisToPosix 0
+      , printingState = Scripta.PDF.PrintWaiting
+      , message = "Starting up"
+      , ticks = 0
       }
     , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
     )
 
-
-subscriptions model =
-    Sub.none
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -94,6 +110,19 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        Tick newTime->
+          let
+            printingState =
+               if model.printingState == Scripta.PDF.PrintProcessing && model.ticks > 2
+               then Scripta.PDF.PrintReady
+               else if model.printingState == Scripta.PDF.PrintReady && model.ticks > 4
+               then Scripta.PDF.PrintWaiting
+               else model.printingState
+
+            ticks = if model.ticks > 4 then 0 else model.ticks + 1
+          in
+          ({ model | currentTime = newTime, ticks = ticks, printingState = printingState} , Cmd.none)
 
         InputText str ->
             ( { model
@@ -151,6 +180,20 @@ update msg model =
                 fileName = Scripta.API.fileNameForExport model.editRecord.parsed
             in
             (model, download fileName exportText)
+--
+        PDF _ -> (model, Cmd.none)
+
+        GotPdfLink result ->
+           ({model| printingState = Scripta.PDF.PrintReady, message = "Got PDF Link" ++ Debug.toString result}, Cmd.none)
+
+        ChangePrintingState printingState -> ({model | printingState = printingState, message = "Changing printing state"}, Cmd.none)
+
+        PrintToPDF ->
+          let
+                 defaultSettings = Scripta.API.defaultSettings
+                 exportSettings = { defaultSettings | isStandaloneDocument = True }
+          in
+          ({model | ticks = 0, printingState = Scripta.PDF.PrintProcessing, message = "requesting PDF"}, Scripta.PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
 
         Render _ ->
             ( model, Cmd.none )
@@ -190,13 +233,15 @@ view model =
 mainColumn : Model -> Element Msg
 mainColumn model =
     column mainColumnStyle
-        [ column [ spacing 36, width (px 1200), height (px 650) ]
+        [ column [ spacing 18, width (px 1200), height (px 650) ]
             [ -- title "Compiler Demo"
               row [ spacing 18 ]
                 [ inputText model
                 , displayRenderedText model
                 , controls model
                 ]
+              , row [ width (px 1200), Font.color (rgb 1 1 1), Font.size 14] [
+                 text <| model.message]
             ]
         ]
 
@@ -206,8 +251,10 @@ controls model =
         [ setLanguageButton "L0" model.documentType L0Lang model.language
         , setLanguageButton "MicroLaTeX" model.documentType MicroLaTeXLang model.language
         , setLanguageButton "XMarkdown" model.documentType XMarkdownLang model.language
+
         , el [ paddingXY 0 40 ] (infoButton model.documentType)
         , exportButton
+        , printToPDF model
         ]
 
 
@@ -272,6 +319,30 @@ jumpToTop id =
 buttonWidth =
     105
 
+
+printToPDF : Model -> Element Msg
+printToPDF model =
+    case model.printingState of
+        Scripta.PDF.PrintWaiting ->
+            Button.simpleTemplate [ elementAttribute "title" "Generate PDF" ] PrintToPDF "PDF"
+
+        Scripta.PDF.PrintProcessing ->
+            el [ Font.size 14, padding 8, height (px 30), Background.color Color.blue, Font.color Color.white ] (text "Please wait ...")
+
+        Scripta.PDF.PrintReady ->
+            link
+                [ Font.size 14
+                , Background.color Color.white
+                , paddingXY 8 8
+                , Font.color Color.blue
+                , Element.Events.onClick (ChangePrintingState Scripta.PDF.PrintWaiting)
+                , elementAttribute "target" "_blank"
+                ]
+                { url = "https://pdfserv.app/pdf/" ++ (Scripta.API.fileNameForExport model.editRecord.parsed), label = el [] (text "Click for PDF") }
+
+elementAttribute : String -> String -> Attribute msg
+elementAttribute key value =
+    htmlAttribute (Html.Attributes.attribute key value)
 
 exportButton :  Element Msg
 exportButton  =
