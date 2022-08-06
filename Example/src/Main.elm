@@ -22,7 +22,7 @@ import Http
 import Color
 import Render.Msg exposing (MarkupMsg)
 import Scripta.API
-import Scripta.PDF exposing(PDFMsg(..))
+import PDF exposing(PDFMsg(..))
 import Scripta.Language exposing (Language(..))
 import Task
 import Text
@@ -49,7 +49,7 @@ type alias Model =
     , language : Language
     , documentType : DocumentType
     , currentTime : Time.Posix
-    , printingState : Scripta.PDF.PrintingState
+    , printingState : PDF.PrintingState
     , message : String
     , ticks : Int
     }
@@ -70,7 +70,7 @@ type Msg
     | Export
     | PrintToPDF
     | GotPdfLink (Result Http.Error String)
-    | ChangePrintingState Scripta.PDF.PrintingState
+    | ChangePrintingState PDF.PrintingState
     | Tick Time.Posix
 
 
@@ -96,7 +96,7 @@ init flags =
       , language = MicroLaTeXLang
       , documentType = Example
       , currentTime = Time.millisToPosix 0
-      , printingState = Scripta.PDF.PrintWaiting
+      , printingState = PDF.PrintWaiting
       , message = "Starting up"
       , ticks = 0
       }
@@ -114,10 +114,10 @@ update msg model =
         Tick newTime->
           let
             printingState =
-               if model.printingState == Scripta.PDF.PrintProcessing && model.ticks > 2
-               then Scripta.PDF.PrintReady
-               else if model.printingState == Scripta.PDF.PrintReady && model.ticks > 10
-               then Scripta.PDF.PrintWaiting
+               if model.printingState == PDF.PrintProcessing && model.ticks > 2
+               then PDF.PrintReady
+               else if model.printingState == PDF.PrintReady && model.ticks > 10
+               then PDF.PrintWaiting
                else model.printingState
 
             ticks = if model.ticks > 10 then 0 else model.ticks + 1
@@ -184,7 +184,7 @@ update msg model =
         PDF _ -> (model, Cmd.none)
 
         GotPdfLink result ->
-           ({model| printingState = Scripta.PDF.PrintReady, message = "Got PDF Link" ++ Debug.toString result}, Cmd.none)
+           ({model| printingState = PDF.PrintReady, message = "Got PDF Link" ++ Debug.toString result}, Cmd.none)
 
         ChangePrintingState printingState -> ({model | printingState = printingState, message = "Changing printing state"}, Cmd.none)
 
@@ -193,7 +193,7 @@ update msg model =
                  defaultSettings = Scripta.API.defaultSettings
                  exportSettings = { defaultSettings | isStandaloneDocument = True }
           in
-          ({model | ticks = 0, printingState = Scripta.PDF.PrintProcessing, message = "requesting PDF"}, Scripta.PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
+          ({model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF"}, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
 
         Render _ ->
             ( model, Cmd.none )
@@ -323,19 +323,19 @@ buttonWidth =
 printToPDF : Model -> Element Msg
 printToPDF model =
     case model.printingState of
-        Scripta.PDF.PrintWaiting ->
+        PDF.PrintWaiting ->
             Button.simpleTemplate [ width (px buttonWidth), elementAttribute "title" "Generate PDF" ] PrintToPDF "PDF"
 
-        Scripta.PDF.PrintProcessing ->
+        PDF.PrintProcessing ->
             el [ Font.size 14, padding 8, height (px 30), Background.color Color.blue, Font.color Color.white ] (text "Please wait ...")
 
-        Scripta.PDF.PrintReady ->
+        PDF.PrintReady ->
             link
                 [ Font.size 14
                 , Background.color Color.white
                 , paddingXY 8 8
                 , Font.color Color.blue
-                , Element.Events.onClick (ChangePrintingState Scripta.PDF.PrintWaiting)
+                , Element.Events.onClick (ChangePrintingState PDF.PrintWaiting)
                 , elementAttribute "target" "_blank"
                 ]
                 { url = "https://pdfserv.app/pdf/" ++ (Scripta.API.fileNameForExport model.editRecord.parsed), label = el [] (text "Click for PDF") }

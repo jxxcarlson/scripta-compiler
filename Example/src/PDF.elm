@@ -1,4 +1,4 @@
-module Scripta.PDF exposing (gotLink, printCmd, PDFMsg(..), PrintingState(..))
+module PDF exposing (gotLink, printCmd, PDFMsg(..), PrintingState(..))
 
 import Compiler.ASTTools as ASTTools
 import Process
