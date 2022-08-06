@@ -39,7 +39,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every 1000 Tick
+  Time.every 400 Tick
 
 
 type alias Model =
@@ -116,11 +116,11 @@ update msg model =
             printingState =
                if model.printingState == Scripta.PDF.PrintProcessing && model.ticks > 2
                then Scripta.PDF.PrintReady
-               else if model.printingState == Scripta.PDF.PrintReady && model.ticks > 4
+               else if model.printingState == Scripta.PDF.PrintReady && model.ticks > 10
                then Scripta.PDF.PrintWaiting
                else model.printingState
 
-            ticks = if model.ticks > 4 then 0 else model.ticks + 1
+            ticks = if model.ticks > 10 then 0 else model.ticks + 1
           in
           ({ model | currentTime = newTime, ticks = ticks, printingState = printingState} , Cmd.none)
 
@@ -324,7 +324,7 @@ printToPDF : Model -> Element Msg
 printToPDF model =
     case model.printingState of
         Scripta.PDF.PrintWaiting ->
-            Button.simpleTemplate [ elementAttribute "title" "Generate PDF" ] PrintToPDF "PDF"
+            Button.simpleTemplate [ width (px buttonWidth), elementAttribute "title" "Generate PDF" ] PrintToPDF "PDF"
 
         Scripta.PDF.PrintProcessing ->
             el [ Font.size 14, padding 8, height (px 30), Background.color Color.blue, Font.color Color.white ] (text "Please wait ...")

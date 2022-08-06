@@ -339,10 +339,6 @@ handleCode state =
 
 reduceTokens : Int -> List Token -> List Expr
 reduceTokens lineNumber tokens =
-    let
-        _ =
-            Tools.debugCyan "reduceTokens" 20 (Symbol.convertTokens2 tokens)
-    in
     case tokens of
         -- The reversed token list is of the form [LB name EXPRS RB], so return [Expr name (evalList EXPRS)]
         (S t m1) :: (BS m2) :: rest ->
@@ -371,10 +367,6 @@ reduceTokens lineNumber tokens =
 
 reduceRestOfTokens : Maybe String -> Int -> List Token -> List Expr
 reduceRestOfTokens macroName lineNumber tokens =
-    let
-        _ =
-            Tools.debugCyan "reduceRestOfTokens" 20 (Symbol.convertTokens2 tokens)
-    in
     case tokens of
         (BS _) :: _ ->
             reduceTokens lineNumber tokens

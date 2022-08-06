@@ -1,42 +1,33 @@
 module Scripta.API exposing
     ( DisplaySettings
     , EditRecord
+    , defaultSettings
     , export
+    , fileNameForExport
     , init
     , makeSettings
-    , defaultSettings
     , render
-    , fileNameForExport
-
-
     , update
     )
 
 import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
-import Regex
 import Compiler.DifferentialParser
-import Compiler.Transform
 import Dict exposing (Dict)
 import Element exposing (..)
-import L0.Parser.Expression
-import MicroLaTeX.Parser.Expression
-import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
-import Parser.BlockUtil
-import Parser.Expr exposing (Expr(..))
+import Parser.Block exposing (ExpressionBlock)
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
-import Parser.Tree
+import Regex
 import Render.Export.LaTeX
 import Render.Markup
 import Render.Msg
 import Render.Settings
-import Scripta.Language exposing (Language(..))
+import Scripta.Language exposing (Language)
 import Scripta.TOC
 import Time
 import Tree
-import XMarkdown.Expression
 
 
 init : Dict String String -> Language -> String -> Compiler.DifferentialParser.EditRecord
@@ -86,14 +77,6 @@ renderSettings ds =
     Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
 
 
-type alias Config =
-    { titleSize : Int }
-
-
-config =
-    { titleSize = 18 }
-
-
 render : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
 render displaySettings editRecord =
     let
@@ -120,21 +103,22 @@ export =
 fileNameForExport : Forest ExpressionBlock -> String
 fileNameForExport ast =
     ast
-      |> Compiler.ASTTools.title
-      |> compressWhitespace
-      |> String.replace " " "-"
-      |> removeNonAlphaNum
-      |> (\s -> s ++ ".tex")
-
-
+        |> Compiler.ASTTools.title
+        |> compressWhitespace
+        |> String.replace " " "-"
+        |> removeNonAlphaNum
+        |> (\s -> s ++ ".tex")
 
 
 compressWhitespace : String -> String
 compressWhitespace string =
     userReplace "\\s\\s+" (\_ -> " ") string
 
+
 removeNonAlphaNum : String -> String
-removeNonAlphaNum string = userReplace "[^A-Za-z0-9\\-]" (\_ -> "") string
+removeNonAlphaNum string =
+    userReplace "[^A-Za-z0-9\\-]" (\_ -> "") string
+
 
 userReplace : String -> (Regex.Match -> String) -> String -> String
 userReplace userRegex replacer string =
@@ -146,76 +130,12 @@ userReplace userRegex replacer string =
             Regex.replace regex replacer string
 
 
-
 defaultSettings =
-            Render.Settings.defaultSettings
+    Render.Settings.defaultSettings
+
+
 
 -- PARSER INTERFACE
-
-
-{-| -}
-parse : Language -> String -> Forest ExpressionBlock
-parse lang sourceText =
-    let
-        parser =
-            case lang of
-                MicroLaTeXLang ->
-                    MicroLaTeX.Parser.Expression.parse
-
-                L0Lang ->
-                    L0.Parser.Expression.parseWithMessages
-
-                PlainTextLang ->
-                    \_ s -> ( parsePlainText s, [] )
-
-                XMarkdownLang ->
-                    \i s -> ( XMarkdown.Expression.parse i s, [] )
-    in
-    sourceText
-        |> toPrimitiveBlockForest lang
-        |> Parser.Forest.map (Parser.BlockUtil.toExpressionBlock lang parser)
-
-
-messagesFromTree : Tree.Tree ExpressionBlock -> List String
-messagesFromTree tree =
-    List.map Parser.BlockUtil.getMessages (Tree.flatten tree) |> List.concat
-
-
-messagesFromForest : Forest ExpressionBlock -> List String
-messagesFromForest forest =
-    List.map messagesFromTree forest |> List.concat
-
-
-parsePlainText : String -> List Parser.Expr.Expr
-parsePlainText str =
-    [ Text str { begin = 0, end = 0, index = 0, id = "??" } ]
-
-
-emptyBlock =
-    Parser.PrimitiveBlock.empty
-
-
-toPrimitiveBlockForest : Language -> String -> Forest PrimitiveBlock
-toPrimitiveBlockForest lang str =
-    str
-        |> String.lines
-        |> Parser.PrimitiveBlock.parse lang isVerbatimLine
-        |> List.map (Compiler.Transform.transform lang)
-        |> Parser.Tree.forestFromBlocks { emptyBlock | indent = -2 } identity identity
-        |> Result.withDefault []
-
-
-isVerbatimLine : String -> Bool
-isVerbatimLine str =
-    (String.left 2 str == "||")
-        || (String.left 3 str == "```")
-        || (String.left 16 str == "\\begin{equation}")
-        || (String.left 15 str == "\\begin{aligned}")
-        || (String.left 15 str == "\\begin{comment}")
-        || (String.left 12 str == "\\begin{code}")
-        || (String.left 12 str == "\\begin{verbatim}")
-        || (String.left 18 str == "\\begin{mathmacros}")
-        || (String.left 2 str == "$$")
 
 
 body : { a | parsed : Forest ExpressionBlock } -> Forest ExpressionBlock

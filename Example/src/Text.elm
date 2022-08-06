@@ -3,13 +3,20 @@ module Text exposing (info, l0Demo, microLaTeXDemo, xMarkdown)
 
 info =
     """
+
 | title
 About the Scripta compiler
+
+| contents
 
 [tags jxxcarlson:about-the-scripta-compiler]
 
 | runninghead
 [link Scripta.io https://scripta.io]
+
+
+| section 1 -
+What it is
 
 The Scripta compiler transforms source text to HTML, where
 the source text is one of the following markup languages:
@@ -36,6 +43,10 @@ and (b) syntax errors are handled gracefully, marked as such
 in the rendered text, and with the following text rendered
 properly to the greatest extent possible.
 
+
+| section 1 -
+Open source
+
 The Scripta compiler is open-source, and can be found at
 [link github.com/jxxcarlson/scripta-compiler  https://github.com/jxxcarlson/scripta-compiler].  In the Example
 folder, you will find a small demo app.  It is hosted online
@@ -47,7 +58,7 @@ interactive editing, a searchable store of documents,
 and facilities for collaboration and web publishing.
 
 
-| subheading
+| section 1 -
 Code
 
 If you are interested in looking at the code, there are two
@@ -82,6 +93,16 @@ Verbatim elements, which are bounded by
 dollar signs or by backtics, for inline
 mathematical text and inline code,
 respectively.
+
+
+| section 1 -
+Status and Roadmap
+
+The Scripta compiler is serviceable — I've used to to write
+[link these class notes https://scripta.io/s/jxxcarlson:wave-packets-dispersion], for example.
+That said, there is still a great deal to be done. Please send bug reports,
+feature requests, and comments in general to me at jxxcarlson (gmail).
+I am on the Elm Slack and Github as jxxcarlson and on Twitter as @epsilon2718.
 
 """
 
@@ -126,7 +147,11 @@ Demo (L0)
 | section 1
 Images
 
+|| hide
 [image https://nas-national-prod.s3.amazonaws.com/styles/hero_image/s3/web_h_apa_2016-a1_2474_8_cedar-waxwing_peter_brannon_kk_female.jpg?itok=VdeVVmGA]
+
+[image https://www.birdsandblooms.com/wp-content/uploads/2018/10/BNBbyc18_patricia-warren.jpg width:400]
+
 
 | section 1
 Math

@@ -7,7 +7,7 @@ import Element exposing (Element)
 import Element.Events as Events
 import Element.Font as Font
 import List.Extra
-import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
+import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Parser.Forest exposing (Forest)
 import Render.Block
@@ -150,14 +150,8 @@ tocIndentAux args =
 getHeadings : Forest ExpressionBlock -> { title : List Expr, subtitle : List Expr }
 getHeadings ast =
     let
-        data =
-            ast |> Compiler.ASTTools.titleTOC |> Compiler.ASTTools.toExprRecord
-
         flattened =
             List.map Tree.flatten ast |> List.concat
-
-        title_ =
-            Compiler.ASTTools.filterBlocksOnName "title" (List.map Tree.flatten ast |> List.concat) |> Debug.log "!! TITLE"
 
         title : List Expr
         title =
