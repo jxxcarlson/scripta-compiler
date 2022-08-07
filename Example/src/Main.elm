@@ -50,6 +50,7 @@ type alias Model =
     , documentType : DocumentType
     , currentTime : Time.Posix
     , printingState : PDF.PrintingState
+    , tarFileState : PDF.TarFileState
     , message : String
     , ticks : Int
     }
@@ -66,6 +67,7 @@ type Msg
     | Render MarkupMsg
     | PDF PDFMsg
     | SetLanguage Language
+    | SetDocument
     | Info
     | Export
     | PrintToPDF
@@ -73,7 +75,10 @@ type Msg
     | GotTarFile (Result Http.Error String)
     | GetTarFile
     | ChangePrintingState PDF.PrintingState
+    | ChangeTarFileState PDF.TarFileState
     | Tick Time.Posix
+
+
 
 
 type alias Flags =
@@ -99,6 +104,7 @@ init flags =
       , documentType = Example
       , currentTime = Time.millisToPosix 0
       , printingState = PDF.PrintWaiting
+      , tarFileState = PDF.TarFileWaiting
       , message = "Starting up"
       , ticks = 0
       }
@@ -122,9 +128,19 @@ update msg model =
                then PDF.PrintWaiting
                else model.printingState
 
+            tarFileState =
+               if model.tarFileState == PDF.TarFileProcessing && model.ticks > 2
+               then PDF.TarFileReady
+               else if model.tarFileState == PDF.TarFileReady && model.ticks > 10
+               then PDF.TarFileWaiting
+               else model.tarFileState
+
             ticks = if model.ticks > 10 then 0 else model.ticks + 1
           in
-          ({ model | currentTime = newTime, ticks = ticks, printingState = printingState} , Cmd.none)
+          ({ model | currentTime = newTime
+            , ticks = ticks
+            , tarFileState = tarFileState
+            , printingState = printingState} , Cmd.none)
 
         InputText str ->
             ( { model
@@ -133,6 +149,18 @@ update msg model =
                 , editRecord = Scripta.API.update model.editRecord str
               }
             , Cmd.none
+            )
+
+
+        SetDocument ->
+            ( { model
+                | language = L0Lang
+                , editRecord = Scripta.API.init Dict.empty L0Lang Text.testFile
+                , input = Text.testFile
+                , count = model.count + 1
+                , documentType = Example
+              }
+            , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
             )
 
         SetLanguage lang ->
@@ -172,16 +200,27 @@ update msg model =
             , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
             )
 
-        Export ->
-            let
-                defaultSettings = Scripta.API.defaultSettings
-                exportSettings = { defaultSettings | isStandaloneDocument = True }
+        GetTarFile ->
+           let
+                  defaultSettings_ = Scripta.API.defaultSettings
+                  exportSettings_ = { defaultSettings_ | isStandaloneDocument = True }
+           in
+            if PDF.getImageUrls model.editRecord.parsed == [] then
+                let
+                    defaultSettings = Scripta.API.defaultSettings
+                    exportSettings = { defaultSettings | isStandaloneDocument = True }
 
-                exportText = Scripta.API.export model.currentTime exportSettings model.editRecord.parsed
+                    exportText = Scripta.API.export model.currentTime exportSettings model.editRecord.parsed
 
-                fileName = Scripta.API.fileNameForExport model.editRecord.parsed
-            in
-            (model, download fileName exportText)
+                    fileName = Scripta.API.fileNameForExport model.editRecord.parsed
+                in
+                (model, download fileName exportText)
+            else
+            ({model |     ticks = 0
+                        , tarFileState = PDF.TarFileProcessing, message = "requesting TAR file"}
+                        , PDF.tarCmd model.currentTime exportSettings_ model.editRecord.parsed
+             |> Cmd.map PDF)
+
 --
         PDF _ -> (model, Cmd.none)
 
@@ -200,17 +239,12 @@ update msg model =
         GotTarFile result ->
            ({model| printingState = PDF.PrintReady, message = "Got TarFile" ++ Debug.toString result}, Cmd.none)
 
-        -- ChangePrintingState printingState -> ({model | printingState = printingState, message = "Changing printing state"}, Cmd.none)
-
-        GetTarFile ->
-          let
-                 defaultSettings = Scripta.API.defaultSettings
-                 exportSettings = { defaultSettings | isStandaloneDocument = True }
-          in
-          ({model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF"}, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
+        ChangeTarFileState tarFileState -> ({model | tarFileState = tarFileState, message = "Changing tar file state"}, Cmd.none)
 
         Render _ ->
             ( model, Cmd.none )
+
+        Export -> ( model, Cmd.none )
 
 
 download : String -> String -> Cmd msg
@@ -267,8 +301,8 @@ controls model =
         , setLanguageButton "XMarkdown" model.documentType XMarkdownLang model.language
 
         , el [ paddingXY 0 40 ] (infoButton model.documentType)
-        , exportButton
-        , tarFileButton
+        , testFileButton
+        , tarFileButton model
         , printToPDF model
         ]
 
@@ -355,29 +389,40 @@ printToPDF model =
                 ]
                 { url = PDF.pdfServUrl ++ (Scripta.API.fileNameForExport model.editRecord.parsed), label = el [] (text "Click for PDF") }
 
+tarFileButton : Model -> Element Msg
+tarFileButton model =
+    case model.tarFileState of
+        PDF.TarFileWaiting ->
+            Button.simpleTemplate [ width (px buttonWidth), elementAttribute "title" "Get Tar File" ] GetTarFile "Export"
+
+        PDF.TarFileProcessing ->
+            el [ Font.size 14, padding 8, height (px 30), Background.color Color.blue, Font.color Color.white ] (text "Please wait ...")
+
+        PDF.TarFileReady ->
+            link
+                [ Font.size 14
+                , Background.color Color.white
+                , paddingXY 8 8
+                , Font.color Color.blue
+                , Element.Events.onClick (ChangeTarFileState PDF.TarFileProcessing)
+                , elementAttribute "target" "_blank"
+                ]
+                { url = PDF.tarArchiveUrl ++ (Scripta.API.fileNameForExport model.editRecord.parsed |> String.replace ".tex" ".tar") , label = el [] (text "Click for Tar file") }
+
 elementAttribute : String -> String -> Attribute msg
 elementAttribute key value =
     htmlAttribute (Html.Attributes.attribute key value)
 
-exportButton :  Element Msg
-exportButton  =
+testFileButton :  Element Msg
+testFileButton  =
     Button.template
-        { tooltipText = "Export text to standard LaTeX"
+        { tooltipText = "Load Test file"
         , tooltipPlacement = above
         , attributes = [ Font.color white, Background.color gray, width (px buttonWidth) ]
-        , msg = Export
-        , label = "Export"
+        , msg = SetDocument
+        , label = "Test Doc"
         }
 
-tarFileButton :  Element Msg
-tarFileButton  =
-    Button.template
-        { tooltipText = "Get Tar File of LaTeX document and images"
-        , tooltipPlacement = above
-        , attributes = [ Font.color white, Background.color gray, width (px buttonWidth) ]
-        , msg = GetTarFile
-        , label = "Tar File"
-        }
 
 infoButton : DocumentType -> Element Msg
 infoButton documentType =

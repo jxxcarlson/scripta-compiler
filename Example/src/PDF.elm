@@ -1,4 +1,5 @@
-module PDF exposing (gotLink, printCmd, pdfServUrl, PDFMsg(..), PrintingState(..))
+module PDF exposing (gotLink, tarCmd, printCmd, pdfServUrl,tarArchiveUrl,
+  TarFileState(..), PDFMsg(..), getImageUrls, prepareContent, PrintingState(..))
 
 import Compiler.ASTTools as ASTTools
 import Process
@@ -21,6 +22,7 @@ pdfServUrl = "http://localhost:3000/pdf/"
 tarArchiveUrl = "http://localhost:3000/tar/"
 
 type PDFMsg = ChangePrintingState PrintingState
+   | ChangeTarFileState TarFileState
    | GotPdfLink (Result Http.Error String)
    | GotTarFile (Result Http.Error String)
 
@@ -29,6 +31,11 @@ type PrintingState
     = PrintWaiting
     | PrintProcessing
     | PrintReady
+
+type TarFileState =
+     TarFileWaiting
+    | TarFileProcessing
+    | TarFileReady
 
 printCmd :  Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 printCmd currentTime settings forest =

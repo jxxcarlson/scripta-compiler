@@ -40,7 +40,7 @@ displayedMath count acc settings _ id str =
         filteredLines =
             -- lines of math text to be rendered: filter stuff out
             String.lines str
-                |> List.filter (\line -> not (String.left 2 line == "$$"))
+                |> List.filter (\line -> not (String.left 2 (String.trim line) == "$$"))
                 |> List.filter (\line -> not (String.left 6 line == "[label"))
                 |> List.filter (\line -> line /= "")
 
@@ -82,7 +82,8 @@ equation count acc settings args id str =
                     )
 
         adjustedLines =
-            "\\begin{equation}" :: "\\nonumber" :: adjustedLines1 ++ [ "\\end{equation}" ]
+            --"\\begin{equation}" :: "\\nonumber" :: adjustedLines1 ++ [ "\\end{equation}" ]
+            adjustedLines1
 
         content =
             String.join "\n" adjustedLines

@@ -344,8 +344,15 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                 Left str ->
                     case name of
                         Just "math" ->
-                            -- TODO: there should be a trailing "$$"
-                            [ "$$", str, "$$" ] |> String.join "\n"
+                            let
+                                fix_ : String -> String
+                                fix_ str_ =
+                                 str_  |> String.lines
+                                      |> List.filter (\line -> String.left 2 line /= "$$")
+                                      |> String.join "\n"
+                            in
+                            -- TODO: This should be fixed upstream
+                            [ "$$", fix_ str , "$$"] |> String.join "\n"
 
                         Just "equation" ->
                             -- TODO: there should be a trailing "$$"
@@ -474,6 +481,9 @@ blockDict =
         , ( "hide", \_ _ _ -> "" )
         , ( "tags", \_ _ _ -> "" )
         , ( "docinfo", \_ _ _ -> "" )
+        , ( "banner", \_ _ _ -> "" )
+
+
 
         --
         , ( "section", \settings_ args body -> section settings_ args body )

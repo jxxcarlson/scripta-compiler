@@ -1,4 +1,4 @@
-module Text exposing (info, l0Demo, microLaTeXDemo, xMarkdown)
+module Text exposing (info, l0Demo, microLaTeXDemo, testFile, xMarkdown)
 
 
 info =
@@ -118,7 +118,7 @@ microLaTeXDemo =
 
 \\section{Images}
 
-\\image{https://see.news/wp-content/uploads/2020/12/UK_wildbirds-01-robin.jpg}
+\\image{https://see.news/wp-content/uploads/2020/12/UK_wildbirds-01-robin.jpg width:400}
 
 \\section{Math}
 
@@ -181,7 +181,7 @@ Demo (XMarkdown)
 
 # Images
 
-![Yellow bird](https://i.ibb.co/XFzZYby/image.png)
+![Yellow bird](https://i.ibb.co/XFzZYby/image.png width:400)
 
 # Math
 
@@ -193,6 +193,91 @@ $$
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
 
-*bold Tip:* Click on a section title to go back to the table of contents.
+*Tip:* Click on a section title to go back to the table of contents.
+
+"""
+
+testFile = """
+| title
+Cartesian Closed Categories
+
+|| mathmacros
+\\newcommand{\\cat}[1]{\\mathcal{#1}}
+\\newcommand{\\op}[1]{\\mathop{\\text{#1}}}
+
+[tags jxxcarlson:cartesian-closed-categories, folder:category-theory-notes]
+
+| runninghead
+[ilink Category Theory Notes jxxcarlson:folder-category-theory]
+
+
+A [term cartesian-closed] category is a category $\\cat{C}$ which
+
+| item
+has a terminal object
+
+| item
+is closed under formation of products. 
+
+| item
+is closed under formation of exponentials. 
+
+
+[b Exponentials.] Let $\\cat{C}$ be a category closed under formation
+of binary products.  An [term exponential object] in $\\cat{C}$ is
+given by an object $Z^Y$ and morphism $\\op{eval}: Z^Y \\times Y \\to Z$
+satisfying a compatibility relation with the product 
+operation.  The idea is that $Z^Y$ is like
+a function space.  Thus, given $\\phi : Z$ (in the case of sets/types), 
+one has
+
+|| equation
+\\phi: Z^Y \\mapsto (y \\mapsto \\op{eval} (\\phi, y)): \\op{Hom(Y,Z)}
+
+The last condition above (exponentials) is equivalent to the condition that $F$ have a 
+right adjoint $\\cat{C} \\to \\cat{C}$.  For locally small categories,
+this condition is equivelant to having an isomorphism 
+
+Compatibility of $\\op{eval}$ with product goes like this.  Suppose
+$g : X \\times Y \\to Z$.  Suppose further there is a morphism $\\lambda g : X \\to Z^Y$.  One can form the composition 
+
+|| equation
+[label eval-compat]
+\\op{eval} \\circ (\\lambda g \\times \\op{id}_Y ): X \\times Y \\to Z
+
+The composition in [eqref eval-compat] has the same type
+as does $g$.
+The compatibilty requirement is that $g$ and the composition [eqref eval-compat] be equal.
+
+
+
+
+[b Adjoints.] Fix an object  $Y$ of  $\\cat{C}$.  Then $F(X) = X \\times Y$  and $G(Y) = Y^Z$ are are adjoint functors $F: \\cat{C} \\to \\cat{C}$:
+
+|| equation
+[label hom-nat-iso]
+\\op{Hom}(X\\times Y, Z) \\cong \\op{Hom}(X, Z^Y)
+
+
+
+
+[b Sets.] The category of sets is Cartesian-closed.  The Cartesian
+product is the usual ones, and the exponential $Z^Y$ is the 
+set of functions from $Y$ to $Z$. 
+For the category of sets, the map from left to right in [eqref hom-nat-iso] is given by
+
+|| aligned
+[label nat-left-right]
+(X\\times Y \\to Z) \\to (X \\to Y \\to Z)
+( (x,y) \\mapsto \\phi(x,y)) \\mapsto (x \\mapsto (y \\mapsto \\phi(x,y))): 
+
+This is the map $\\phi \\mapsto \\op{curry}(\\phi)$. The map from right to left is given by 
+
+|| equation
+[label nat-right-left]
+\\psi \\mapsto ((x,y) \\mapsto \\psi(x)(y))
+
+
+This is the map is $\\psi \\mapsto \\op{uncurry}(\\psi)$.
 
 """
