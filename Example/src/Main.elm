@@ -70,6 +70,8 @@ type Msg
     | Export
     | PrintToPDF
     | GotPdfLink (Result Http.Error String)
+    | GotTarFile (Result Http.Error String)
+    | GetTarFile
     | ChangePrintingState PDF.PrintingState
     | Tick Time.Posix
 
@@ -195,6 +197,18 @@ update msg model =
           in
           ({model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF"}, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
 
+        GotTarFile result ->
+           ({model| printingState = PDF.PrintReady, message = "Got TarFile" ++ Debug.toString result}, Cmd.none)
+
+        -- ChangePrintingState printingState -> ({model | printingState = printingState, message = "Changing printing state"}, Cmd.none)
+
+        GetTarFile ->
+          let
+                 defaultSettings = Scripta.API.defaultSettings
+                 exportSettings = { defaultSettings | isStandaloneDocument = True }
+          in
+          ({model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF"}, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF)
+
         Render _ ->
             ( model, Cmd.none )
 
@@ -254,6 +268,7 @@ controls model =
 
         , el [ paddingXY 0 40 ] (infoButton model.documentType)
         , exportButton
+        , tarFileButton
         , printToPDF model
         ]
 
@@ -354,6 +369,15 @@ exportButton  =
         , label = "Export"
         }
 
+tarFileButton :  Element Msg
+tarFileButton  =
+    Button.template
+        { tooltipText = "Get Tar File of LaTeX document and images"
+        , tooltipPlacement = above
+        , attributes = [ Font.color white, Background.color gray, width (px buttonWidth) ]
+        , msg = GetTarFile
+        , label = "Tar File"
+        }
 
 infoButton : DocumentType -> Element Msg
 infoButton documentType =
