@@ -58,6 +58,7 @@ type alias Model =
 
 type DocumentType
     = InfoDocument
+    | TestDocument
     | Example
 
 
@@ -158,7 +159,7 @@ update msg model =
                 , editRecord = Scripta.API.init Dict.empty L0Lang Text.testFile
                 , input = Text.testFile
                 , count = model.count + 1
-                , documentType = Example
+                , documentType = TestDocument
               }
             , Cmd.batch [ jumpToTop "scripta-output", jumpToTop "input-text" ]
             )
@@ -301,7 +302,7 @@ controls model =
         , setLanguageButton "XMarkdown" model.documentType XMarkdownLang model.language
 
         , el [ paddingXY 0 40 ] (infoButton model.documentType)
-        , testFileButton
+        , testFileButton model.documentType
         , tarFileButton model
         , printToPDF model
         ]
@@ -413,12 +414,23 @@ elementAttribute : String -> String -> Attribute msg
 elementAttribute key value =
     htmlAttribute (Html.Attributes.attribute key value)
 
-testFileButton :  Element Msg
-testFileButton  =
+testFileButton :  DocumentType -> Element Msg
+testFileButton  documentType =
+    let
+            bgColor =
+                case documentType of
+                    InfoDocument ->
+                        gray
+
+                    Example ->
+                        gray
+
+                    TestDocument -> darkRed
+    in
     Button.template
         { tooltipText = "Load Test file"
         , tooltipPlacement = above
-        , attributes = [ Font.color white, Background.color gray, width (px buttonWidth) ]
+        , attributes = [ Font.color white, Background.color bgColor, width (px buttonWidth) ]
         , msg = SetDocument
         , label = "Test Doc"
         }
@@ -434,6 +446,8 @@ infoButton documentType =
 
                 Example ->
                     gray
+
+                TestDocument -> gray
     in
     Button.template
         { tooltipText = "Info on the Scripta compiler"
