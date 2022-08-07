@@ -23,3 +23,7 @@ scripts:
     cat macros.txt | sed 's/^, (//g' | sed 's/,.*//g' | sed 's/"//g'
 
   server: fs -p 3300 initialDocs
+
+  # vendor: cp -r  /Users/carlson/dev/lamdera/bluesky/scripta-compiler/compiler/* ./compiler/
+
+  ssh: ssh root@161.35.125.40

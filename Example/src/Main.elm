@@ -338,7 +338,7 @@ printToPDF model =
                 , Element.Events.onClick (ChangePrintingState PDF.PrintWaiting)
                 , elementAttribute "target" "_blank"
                 ]
-                { url = "https://pdfserv.app/pdf/" ++ (Scripta.API.fileNameForExport model.editRecord.parsed), label = el [] (text "Click for PDF") }
+                { url = PDF.pdfServUrl ++ (Scripta.API.fileNameForExport model.editRecord.parsed), label = el [] (text "Click for PDF") }
 
 elementAttribute : String -> String -> Attribute msg
 elementAttribute key value =

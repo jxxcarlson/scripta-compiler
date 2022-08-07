@@ -1,4 +1,4 @@
-module PDF exposing (gotLink, printCmd, PDFMsg(..), PrintingState(..))
+module PDF exposing (gotLink, printCmd, pdfServUrl, PDFMsg(..), PrintingState(..))
 
 import Compiler.ASTTools as ASTTools
 import Process
@@ -14,6 +14,10 @@ import Tree
 import Http
 import Parser.Forest exposing(Forest)
 import Scripta.API
+
+pdfServUrl1  = "https://pdfserv.app/pdf/"
+
+pdfServUrl = "http://localhost:3000/pdf/"
 
 type PDFMsg = ChangePrintingState PrintingState | GotPdfLink (Result Http.Error String)
 
@@ -57,7 +61,7 @@ generatePdf currentTime settings syntaxTree =
         [ Http.request
             { method = "POST"
             , headers = [ Http.header "Content-Type" "application/json" ]
-            , url = "https://pdfserv.app/pdf"
+            , url = pdfServUrl
             , body = Http.jsonBody (encodeForPDF fileName contentForExport imageUrls)
             , expect = Http.expectString GotPdfLink
             , timeout = Nothing
