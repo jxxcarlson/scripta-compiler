@@ -209,7 +209,7 @@ testFile =
 \\contents
 
 | banner
-\\ilink{Quantum Mechanics Notes jxxcarlson:quantum-mechanics-notes}
+\\link{Quantum Mechanics Notes https://scripta.io/s/jxxcarlson:quantum-mechanics-notes}
 
 | setcounter 2
 
