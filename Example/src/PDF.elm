@@ -1,30 +1,55 @@
-module PDF exposing (gotLink, tarCmd, printCmd, pdfServUrl,tarArchiveUrl,
-  TarFileState(..), PDFMsg(..), getImageUrls, prepareContent, PrintingState(..))
+module PDF exposing
+    ( PDFMsg(..)
+    , PrintingState(..)
+    , TarFileState(..)
+    , getImageUrls
+    , gotLink
+    , pdfServUrl
+    , prepareContent
+    , printCmd
+    , tarArchiveUrl
+    , tarCmd
+    )
 
 import Compiler.ASTTools as ASTTools
-import Process
-import Task
-import Time
 import Either
+import Http
 import Json.Encode as E
 import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
+import Parser.Forest exposing (Forest)
+import Process
 import Render.Export.LaTeX
 import Render.Settings exposing (Settings)
-import Tree
-import Http
-import Parser.Forest exposing(Forest)
 import Scripta.API
+import Task
+import Time
+import Tree
 
-pdfServUrl1  = "https://pdfserv.app/pdf/"
 
-pdfServUrl = "http://localhost:3000/pdf/"
-tarArchiveUrl = "http://localhost:3000/tar/"
+pdfServUrl1 =
+    "https://pdfserv.app/pdf/"
 
-type PDFMsg = ChangePrintingState PrintingState
-   | ChangeTarFileState TarFileState
-   | GotPdfLink (Result Http.Error String)
-   | GotTarFile (Result Http.Error String)
+
+
+--
+--pdfServUrl = "http://localhost:3000/pdf/"
+--tarArchiveUrl = "http://localhost:3000/tar/"
+
+
+pdfServUrl =
+    "https://pdfServ.app/pdf/"
+
+
+tarArchiveUrl =
+    "https://pdfServ.app/tar/"
+
+
+type PDFMsg
+    = ChangePrintingState PrintingState
+    | ChangeTarFileState TarFileState
+    | GotPdfLink (Result Http.Error String)
+    | GotTarFile (Result Http.Error String)
 
 
 type PrintingState
@@ -32,29 +57,29 @@ type PrintingState
     | PrintProcessing
     | PrintReady
 
-type TarFileState =
-     TarFileWaiting
+
+type TarFileState
+    = TarFileWaiting
     | TarFileProcessing
     | TarFileReady
 
-printCmd :  Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+
+printCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 printCmd currentTime settings forest =
-     Cmd.batch
-        [
-         Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
+    Cmd.batch
+        [ Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
         , pdfCmd currentTime settings forest
         ]
 
 
 prepareContent : Time.Posix -> Settings -> Forest ExpressionBlock -> String
 prepareContent currentTime settings syntaxTree =
-     let
-           contentForExport : String
-           contentForExport =
-                Render.Export.LaTeX.export currentTime settings syntaxTree
-
-        in
-        contentForExport
+    let
+        contentForExport : String
+        contentForExport =
+            Render.Export.LaTeX.export currentTime settings syntaxTree
+    in
+    contentForExport
 
 
 getImageUrls : Forest ExpressionBlock -> List String
@@ -70,16 +95,19 @@ getImageUrls syntaxTree =
         |> List.map (Maybe.andThen extractUrl)
         |> Maybe.Extra.values
 
+
 pdfCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 pdfCmd currentTime settings syntaxTree =
     let
-
         imageUrls : List String
-        imageUrls = getImageUrls syntaxTree
+        imageUrls =
+            getImageUrls syntaxTree
 
-        fileName = Scripta.API.fileNameForExport syntaxTree
+        fileName =
+            Scripta.API.fileNameForExport syntaxTree
 
-        contentForExport = prepareContent currentTime settings syntaxTree
+        contentForExport =
+            prepareContent currentTime settings syntaxTree
     in
     Cmd.batch
         [ Http.request
@@ -97,13 +125,15 @@ pdfCmd currentTime settings syntaxTree =
 tarCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 tarCmd currentTime settings syntaxTree =
     let
-
         imageUrls : List String
-        imageUrls = getImageUrls syntaxTree
+        imageUrls =
+            getImageUrls syntaxTree
 
-        fileName = Scripta.API.fileNameForExport syntaxTree
+        fileName =
+            Scripta.API.fileNameForExport syntaxTree
 
-        contentForExport = prepareContent currentTime settings syntaxTree
+        contentForExport =
+            prepareContent currentTime settings syntaxTree
     in
     Cmd.batch
         [ Http.request
@@ -116,6 +146,7 @@ tarCmd currentTime settings syntaxTree =
             , tracker = Nothing
             }
         ]
+
 
 extractUrl : String -> Maybe String
 extractUrl str =
