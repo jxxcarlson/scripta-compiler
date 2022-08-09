@@ -4,7 +4,10 @@
     "summary": "A compiler that transforms markup source text to HTML",
     "license": "MIT",
     "version": "1.0.0",
-    "exposed-modules": ["Scripta.API", "Scripta.Language"],
+    "exposed-modules": [
+        "Scripta.API",
+        "Scripta.Language"
+    ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
         "Garados007/elm-svg-parser": "1.0.0 <= v < 2.0.0",
@@ -25,5 +28,7 @@
         "toastal/either": "3.6.3 <= v < 4.0.0",
         "zwilias/elm-rosetree": "1.5.0 <= v < 2.0.0"
     },
-    "test-dependencies": {}
+    "test-dependencies": {
+        "elm-explorations/test": "1.2.2 <= v < 2.0.0"
+    }
 }
