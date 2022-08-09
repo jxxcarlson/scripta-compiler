@@ -230,7 +230,7 @@ update msg model =
                         { defaultSettings | isStandaloneDocument = True }
 
                     exportText =
-                        Scripta.API.export model.currentTime exportSettings model.editRecord.parsed
+                        Scripta.API.prepareContentForExport model.currentTime exportSettings model.editRecord.parsed
 
                     fileName =
                         Scripta.API.fileNameForExport model.editRecord.parsed

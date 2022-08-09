@@ -209,10 +209,7 @@ type alias Settings =
     , isStandaloneDocument : Bool
     }
 
-{-| -}
-export : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> String
-export =
-    Render.Export.LaTeX.export
+
 
 {-| -}
 fileNameForExport : Forest ExpressionBlock -> String
