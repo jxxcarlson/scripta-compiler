@@ -198,7 +198,7 @@ $$
 """
 
 
-testFile =
+testFile1 =
     """
 
 \\title{Wave Packets and the Dispersion Relation}
@@ -477,4 +477,51 @@ In the case of our electron, we find that $t_{double} \\sim 10^{-16}\\,\\text{se
 \\link{Time evolution in QM - MIT https//ocw.mit.edu/courses/nuclear-engineering/22-02-introduction-to-applied-nuclear-physics-spring-2012/lecture-notes/MIT22_02S12_lec_ch6.pdf}
 
 
+"""
+
+
+testFile =
+    """
+\\title{Test Math Macros (MicroLaTeX)}
+
+\\tags{jxxcarlson:test-math-macros-microlatex, folder:scripta}
+
+|| mathmacros
+\\newcommand{\\cat}[1]{\\mathcal{#1}}
+\\newcommand{\\foo}[1]{a_{#1}}
+\\newcommand{\\op}[1]{\\mathop{\\text{#1}}}
+\\newcommand{\\bool}{\\mathop{\\text{Bool}}}
+\\newcommand{\\Type}{\\mathop{\\mathcal{U}}}
+
+
+From old type theory notes
+
+
+$$
+true : \\bool \\qquad \\bool : \\Type
+$$
+
+
+
+$$
+\\frac{\\Gamma \\vdash \\bool}{\\bool : \\Type}
+$$
+
+Macro expansion in superscript:
+
+$$
+a^{\\cat{C}^{op}}
+$$
+
+Macro expansion in nested superscript:
+
+$$
+a^{\\cat{C}^{\\cat{C}^{op}}}
+$$
+
+
+1: $\\red{\\cal{A}}$,
+2: $\\cal{\\red{A}}$
+3: $\\foo{x}$,
+4: $\\foo{\\cal{C}}$
 """

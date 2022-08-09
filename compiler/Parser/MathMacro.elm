@@ -51,6 +51,10 @@ evalStr : MathMacroDict -> String -> String
 evalStr dict str =
     case parseMany (String.trim str) of
         Ok result ->
+            let
+                _ =
+                    Debug.log "RESUlT" result
+            in
             List.map (expandMacroWithDict dict) result |> printList
 
         Err _ ->
@@ -91,13 +95,17 @@ type Deco
     | DecoI Int
 
 
+
+-- RESUlT: [Macro "frac" [Arg [Macro "baar" [Arg [AlphaNum "X"]]],Arg [Macro "baar" [Arg [AlphaNum "Y"]]]]]
+
+
 expandMacroWithDict : MathMacroDict -> MathExpr -> MathExpr
 expandMacroWithDict dict expr =
     case expr of
         Macro macroName args ->
             case Dict.get macroName dict of
                 Nothing ->
-                    expr
+                    Macro macroName (List.map (expandMacroWithDict dict) args)
 
                 Just (MacroBody k exprs) ->
                     Expr (expandMacro_ (List.map (expandMacroWithDict dict) args) (MacroBody k (List.map (expandMacroWithDict dict) exprs)))

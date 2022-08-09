@@ -18,12 +18,17 @@ testMathExpression str =
     parse str |> Result.map printList
 
 
+test0 label expr expected=
+    test label <| \_ -> equal expr  expected
+
+
 test_ input =
     test input <| \_ -> equal (testMathExpression input) (Ok input)
 
 
 testNewCommand input =
     test input <| \_ -> equal (parseNewCommand input |> Result.map printNewCommand) (Ok input)
+
 
 
 suite : Test
@@ -40,6 +45,7 @@ suite =
         , test_ "x^{\\alpha_1}"
         , test_ "\\overline{M_{#1}}"
         , test_ "(x^2) = (y^2)"
+        , test0 "nested insdie existing macro" (evalStr d0 t0) t0b
         , testNewCommand "\\newcommand{\\foo}[1]{\\overline{M_{#1}}}"
         , testNewCommand "\\newcommand{\\grst}{\\Gamma^{rs}_t}"
         , testNewCommand "\\newcommand{\\christoffel}[3]{\\ensuremath{\\Gamma^{#1#2}_{#3}}}"
@@ -55,6 +61,15 @@ suite =
 
 s1 =
     "\\newcommand{\\foo}[2]{\\alpha(#1,#2)}"
+
+s0 =
+    "\\newcommand{\\baar}[1]{\\beta_{#1}}"
+
+t0 = "\\frac{\\baar{X}}{\\baar{Y}}"
+
+t0b = "\\frac{\\beta_{{X}}}{\\beta_{{Y}}}"
+
+d0 = makeMacroDict s0
 
 
 d =

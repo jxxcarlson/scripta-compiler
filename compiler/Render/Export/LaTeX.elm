@@ -3,7 +3,6 @@ module Render.Export.LaTeX exposing (export, exportExpr, rawExport)
 import Compiler.ASTTools as ASTTools
 import Compiler.TextMacro as Lambda
 import Dict exposing (Dict)
-import Time
 import Either exposing (Either(..))
 import List.Extra
 import Maybe.Extra
@@ -16,6 +15,7 @@ import Render.Export.Preamble
 import Render.Export.Util
 import Render.Settings exposing (Settings)
 import Render.Utility as Utility
+import Time
 import Tree exposing (Tree)
 
 
@@ -347,12 +347,13 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                             let
                                 fix_ : String -> String
                                 fix_ str_ =
-                                 str_  |> String.lines
-                                      |> List.filter (\line -> String.left 2 line /= "$$")
-                                      |> String.join "\n"
+                                    str_
+                                        |> String.lines
+                                        |> List.filter (\line -> String.left 2 line /= "$$")
+                                        |> String.join "\n"
                             in
                             -- TODO: This should be fixed upstream
-                            [ "$$", fix_ str , "$$"] |> String.join "\n"
+                            [ "$$", fix_ str, "$$" ] |> String.join "\n"
 
                         Just "equation" ->
                             -- TODO: there should be a trailing "$$"
@@ -482,8 +483,6 @@ blockDict =
         , ( "tags", \_ _ _ -> "" )
         , ( "docinfo", \_ _ _ -> "" )
         , ( "banner", \_ _ _ -> "" )
-
-
 
         --
         , ( "section", \settings_ args body -> section settings_ args body )
