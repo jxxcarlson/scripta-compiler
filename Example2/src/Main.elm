@@ -21,7 +21,6 @@ import Html exposing (Html)
 import Html.Attributes
 import Http
 import PDF exposing (PDFMsg(..))
-import Render.Msg exposing (MarkupMsg)
 import Scripta.API
 import Scripta.Language exposing (Language(..))
 import Task
@@ -66,7 +65,7 @@ type DocumentType
 type Msg
     = NoOp
     | InputText String
-    | Render MarkupMsg
+    | Render Scripta.API.Msg
     | PDF PDFMsg
     | SetLanguage Language
     | SetDocument

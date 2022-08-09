@@ -12,8 +12,6 @@ module PDF exposing
 
 import Http
 import Json.Encode as E
-import Parser.Block exposing (ExpressionBlock(..))
-import Parser.Forest exposing (Forest)
 import Process
 import Scripta.API
 import Task
@@ -58,7 +56,7 @@ type TarFileState
     | TarFileReady
 
 
-printCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+printCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.SyntaxTree -> Cmd PDFMsg
 printCmd currentTime settings forest =
     Cmd.batch
         [ Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
@@ -66,7 +64,7 @@ printCmd currentTime settings forest =
         ]
 
 
-pdfCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+pdfCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.SyntaxTree -> Cmd PDFMsg
 pdfCmd currentTime settings syntaxTree =
     let
         imageUrls : List String
@@ -92,7 +90,7 @@ pdfCmd currentTime settings syntaxTree =
         ]
 
 
-tarCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+tarCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.SyntaxTree -> Cmd PDFMsg
 tarCmd currentTime settings syntaxTree =
     let
         imageUrls : List String

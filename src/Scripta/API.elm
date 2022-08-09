@@ -11,6 +11,8 @@ module Scripta.API exposing
     , compile
     , prepareContentForExport
     , getImageUrls
+    , SyntaxTree
+    , Msg
     )
 
 {-|
@@ -70,6 +72,13 @@ tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
 @docs fileNameForExport, prepareContentForExport, getImageUrls, Settings
+
+# Compatibility
+
+The PDF module in Example2 requires these.
+
+@docs Msg, SyntaxTree
+
 -}
 
 
@@ -88,6 +97,7 @@ import Render.Markup
 import Render.Msg
 import Render.Settings
 import Scripta.Language exposing (Language)
+import Render.Msg exposing (MarkupMsg)
 import Scripta.TOC
 import Time
 import Tree
@@ -97,8 +107,11 @@ import Maybe.Extra
 import Tree
 import Render.Export.LaTeX
 
+{-| -}
+type alias SyntaxTree = Forest ExpressionBlock
 
-
+{-| -}
+type alias Msg = MarkupMsg
 
 {-|
 
