@@ -53,7 +53,7 @@ evalStr dict str =
         Ok result ->
             let
                 _ =
-                    Debug.log "RESUlT" result
+                    result
             in
             List.map (expandMacroWithDict dict) result |> printList
 
