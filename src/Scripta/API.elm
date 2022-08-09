@@ -8,7 +8,21 @@ module Scripta.API exposing
     , makeSettings
     , render
     , update
+    , compile
     )
+
+{-|
+
+Scripta.API provides most of the functions you will need for an application.
+
+# Simple compilation
+
+**Example.** `compile defaultSettings "Pythagorean formula: $a^2 + b^2 = c^2$"`
+
+@docs  compile, DisplaySettings, defaultSettings, EditRecord, init, update,   makeSettings, render, export, fileNameForExport
+
+-}
+
 
 import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
@@ -30,20 +44,35 @@ import Time
 import Tree
 
 
+
+
+{-|
+
+  Compile source text in the given language using the given display settings
+-}
+compile : DisplaySettings -> Language -> String -> List (Element Render.Msg.MarkupMsg)
+compile displaySettings language sourceText =
+    sourceText
+      |> init Dict.empty language
+      |> render displaySettings
+
+
+
+{-| -}
 init : Dict String String -> Language -> String -> Compiler.DifferentialParser.EditRecord
-init =
-    Compiler.DifferentialParser.init
+init importedFileDict language sourceText =
+    Compiler.DifferentialParser.init importedFileDict language sourceText
 
-
+{-| -}
 update : EditRecord -> String -> EditRecord
 update =
     Compiler.DifferentialParser.update
 
-
+{-| -}
 type alias EditRecord =
     Compiler.AbstractDifferentialParser.EditRecord (Tree.Tree PrimitiveBlock) (Tree.Tree ExpressionBlock) Compiler.Acc.Accumulator
 
-
+{-| -}
 type alias DisplaySettings =
     { windowWidth : Int
     , counter : Int
@@ -56,7 +85,7 @@ type alias DisplaySettings =
 
 -- VIEW
 
-
+{-| -}
 makeSettings : String -> Maybe String -> Float -> Int -> Render.Settings.Settings
 makeSettings id selectedSlug scale width =
     { width = round (scale * toFloat width)
@@ -76,7 +105,7 @@ renderSettings : DisplaySettings -> Render.Settings.Settings
 renderSettings ds =
     Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
 
-
+{-| -}
 render : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
 render displaySettings editRecord =
     let
@@ -94,12 +123,12 @@ renderBody count settings editRecord =
 
 -- EXPORT
 
-
+{-| -}
 export : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> String
 export =
     Render.Export.LaTeX.export
 
-
+{-| -}
 fileNameForExport : Forest ExpressionBlock -> String
 fileNameForExport ast =
     ast
@@ -129,7 +158,8 @@ userReplace userRegex replacer string =
         Just regex ->
             Regex.replace regex replacer string
 
-
+{-| -}
+defaultSettings : Render.Settings.Settings
 defaultSettings =
     Render.Settings.defaultSettings
 
