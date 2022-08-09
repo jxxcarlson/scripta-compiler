@@ -50,8 +50,8 @@ type alias Flags =
     {}
 
 
-settings : a -> { windowWidth : number, counter : a, selectedId : String, selectedSlug : Maybe b, scale : Float }
-settings counter =
+displaySettings : Int -> Scripta.API.DisplaySettings
+displaySettings counter =
     { windowWidth = 500
     , counter = counter
     , selectedId = "--"
@@ -145,7 +145,7 @@ displayRenderedText model =
                   , paddingXY 16 32
                   , scrollbarY
                   ]
-                  (Scripta.API.compile (settings model.count) MicroLaTeXLang model.sourceText |> List.map (Element.map Render))
+                  (Scripta.API.compile (displaySettings model.count) MicroLaTeXLang model.sourceText |> List.map (Element.map Render))
 
         ]
 

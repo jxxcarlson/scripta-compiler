@@ -2,29 +2,23 @@ module PDF exposing
     ( PDFMsg(..)
     , PrintingState(..)
     , TarFileState(..)
-    , getImageUrls
     , gotLink
     , pdfServUrl
-    , prepareContent
     , printCmd
     , tarArchiveUrl
     , tarCmd
     )
 
-import Compiler.ASTTools as ASTTools
-import Either
+
 import Http
 import Json.Encode as E
-import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
 import Process
-import Render.Export.LaTeX
-import Render.Settings exposing (Settings)
 import Scripta.API
 import Task
 import Time
-import Tree
+
 
 
 pdfServUrl1 =
@@ -64,7 +58,7 @@ type TarFileState
     | TarFileReady
 
 
-printCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+printCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 printCmd currentTime settings forest =
     Cmd.batch
         [ Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
@@ -72,42 +66,18 @@ printCmd currentTime settings forest =
         ]
 
 
-prepareContent : Time.Posix -> Settings -> Forest ExpressionBlock -> String
-prepareContent currentTime settings syntaxTree =
-    let
-        contentForExport : String
-        contentForExport =
-            Render.Export.LaTeX.export currentTime settings syntaxTree
-    in
-    contentForExport
-
-
-getImageUrls : Forest ExpressionBlock -> List String
-getImageUrls syntaxTree =
-    syntaxTree
-        |> List.map Tree.flatten
-        |> List.concat
-        |> List.map (\(ExpressionBlock { content }) -> Either.toList content)
-        |> List.concat
-        |> List.concat
-        |> ASTTools.filterExpressionsOnName "image"
-        |> List.map (ASTTools.getText >> Maybe.map String.trim)
-        |> List.map (Maybe.andThen extractUrl)
-        |> Maybe.Extra.values
-
-
-pdfCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+pdfCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 pdfCmd currentTime settings syntaxTree =
     let
         imageUrls : List String
         imageUrls =
-            getImageUrls syntaxTree
+            Scripta.API.getImageUrls syntaxTree
 
         fileName =
             Scripta.API.fileNameForExport syntaxTree
 
         contentForExport =
-            prepareContent currentTime settings syntaxTree
+            Scripta.API.prepareContentForExport currentTime settings syntaxTree
     in
     Cmd.batch
         [ Http.request
@@ -122,18 +92,18 @@ pdfCmd currentTime settings syntaxTree =
         ]
 
 
-tarCmd : Time.Posix -> Settings -> Forest ExpressionBlock -> Cmd PDFMsg
+tarCmd : Time.Posix -> Scripta.API.Settings -> Forest ExpressionBlock -> Cmd PDFMsg
 tarCmd currentTime settings syntaxTree =
     let
         imageUrls : List String
         imageUrls =
-            getImageUrls syntaxTree
+            Scripta.API.getImageUrls syntaxTree
 
         fileName =
             Scripta.API.fileNameForExport syntaxTree
 
         contentForExport =
-            prepareContent currentTime settings syntaxTree
+            Scripta.API.prepareContentForExport currentTime settings syntaxTree
     in
     Cmd.batch
         [ Http.request
@@ -148,9 +118,6 @@ tarCmd currentTime settings syntaxTree =
         ]
 
 
-extractUrl : String -> Maybe String
-extractUrl str =
-    str |> String.split " " |> List.head
 
 
 gotLink : model -> Result error value -> ( model, Cmd PDFMsg )

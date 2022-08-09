@@ -221,7 +221,7 @@ update msg model =
                 exportSettings_ =
                     { defaultSettings_ | isStandaloneDocument = True }
             in
-            if PDF.getImageUrls model.editRecord.parsed == [] then
+            if Scripta.API.getImageUrls model.editRecord.parsed == [] then
                 let
                     defaultSettings =
                         Scripta.API.defaultSettings

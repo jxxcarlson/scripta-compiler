@@ -2,25 +2,74 @@ module Scripta.API exposing
     ( DisplaySettings
     , EditRecord
     , defaultSettings
-    , export
     , fileNameForExport
+    , Settings
     , init
     , makeSettings
     , render
     , update
     , compile
+    , prepareContentForExport
+    , getImageUrls
     )
 
 {-|
 
-Scripta.API provides most of the functions you will need for an application.
+Scripta.API provides the functions you will need for an application
+that compiles source text in L0, microLaTeX, or XMarkdown to HTML.
 
 # Simple compilation
 
-**Example.** `compile defaultSettings "Pythagorean formula: $a^2 + b^2 = c^2$"`
+@docs  compile, DisplaySettings
 
-@docs  compile, DisplaySettings, defaultSettings, EditRecord, init, update,   makeSettings, render, export, fileNameForExport
 
+## Example
+
+`compile (displaySettings 0) "Pythagorean formula: $a^2 + b^2 = c^2$"` where
+we define
+
+```
+displaySettings : Int -> Scripta.API.DisplaySettings
+displaySettings counter =
+    { windowWidth = 500
+    , counter = counter
+    , selectedId = "--"
+    , selectedSlug = Nothing
+    , scale = 0.8
+    }
+```
+
+The counter field must be updated on each edit.
+This is needed for the rendered text to be
+properly updated. See the demo app in
+folder `Example1`.
+
+# Differential Compilation
+
+Compilation can be sped up by keeping track of which blocks
+of source text have changed and ony reparsing those blocks.
+An `EditRecord` is used to keep track of what has changed
+and what has not.  In this setup, the `EditRecord` is
+initialized with the source text using the `init` function.
+On each document change it brought up to date by the
+`update` function.  The `render` function  transforms
+the current `EditRecord` into HTML.
+
+@docs EditRecord, init, update, render, makeSettings, defaultSettings
+
+# Export
+
+The `export` and `fileNameForExport` are functions used to transform source
+text in a given markup language to standard LaTeX.  The transformed text
+can be  used to produce a PDF file or a tar files that contains both the
+standare LaTeX source and a folder of images used in the documents.
+See the code in modules `PDF` and `Main` of `Example2` for more details.
+The Elm app sends data to `https://pdfServ.app`, a small server
+(165 lines of Haskell code) where it is turned into a PDF file or
+tar archive where it is then accessible by a GET request.
+See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
+
+@docs fileNameForExport, prepareContentForExport, getImageUrls, Settings
 -}
 
 
@@ -30,7 +79,7 @@ import Compiler.Acc
 import Compiler.DifferentialParser
 import Dict exposing (Dict)
 import Element exposing (..)
-import Parser.Block exposing (ExpressionBlock)
+import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Regex
@@ -42,13 +91,19 @@ import Scripta.Language exposing (Language)
 import Scripta.TOC
 import Time
 import Tree
+import Compiler.ASTTools as ASTTools
+import Either
+import Maybe.Extra
+import Tree
+import Render.Export.LaTeX
 
 
 
 
 {-|
 
-  Compile source text in the given language using the given display settings
+  Compile source text in the given language using the given display settings.
+
 -}
 compile : DisplaySettings -> Language -> String -> List (Element Render.Msg.MarkupMsg)
 compile displaySettings language sourceText =
@@ -56,6 +111,29 @@ compile displaySettings language sourceText =
       |> init Dict.empty language
       |> render displaySettings
 
+
+{-|
+
+- windowWidth: set this to agree with the width
+  of the window in pixels in which the rendered
+  text is displayed.
+
+- counter: This is updated on each edit.
+  For technical reasons (virtual Dom)
+  this is needed for the text to display properly.
+
+- selectedId and selectedSlug: useful for interactive editing.
+
+- scale: a fudge factor
+
+-}
+type alias DisplaySettings =
+    { windowWidth : Int
+    , counter : Int
+    , selectedId : String
+    , selectedSlug : Maybe String
+    , scale : Float
+    }
 
 
 {-| -}
@@ -68,18 +146,11 @@ update : EditRecord -> String -> EditRecord
 update =
     Compiler.DifferentialParser.update
 
+
 {-| -}
 type alias EditRecord =
     Compiler.AbstractDifferentialParser.EditRecord (Tree.Tree PrimitiveBlock) (Tree.Tree ExpressionBlock) Compiler.Acc.Accumulator
 
-{-| -}
-type alias DisplaySettings =
-    { windowWidth : Int
-    , counter : Int
-    , selectedId : String
-    , selectedSlug : Maybe String
-    , scale : Float
-    }
 
 
 
@@ -123,6 +194,21 @@ renderBody count settings editRecord =
 
 -- EXPORT
 
+
+{-| Settings used by render -}
+type alias Settings =
+    { paragraphSpacing : Int
+    , selectedId : String
+    , selectedSlug : Maybe String
+    , showErrorMessages : Bool
+    , showTOC : Bool
+    , titleSize : Int
+    , width : Int
+    , backgroundColor : Element.Color
+    , titlePrefix : String
+    , isStandaloneDocument : Bool
+    }
+
 {-| -}
 export : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> String
 export =
@@ -137,6 +223,36 @@ fileNameForExport ast =
         |> String.replace " " "-"
         |> removeNonAlphaNum
         |> (\s -> s ++ ".tex")
+
+
+{-| -}
+prepareContentForExport : Time.Posix -> Settings -> Forest ExpressionBlock -> String
+prepareContentForExport currentTime settings syntaxTree =
+    let
+        contentForExport : String
+        contentForExport =
+            Render.Export.LaTeX.export currentTime settings syntaxTree
+    in
+    contentForExport
+
+
+{-| -}
+getImageUrls : Forest ExpressionBlock -> List String
+getImageUrls syntaxTree =
+    syntaxTree
+        |> List.map Tree.flatten
+        |> List.concat
+        |> List.map (\(ExpressionBlock { content }) -> Either.toList content)
+        |> List.concat
+        |> List.concat
+        |> ASTTools.filterExpressionsOnName "image"
+        |> List.map (ASTTools.getText >> Maybe.map String.trim)
+        |> List.map (Maybe.andThen extractUrl)
+        |> Maybe.Extra.values
+
+extractUrl : String -> Maybe String
+extractUrl str =
+    str |> String.split " " |> List.head
 
 
 compressWhitespace : String -> String
