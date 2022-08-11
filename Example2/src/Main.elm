@@ -39,7 +39,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Time.every 400 Tick
+    Time.every 40000 Tick
 
 
 type alias Model =

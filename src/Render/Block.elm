@@ -476,7 +476,11 @@ highlightAttrs id settings =
 
 
 renderCode : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderCode _ _ _ _ id str =
+renderCode _ _ _ args id str =
+    let
+        _ =
+            List.head args
+    in
     Element.column
         [ Font.color Render.Settings.codeColor
         , Font.family
@@ -489,7 +493,13 @@ renderCode _ _ _ _ id str =
         , Events.onClick (SendId id)
         , Render.Utility.elementAttribute "id" id
         ]
-        (List.map renderVerbatimLine (String.lines (String.trim str)))
+        (case List.head args of
+            Just arg ->
+                List.map (renderVerbatimLine arg) (String.lines (String.trim str))
+
+            Nothing ->
+                List.map (renderVerbatimLine "plain") (String.lines (String.trim str))
+        )
 
 
 renderVerse : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
@@ -498,19 +508,70 @@ renderVerse _ _ _ _ id str =
         [ Events.onClick (SendId id)
         , Render.Utility.elementAttribute "id" id
         ]
-        (List.map renderVerbatimLine (String.lines (String.trim str)))
+        (List.map (renderVerbatimLine "plain") (String.lines (String.trim str)))
 
 
-renderVerbatimLine str =
+renderVerbatimLine : String -> String -> Element msg
+renderVerbatimLine lang str =
     if String.trim str == "" then
         Element.el [ Element.height (Element.px 11) ] (Element.text "")
 
-    else
+    else if lang == "plain" then
         Element.el [ Element.height (Element.px 22) ] (Element.text str)
+
+    else
+        Element.paragraph [ Element.height (Element.px 22) ] (renderedColoredLine lang str)
+
+
+renderedColoredLine lang str =
+    str
+        |> String.words
+        |> List.map (renderedColoredWord lang)
+
+
+renderedColoredWord lang word =
+    case lang of
+        "elm" ->
+            case Dict.get word elmDict of
+                Just color ->
+                    Element.el [ color ] (Element.text (word ++ " "))
+
+                Nothing ->
+                    Element.el [] (Element.text (word ++ " "))
+
+        _ ->
+            Element.el [] (Element.text (word ++ " "))
+
+
+orange =
+    Font.color (Element.rgb255 227 81 18)
+
+
+green =
+    Font.color (Element.rgb255 11 158 26)
+
+
+cyan =
+    Font.color (Element.rgb255 11 143 158)
+
+
+elmDict =
+    Dict.fromList
+        [ ( "type", orange )
+        , ( "LB", green )
+        , ( "RB", green )
+        , ( "S", green )
+        , ( "String", green )
+        , ( "Meta", cyan )
+        ]
 
 
 renderVerbatim : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderVerbatim _ _ _ _ id str =
+renderVerbatim _ _ _ args id str =
+    let
+        _ =
+            List.head args
+    in
     Element.column
         [ Font.family
             [ Font.typeface "Inconsolata"
@@ -521,7 +582,13 @@ renderVerbatim _ _ _ _ id str =
         , Events.onClick (SendId id)
         , Render.Utility.elementAttribute "id" id
         ]
-        (List.map renderVerbatimLine (String.lines (String.trim str)))
+        (case List.head args of
+            Just lang ->
+                List.map (renderVerbatimLine lang) (String.lines (String.trim str))
+
+            _ ->
+                List.map (renderVerbatimLine "none") (String.lines (String.trim str))
+        )
 
 
 
