@@ -486,6 +486,7 @@ blockDict =
 
         --
         , ( "section", \settings_ args body -> section settings_ args body )
+        , ( "subheading", \settings_ args body -> subheading settings_ args body )
         , ( "item", \_ _ body -> macro1 "item" body )
         , ( "numbered", \_ _ body -> macro1 "item" body )
         , ( "beginBlock", \_ _ _ -> "\\begin{itemize}" )
@@ -539,6 +540,10 @@ setcounter : List String -> String
 setcounter args =
     [ "\\setcounter{section}{", Utility.getArg "0" 0 args, "}" ] |> String.join ""
 
+
+subheading : Settings -> List String -> String -> String
+subheading settings args body =
+    "\\subheading{" ++ body ++ "}"
 
 section : Settings -> List String -> String -> String
 section settings args body =
