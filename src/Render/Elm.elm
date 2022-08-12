@@ -71,6 +71,7 @@ markupDict =
         , ( "b", \g acc s exprList -> strong g acc s exprList )
         , ( "var", \g acc s exprList -> var g acc s exprList )
         , ( "italic", \g acc s exprList -> italic g acc s exprList )
+        , ( "bi", \g acc s exprList -> boldItalic g acc s exprList )
         , ( "i", \g acc s exprList -> italic g acc s exprList )
         , ( "boldItalic", \g acc s exprList -> boldItalic g acc s exprList )
         , ( "strike", \g acc s exprList -> strike g acc s exprList )

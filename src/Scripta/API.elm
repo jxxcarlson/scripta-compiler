@@ -217,7 +217,7 @@ type alias Settings =
 fileNameForExport : Forest ExpressionBlock -> String
 fileNameForExport ast =
     ast
-        |> Compiler.ASTTools.title
+        |> ASTTools.title
         |> compressWhitespace
         |> String.replace " " "-"
         |> removeNonAlphaNum

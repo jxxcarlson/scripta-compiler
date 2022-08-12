@@ -566,7 +566,7 @@ tokenParser mode start index =
 
 
 languageChars =
-    [ '\\', '[', ']', '(', ')', '`', '*', '_', '$' ]
+    [ '\\', '[', ']', '(', ')', '`', '*', '$' ]
 
 
 mathChars =
