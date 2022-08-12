@@ -527,7 +527,6 @@ isReducible tokens =
 
 recoverFromError : State -> Step State State
 recoverFromError state =
-    let _ = Debug.log "STACK" state.stack in
     case List.reverse state.stack of
         (LB _) :: (S txt meta) :: (RB _) :: [] ->
             Loop { state | stack = [], committed = Text ("[" ++ txt ++ "]") meta :: [] }
@@ -556,33 +555,12 @@ recoverFromError state =
                         , messages = [ "!!" ]
                     }
 
-        --(Italic _) :: (S str meta) :: [] ->
-        --    Loop
-        --        { state
-        --            | stack = []
-        --            , committed = errorMessage "*?2" :: Fun "italic" [ Text str meta ] meta :: state.committed
-        --            , tokenIndex = meta.index + 1
-        --            , messages = [ "!!" ]
-        --        }
-
-        --(Italic meta1 :: S str meta2 :: Bold meta3 :: rest) ->
-        --    Loop { state |
-        --                stack = []
-        --                -- TODO: fix the below (dummyLoc)
-        --              , committed =
-        --                 Fun "pink" [Text ": extra *?!!"  dummyLocWithId] dummyLocWithId
-        --                 :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-        --                 :: state.committed
-        --              , tokenIndex = meta3.index + 1
-        --
-        --         }
-
 
         (Italic meta1) :: (S str meta2) :: [] ->
             Loop { state
                       | stack = []
                        , committed =
-                              Fun "pink" [Text " << missing *? "  dummyLocWithId] dummyLocWithId
+                              Fun "pink" [Text "* << missing? "  dummyLocWithId] dummyLocWithId
                               :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
                               :: state.committed
                        , tokenIndex = meta2.index + 1
@@ -592,27 +570,37 @@ recoverFromError state =
             Loop { state
                       | stack = []
                        , committed =
-                              Fun "pink" [Text " << extra *? "  dummyLocWithId] dummyLocWithId
+                              Fun "pink" [Text "* << extra? "  dummyLocWithId] dummyLocWithId
                               :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
                               :: state.committed
                        , tokenIndex = meta3.index + 1
                        }
 
         (Italic meta1) :: (S str meta2) :: (Bold meta3) :: rest ->
+          if String.right 1 str == " " then
             Loop { state
                       | stack = []
                        , committed =
-                              Fun "pink" [Text " << extra *? "  dummyLocWithId] dummyLocWithId
+                              Fun "pink" [Text "* << missing? "  dummyLocWithId] dummyLocWithId
                               :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
                               :: state.committed
-                       , tokenIndex = meta3.index + 1
+                       , tokenIndex = meta3.index
                        }
+          else
+            Loop { state
+                  | stack = []
+                   , committed =
+                          Fun "pink" [Text "* << extra? "  dummyLocWithId] dummyLocWithId
+                          :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+                          :: state.committed
+                   , tokenIndex = meta3.index + 1
+                   }
 
         (Italic meta1) :: (S str meta2) :: rest ->
             Loop { state
                       | stack = []
                        , committed =
-                              Fun "pink" [Text " << missing *? "  dummyLocWithId] dummyLocWithId
+                              Fun "pink" [Text "* <<missing? "  dummyLocWithId] dummyLocWithId
                               :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
                               :: state.committed
                        , tokenIndex = meta2.index + 1
@@ -624,7 +612,7 @@ recoverFromError state =
                    Loop { state
                            |   stack = []
                              , tokens = List.Extra.setAt meta2.index (Italic meta2) state.tokens
-                               |> insertAt meta2.index (S "<< extra *" {meta2 | index = meta2.index + 1})
+                               |> insertAt meta2.index (S "* << extra? " {meta2 | index = meta2.index + 1})
                                |> Token.changeTokenIndicesFrom (meta2.index + 2) 1
 
 
@@ -654,7 +642,7 @@ recoverFromError state =
 
         (Bold meta) :: [] ->
             if List.isEmpty state.committed then
-                Loop { state | stack = [], committed = errorMessage "**:1" :: [] }
+                Loop { state | stack = [], committed = errorMessage "**" :: [] }
 
             else
                 let
@@ -680,10 +668,21 @@ recoverFromError state =
             Loop
                 { state
                     | stack = []
-                    , committed = errorMessage "**?3" :: Fun "bold" [ Text str meta ] meta :: state.committed
+                    , committed = errorMessage "** << missing?" :: Fun "bold" [ Text str meta ] meta :: state.committed
                     , tokenIndex = meta.index + 1
                     , messages = [ "!!" ]
                 }
+
+        (Bold meta1) :: (S str meta2) :: (Italic meta3) :: rest ->
+                    Loop
+                        { state
+                            | stack = []
+                            , committed = errorMessage "* << missing"
+                              :: Fun "bold" [ Text str dummyLocWithId ] dummyLocWithId
+                              :: state.committed
+                            , tokenIndex = meta3.index + 1
+                            , messages = [ "!!" ]
+                        }
 
         -- dollar sign with no closing dollar sign
         (MathToken meta) :: rest ->

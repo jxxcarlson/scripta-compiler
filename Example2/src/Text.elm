@@ -172,6 +172,7 @@ xMarkdown =  """
 
 
 
+
 # Italic first
 
 ## Solo asterisk
@@ -198,15 +199,26 @@ xMarkdown =  """
 
 # Bold first
 
+## Solo double asterisk
+
 **
 
+## No final double asterisk
+
 **foo
+
+
+## Final asterisk instead of double asterisk
 
 **foo*
 
 **foo* bar
 
+
+## OK
+
 **foo** bar
+
 
 """
 
