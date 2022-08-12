@@ -168,8 +168,49 @@ $$
 
 """
 
+xMarkdown =  """
 
-xMarkdown =
+
+
+# Italic first
+
+## Solo asterisk
+
+*
+
+## Missing final asterisk
+
+*foo
+
+*foo bar **baz**
+
+## Italicized foo, then bar
+
+*foo* bar
+
+## Extra final asterisk
+
+*foo**
+
+## Extra final asterisk, then bar
+
+*foo** bar
+
+# Bold first
+
+**
+
+**foo
+
+**foo*
+
+**foo* bar
+
+**foo** bar
+
+"""
+
+xMarkdown2 =
     """
 | title
 Demo (XMarkdown)

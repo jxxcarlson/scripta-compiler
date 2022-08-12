@@ -9,8 +9,10 @@ module XMarkdown.Token exposing
     , toString
     , toString2
     , type_
+    , changeTokenIndicesFrom
     )
 
+import List.Extra
 import Parser.Advanced as Parser exposing (DeadEnd, Parser)
 import Parser.Helpers exposing (Step(..), loop)
 import Parser.Meta exposing (Meta)
@@ -655,13 +657,13 @@ rightParenParser start index =
 
 boldParser : Int -> Int -> TokenParser
 boldParser start index =
-    PT.text (\c -> c == '*') (\_ -> False)
-        |> Parser.map (\_ -> Bold { begin = start, end = start, index = index, id = makeId start index })
+    Parser.symbol (Parser.Token "**" (PT.ExpectingSymbol "**"))
+        |> Parser.map (\_ -> Bold { begin = start, end = start + 1, index = index, id = makeId start index })
 
 
 italicParser : Int -> Int -> TokenParser
 italicParser start index =
-    PT.text (\c -> c == '_') (\_ -> False)
+    PT.text (\c -> c == '*') (\_ -> False)
         |> Parser.map (\_ -> Italic { begin = start, end = start, index = index, id = makeId start index })
 
 
@@ -690,3 +692,65 @@ codeParser : Int -> Int -> TokenParser
 codeParser start index =
     PT.text (\c -> c == '`') (\_ -> False)
         |> Parser.map (\_ -> CodeToken { begin = start, end = start, index = index, id = makeId start index })
+
+
+
+changeTokenIndicesFrom : Int -> Int -> List Token -> List Token
+changeTokenIndicesFrom from delta tokens =
+    let
+        f : Token -> Token
+        f token =
+            let
+                k =
+                    indexOf token
+            in
+            if k >= from then
+                setIndex (k + delta) token
+
+            else
+                token
+    in
+    List.map (\token -> f token) tokens
+
+
+indexOf : Token -> Int
+indexOf token =
+    case token of
+        LB meta ->
+            meta.index
+
+        RB meta ->
+            meta.index
+
+        S _ meta ->
+            meta.index
+
+        W _ meta ->
+            meta.index
+
+        MathToken meta ->
+            meta.index
+
+        CodeToken meta ->
+            meta.index
+
+        TokenError _ meta ->
+            meta.index
+
+        LP meta -> meta.index
+
+
+        RP meta -> meta.index
+
+
+        Image meta -> meta.index
+
+
+        AT meta -> meta.index
+
+
+        Bold meta -> meta.index
+
+
+        Italic meta -> meta.index
+

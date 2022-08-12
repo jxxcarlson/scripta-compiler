@@ -527,13 +527,16 @@ isReducible tokens =
 
 recoverFromError : State -> Step State State
 recoverFromError state =
+    let _ = Debug.log "STACK" state.stack in
     case List.reverse state.stack of
         (LB _) :: (S txt meta) :: (RB _) :: [] ->
             Loop { state | stack = [], committed = Text ("[" ++ txt ++ "]") meta :: [] }
 
+
+
         (Italic meta) :: [] ->
             if List.isEmpty state.committed then
-                Loop { state | stack = [], committed = errorMessage "_" :: [] }
+                Loop { state | stack = [], committed = errorMessage "*" :: [] }
 
             else
                 let
@@ -548,14 +551,110 @@ recoverFromError state =
                 Loop
                     { state
                         | stack = []
-                        , committed = expr :: errorMessage "_" :: List.drop 1 state.committed
+                        , committed = expr :: errorMessage "*?1" :: List.drop 1 state.committed
                         , tokenIndex = meta.index + 1
                         , messages = [ "!!" ]
                     }
 
+        --(Italic _) :: (S str meta) :: [] ->
+        --    Loop
+        --        { state
+        --            | stack = []
+        --            , committed = errorMessage "*?2" :: Fun "italic" [ Text str meta ] meta :: state.committed
+        --            , tokenIndex = meta.index + 1
+        --            , messages = [ "!!" ]
+        --        }
+
+        --(Italic meta1 :: S str meta2 :: Bold meta3 :: rest) ->
+        --    Loop { state |
+        --                stack = []
+        --                -- TODO: fix the below (dummyLoc)
+        --              , committed =
+        --                 Fun "pink" [Text ": extra *?!!"  dummyLocWithId] dummyLocWithId
+        --                 :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+        --                 :: state.committed
+        --              , tokenIndex = meta3.index + 1
+        --
+        --         }
+
+
+        (Italic meta1) :: (S str meta2) :: [] ->
+            Loop { state
+                      | stack = []
+                       , committed =
+                              Fun "pink" [Text " << missing *? "  dummyLocWithId] dummyLocWithId
+                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+                              :: state.committed
+                       , tokenIndex = meta2.index + 1
+                       }
+
+        (Italic meta1) :: (S str meta2) :: (Bold meta3) :: [] ->
+            Loop { state
+                      | stack = []
+                       , committed =
+                              Fun "pink" [Text " << extra *? "  dummyLocWithId] dummyLocWithId
+                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+                              :: state.committed
+                       , tokenIndex = meta3.index + 1
+                       }
+
+        (Italic meta1) :: (S str meta2) :: (Bold meta3) :: rest ->
+            Loop { state
+                      | stack = []
+                       , committed =
+                              Fun "pink" [Text " << extra *? "  dummyLocWithId] dummyLocWithId
+                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+                              :: state.committed
+                       , tokenIndex = meta3.index + 1
+                       }
+
+        (Italic meta1) :: (S str meta2) :: rest ->
+            Loop { state
+                      | stack = []
+                       , committed =
+                              Fun "pink" [Text " << missing *? "  dummyLocWithId] dummyLocWithId
+                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
+                              :: state.committed
+                       , tokenIndex = meta2.index + 1
+                       }
+
+        (Italic meta1) :: rest ->
+            case List.Extra.last rest of
+                (Just (Bold meta2)) ->
+                   Loop { state
+                           |   stack = []
+                             , tokens = List.Extra.setAt meta2.index (Italic meta2) state.tokens
+                               |> insertAt meta2.index (S "<< extra *" {meta2 | index = meta2.index + 1})
+                               |> Token.changeTokenIndicesFrom (meta2.index + 2) 1
+
+
+                             , tokenIndex = meta2.index + 2
+                         }
+
+
+                (Just _) ->
+                    Loop
+                        { state
+                            | stack = []
+                            , committed = state.committed ++ (errorMessage "*??1a" :: List.drop 1 state.committed)
+                            , tokenIndex = meta1.index + 1
+                            , messages = [ "!!" ]
+                        }
+
+                Nothing ->
+                    Loop
+                        { state
+                            | stack = []
+                            , committed = state.committed ++ (errorMessage "*??1b" :: List.drop 1 state.committed)
+                            , tokenIndex = meta1.index + 1
+                            , messages = [ "!!" ]
+                        }
+
+
+
         (Bold meta) :: [] ->
             if List.isEmpty state.committed then
-                Loop { state | stack = [], committed = errorMessage "*" :: [] }
+                Loop { state | stack = [], committed = errorMessage "**:1" :: [] }
 
             else
                 let
@@ -570,25 +669,18 @@ recoverFromError state =
                 Loop
                     { state
                         | stack = []
-                        , committed = expr :: errorMessage "*" :: List.drop 1 state.committed
+                        , committed = expr :: errorMessage "**?2" :: List.drop 1 state.committed
                         , tokenIndex = meta.index + 1
                         , messages = [ "!!" ]
                     }
 
-        (Italic _) :: (S str meta) :: [] ->
-            Loop
-                { state
-                    | stack = []
-                    , committed = errorMessage "_" :: Fun "italic" [ Text str meta ] meta :: state.committed
-                    , tokenIndex = meta.index + 1
-                    , messages = [ "!!" ]
-                }
+
 
         (Bold _) :: (S str meta) :: [] ->
             Loop
                 { state
                     | stack = []
-                    , committed = errorMessage "*" :: Fun "bold" [ Text str meta ] meta :: state.committed
+                    , committed = errorMessage "**?3" :: Fun "bold" [ Text str meta ] meta :: state.committed
                     , tokenIndex = meta.index + 1
                     , messages = [ "!!" ]
                 }
@@ -649,6 +741,13 @@ makeId a b =
 
 -- HELPERS
 
+
+insertAt : Int -> a -> List a -> List a
+insertAt k a list =
+    let
+        (p, q) = List.Extra.splitAt k list
+    in
+    p ++ (a :: q)
 
 dummyTokenIndex =
     0
