@@ -1,28 +1,17 @@
 module Scripta.API exposing
-    ( DisplaySettings
-    , EditRecord
-    , defaultSettings
-    , fileNameForExport
-    , Settings
-    , init
-    , makeSettings
-    , render
-    , update
-    , compile
-    , prepareContentForExport
-    , getImageUrls
-    , SyntaxTree
-    , Msg
+    ( compile, DisplaySettings
+    , EditRecord, init, update, render, makeSettings, defaultSettings
+    , fileNameForExport, prepareContentForExport, getImageUrls, Settings
+    , Msg, SyntaxTree
     )
 
-{-|
-
-Scripta.API provides the functions you will need for an application
+{-| Scripta.API provides the functions you will need for an application
 that compiles source text in L0, microLaTeX, or XMarkdown to HTML.
+
 
 # Simple compilation
 
-@docs  compile, DisplaySettings
+@docs compile, DisplaySettings
 
 
 ## Example
@@ -30,40 +19,40 @@ that compiles source text in L0, microLaTeX, or XMarkdown to HTML.
 `compile (displaySettings 0) "Pythagorean formula: $a^2 + b^2 = c^2$"` where
 we define
 
-```
-displaySettings : Int -> Scripta.API.DisplaySettings
-displaySettings counter =
-    { windowWidth = 500
-    , counter = counter
-    , selectedId = "--"
-    , selectedSlug = Nothing
-    , scale = 0.8
-    }
-```
+    displaySettings : Int -> Scripta.API.DisplaySettings
+    displaySettings counter =
+        { windowWidth = 500
+        , counter = counter
+        , selectedId = "--"
+        , selectedSlug = Nothing
+        , scale = 0.8
+        }
 
 The counter field must be updated on each edit.
 This is needed for the rendered text to be
 properly updated. See the demo app in
 folder `Example1`.
 
+
 # Differential Compilation
 
 Compilation can be sped up by keeping track of which blocks
 of source text have changed and ony reparsing those blocks.
 An `EditRecord` is used to keep track of what has changed
-and what has not.  In this setup, the `EditRecord` is
+and what has not. In this setup, the `EditRecord` is
 initialized with the source text using the `init` function.
 On each document change it brought up to date by the
-`update` function.  The `render` function  transforms
+`update` function. The `render` function transforms
 the current `EditRecord` into HTML.
 
 @docs EditRecord, init, update, render, makeSettings, defaultSettings
 
+
 # Export
 
 The `export` and `fileNameForExport` are functions used to transform source
-text in a given markup language to standard LaTeX.  The transformed text
-can be  used to produce a PDF file or a tar files that contains both the
+text in a given markup language to standard LaTeX. The transformed text
+can be used to produce a PDF file or a tar files that contains both the
 standare LaTeX source and a folder of images used in the documents.
 See the code in modules `PDF` and `Main` of `Example2` for more details.
 The Elm app sends data to `https://pdfServ.app`, a small server
@@ -73,6 +62,7 @@ See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
 @docs fileNameForExport, prepareContentForExport, getImageUrls, Settings
 
+
 # Compatibility
 
 The PDF module in Example2 requires these.
@@ -81,63 +71,60 @@ The PDF module in Example2 requires these.
 
 -}
 
-
-import Compiler.ASTTools
+import Compiler.ASTTools as ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
 import Compiler.DifferentialParser
 import Dict exposing (Dict)
+import Either
 import Element exposing (..)
+import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Regex
 import Render.Export.LaTeX
 import Render.Markup
-import Render.Msg
+import Render.Msg exposing (MarkupMsg)
 import Render.Settings
 import Scripta.Language exposing (Language)
-import Render.Msg exposing (MarkupMsg)
 import Scripta.TOC
 import Time
 import Tree
-import Compiler.ASTTools as ASTTools
-import Either
-import Maybe.Extra
-import Tree
-import Render.Export.LaTeX
+
 
 {-| -}
-type alias SyntaxTree = Forest ExpressionBlock
+type alias SyntaxTree =
+    Forest ExpressionBlock
+
 
 {-| -}
-type alias Msg = MarkupMsg
+type alias Msg =
+    MarkupMsg
 
-{-|
 
-  Compile source text in the given language using the given display settings.
-
+{-| Compile source text in the given language using the given display settings.
 -}
 compile : DisplaySettings -> Language -> String -> List (Element Render.Msg.MarkupMsg)
 compile displaySettings language sourceText =
     sourceText
-      |> init Dict.empty language
-      |> render displaySettings
+        |> init Dict.empty language
+        |> render displaySettings
 
 
 {-|
 
-- windowWidth: set this to agree with the width
-  of the window in pixels in which the rendered
-  text is displayed.
+  - windowWidth: set this to agree with the width
+    of the window in pixels in which the rendered
+    text is displayed.
 
-- counter: This is updated on each edit.
-  For technical reasons (virtual Dom)
-  this is needed for the text to display properly.
+  - counter: This is updated on each edit.
+    For technical reasons (virtual Dom)
+    this is needed for the text to display properly.
 
-- selectedId and selectedSlug: useful for interactive editing.
+  - selectedId and selectedSlug: useful for interactive editing.
 
-- scale: a fudge factor
+  - scale: a fudge factor
 
 -}
 type alias DisplaySettings =
@@ -154,6 +141,7 @@ init : Dict String String -> Language -> String -> Compiler.DifferentialParser.E
 init importedFileDict language sourceText =
     Compiler.DifferentialParser.init importedFileDict language sourceText
 
+
 {-| -}
 update : EditRecord -> String -> EditRecord
 update =
@@ -166,8 +154,8 @@ type alias EditRecord =
 
 
 
-
 -- VIEW
+
 
 {-| -}
 makeSettings : String -> Maybe String -> Float -> Int -> Render.Settings.Settings
@@ -189,6 +177,7 @@ renderSettings : DisplaySettings -> Render.Settings.Settings
 renderSettings ds =
     Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
 
+
 {-| -}
 render : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
 render displaySettings editRecord =
@@ -208,7 +197,8 @@ renderBody count settings editRecord =
 -- EXPORT
 
 
-{-| Settings used by render -}
+{-| Settings used by render
+-}
 type alias Settings =
     { paragraphSpacing : Int
     , selectedId : String
@@ -221,7 +211,6 @@ type alias Settings =
     , titlePrefix : String
     , isStandaloneDocument : Bool
     }
-
 
 
 {-| -}
@@ -260,6 +249,7 @@ getImageUrls syntaxTree =
         |> List.map (Maybe.andThen extractUrl)
         |> Maybe.Extra.values
 
+
 extractUrl : String -> Maybe String
 extractUrl str =
     str |> String.split " " |> List.head
@@ -283,6 +273,7 @@ userReplace userRegex replacer string =
 
         Just regex ->
             Regex.replace regex replacer string
+
 
 {-| -}
 defaultSettings : Render.Settings.Settings

@@ -1,6 +1,7 @@
 module XMarkdown.Token exposing
     ( Token(..)
     , TokenType(..)
+    , changeTokenIndicesFrom
     , idem
     , idemTest
     , imageParser
@@ -9,7 +10,6 @@ module XMarkdown.Token exposing
     , toString
     , toString2
     , type_
-    , changeTokenIndicesFrom
     )
 
 import List.Extra
@@ -694,7 +694,6 @@ codeParser start index =
         |> Parser.map (\_ -> CodeToken { begin = start, end = start, index = index, id = makeId start index })
 
 
-
 changeTokenIndicesFrom : Int -> Int -> List Token -> List Token
 changeTokenIndicesFrom from delta tokens =
     let
@@ -737,20 +736,20 @@ indexOf token =
         TokenError _ meta ->
             meta.index
 
-        LP meta -> meta.index
+        LP meta ->
+            meta.index
 
+        RP meta ->
+            meta.index
 
-        RP meta -> meta.index
+        Image meta ->
+            meta.index
 
+        AT meta ->
+            meta.index
 
-        Image meta -> meta.index
+        Bold meta ->
+            meta.index
 
-
-        AT meta -> meta.index
-
-
-        Bold meta -> meta.index
-
-
-        Italic meta -> meta.index
-
+        Italic meta ->
+            meta.index

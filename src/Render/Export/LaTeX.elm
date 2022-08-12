@@ -545,6 +545,7 @@ subheading : Settings -> List String -> String -> String
 subheading settings args body =
     "\\subheading{" ++ body ++ "}"
 
+
 section : Settings -> List String -> String -> String
 section settings args body =
     if settings.isStandaloneDocument then

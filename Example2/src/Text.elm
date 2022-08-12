@@ -168,7 +168,9 @@ $$
 
 """
 
-xMarkdown =  """
+
+xMarkdown =
+    """
 
 
 
@@ -221,6 +223,7 @@ xMarkdown =  """
 
 
 """
+
 
 xMarkdown2 =
     """

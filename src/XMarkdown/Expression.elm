@@ -531,8 +531,6 @@ recoverFromError state =
         (LB _) :: (S txt meta) :: (RB _) :: [] ->
             Loop { state | stack = [], committed = Text ("[" ++ txt ++ "]") meta :: [] }
 
-
-
         (Italic meta) :: [] ->
             if List.isEmpty state.committed then
                 Loop { state | stack = [], committed = errorMessage "*" :: [] }
@@ -555,72 +553,76 @@ recoverFromError state =
                         , messages = [ "!!" ]
                     }
 
-
         (Italic meta1) :: (S str meta2) :: [] ->
-            Loop { state
-                      | stack = []
-                       , committed =
-                              Fun "pink" [Text "* << missing? "  dummyLocWithId] dummyLocWithId
-                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-                              :: state.committed
-                       , tokenIndex = meta2.index + 1
-                       }
+            Loop
+                { state
+                    | stack = []
+                    , committed =
+                        Fun "pink" [ Text "* << missing? " dummyLocWithId ] dummyLocWithId
+                            :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
+                            :: state.committed
+                    , tokenIndex = meta2.index + 1
+                }
 
         (Italic meta1) :: (S str meta2) :: (Bold meta3) :: [] ->
-            Loop { state
-                      | stack = []
-                       , committed =
-                              Fun "pink" [Text "* << extra? "  dummyLocWithId] dummyLocWithId
-                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-                              :: state.committed
-                       , tokenIndex = meta3.index + 1
-                       }
+            Loop
+                { state
+                    | stack = []
+                    , committed =
+                        Fun "pink" [ Text "* << extra? " dummyLocWithId ] dummyLocWithId
+                            :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
+                            :: state.committed
+                    , tokenIndex = meta3.index + 1
+                }
 
         (Italic meta1) :: (S str meta2) :: (Bold meta3) :: rest ->
-          if String.right 1 str == " " then
-            Loop { state
-                      | stack = []
-                       , committed =
-                              Fun "pink" [Text "* << missing? "  dummyLocWithId] dummyLocWithId
-                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-                              :: state.committed
-                       , tokenIndex = meta3.index
-                       }
-          else
-            Loop { state
-                  | stack = []
-                   , committed =
-                          Fun "pink" [Text "* << extra? "  dummyLocWithId] dummyLocWithId
-                          :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-                          :: state.committed
-                   , tokenIndex = meta3.index + 1
-                   }
+            if String.right 1 str == " " then
+                Loop
+                    { state
+                        | stack = []
+                        , committed =
+                            Fun "pink" [ Text "* << missing? " dummyLocWithId ] dummyLocWithId
+                                :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
+                                :: state.committed
+                        , tokenIndex = meta3.index
+                    }
+
+            else
+                Loop
+                    { state
+                        | stack = []
+                        , committed =
+                            Fun "pink" [ Text "* << extra? " dummyLocWithId ] dummyLocWithId
+                                :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
+                                :: state.committed
+                        , tokenIndex = meta3.index + 1
+                    }
 
         (Italic meta1) :: (S str meta2) :: rest ->
-            Loop { state
-                      | stack = []
-                       , committed =
-                              Fun "pink" [Text "* <<missing? "  dummyLocWithId] dummyLocWithId
-                              :: Fun "italic" [Text str dummyLocWithId] dummyLocWithId
-                              :: state.committed
-                       , tokenIndex = meta2.index + 1
-                       }
+            Loop
+                { state
+                    | stack = []
+                    , committed =
+                        Fun "pink" [ Text "* <<missing? " dummyLocWithId ] dummyLocWithId
+                            :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
+                            :: state.committed
+                    , tokenIndex = meta2.index + 1
+                }
 
         (Italic meta1) :: rest ->
             case List.Extra.last rest of
-                (Just (Bold meta2)) ->
-                   Loop { state
-                           |   stack = []
-                             , tokens = List.Extra.setAt meta2.index (Italic meta2) state.tokens
-                               |> insertAt meta2.index (S "* << extra? " {meta2 | index = meta2.index + 1})
-                               |> Token.changeTokenIndicesFrom (meta2.index + 2) 1
+                Just (Bold meta2) ->
+                    Loop
+                        { state
+                            | stack = []
+                            , tokens =
+                                List.Extra.setAt meta2.index (Italic meta2) state.tokens
+                                    |> insertAt meta2.index (S "* << extra? " { meta2 | index = meta2.index + 1 })
+                                    |> Token.changeTokenIndicesFrom (meta2.index + 2) 1
+                            , tokenIndex = meta2.index + 2
+                        }
 
-
-                             , tokenIndex = meta2.index + 2
-                         }
-
-
-                (Just _) ->
+                Just _ ->
                     Loop
                         { state
                             | stack = []
@@ -637,8 +639,6 @@ recoverFromError state =
                             , tokenIndex = meta1.index + 1
                             , messages = [ "!!" ]
                         }
-
-
 
         (Bold meta) :: [] ->
             if List.isEmpty state.committed then
@@ -662,8 +662,6 @@ recoverFromError state =
                         , messages = [ "!!" ]
                     }
 
-
-
         (Bold _) :: (S str meta) :: [] ->
             Loop
                 { state
@@ -674,15 +672,16 @@ recoverFromError state =
                 }
 
         (Bold meta1) :: (S str meta2) :: (Italic meta3) :: rest ->
-                    Loop
-                        { state
-                            | stack = []
-                            , committed = errorMessage "* << missing"
-                              :: Fun "bold" [ Text str dummyLocWithId ] dummyLocWithId
-                              :: state.committed
-                            , tokenIndex = meta3.index + 1
-                            , messages = [ "!!" ]
-                        }
+            Loop
+                { state
+                    | stack = []
+                    , committed =
+                        errorMessage "* << missing"
+                            :: Fun "bold" [ Text str dummyLocWithId ] dummyLocWithId
+                            :: state.committed
+                    , tokenIndex = meta3.index + 1
+                    , messages = [ "!!" ]
+                }
 
         -- dollar sign with no closing dollar sign
         (MathToken meta) :: rest ->
@@ -744,9 +743,11 @@ makeId a b =
 insertAt : Int -> a -> List a -> List a
 insertAt k a list =
     let
-        (p, q) = List.Extra.splitAt k list
+        ( p, q ) =
+            List.Extra.splitAt k list
     in
     p ++ (a :: q)
+
 
 dummyTokenIndex =
     0

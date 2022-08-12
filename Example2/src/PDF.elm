@@ -9,14 +9,12 @@ module PDF exposing
     , tarCmd
     )
 
-
 import Http
 import Json.Encode as E
 import Process
 import Scripta.API
 import Task
 import Time
-
 
 
 pdfServUrl1 =
@@ -114,8 +112,6 @@ tarCmd currentTime settings syntaxTree =
             , tracker = Nothing
             }
         ]
-
-
 
 
 gotLink : model -> Result error value -> ( model, Cmd PDFMsg )

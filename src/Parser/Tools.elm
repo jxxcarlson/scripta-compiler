@@ -8,7 +8,6 @@ module Parser.Tools exposing
     , textWithEndSymbol
     )
 
-
 import Parser.Advanced as Parser exposing ((|.), (|=))
 
 
@@ -17,7 +16,6 @@ type Problem
     | ExpectingSymbol String
     | ExpectingImageStart
     | ExpectingATStart
-
 
 
 type Context
@@ -93,4 +91,3 @@ sequenceAux state =
 
         Just parser ->
             parser |> Parser.map (\a -> Parser.Loop { state | results = a :: state.results, parsers = List.drop 1 state.parsers })
-

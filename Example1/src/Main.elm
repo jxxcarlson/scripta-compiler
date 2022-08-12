@@ -17,7 +17,6 @@ import Scripta.API
 import Scripta.Language exposing (Language(..))
 
 
-
 main =
     Browser.element
         { init = init
@@ -29,7 +28,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-   Sub.none
+    Sub.none
 
 
 type alias Model =
@@ -37,7 +36,6 @@ type alias Model =
     , count : Int
     , language : Language
     }
-
 
 
 type Msg
@@ -60,7 +58,8 @@ displaySettings counter =
     }
 
 
-initialText = """
+initialText =
+    """
 Pythagoras says: $a^2 + b^2 = c^2$
 
 This \\strong{will} be on the test:
@@ -88,7 +87,6 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-
         InputText str ->
             ( { model
                 | sourceText = str
@@ -107,10 +105,9 @@ update msg model =
 --
 
 
-
 view : Model -> Html Msg
 view model =
-    layoutWith { options = [  ] }
+    layoutWith { options = [] }
         [ bgGray 0.2 ]
         (mainColumn model)
 
@@ -123,9 +120,7 @@ mainColumn model =
               row [ spacing 18 ]
                 [ inputText model
                 , displayRenderedText model
-
                 ]
-
             ]
         ]
 
@@ -140,15 +135,14 @@ displayRenderedText model =
     column [ spacing 8, Font.size 14 ]
         [ el [ fontGray 0.9 ] (text "Rendered Text")
         , column
-                  [ spacing 18
-                  , Background.color (Element.rgb 1.0 1.0 1.0)
-                  , width (px 500)
-                  , height (px 600)
-                  , paddingXY 16 32
-                  , scrollbarY
-                  ]
-                  (Scripta.API.compile (displaySettings model.count) MicroLaTeXLang model.sourceText |> List.map (Element.map Render))
-
+            [ spacing 18
+            , Background.color (Element.rgb 1.0 1.0 1.0)
+            , width (px 500)
+            , height (px 600)
+            , paddingXY 16 32
+            , scrollbarY
+            ]
+            (Scripta.API.compile (displaySettings model.count) MicroLaTeXLang model.sourceText |> List.map (Element.map Render))
         ]
 
 
