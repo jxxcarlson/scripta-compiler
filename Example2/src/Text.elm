@@ -171,184 +171,116 @@ $$
 
 xMarkdown =
     """
-
 | title
-XMarkdown Manual
-
-@[tags cheatsheet, jxxcarlson:xmarkdown-manual, folder:systemdocs]
-
-
+XMarkdown Visual Check
 
 | contents
 
-# General
-
-
-@[cslink Hints jxxcarlson:tips]
-
-@[cslink Guide jxxcarlson-xmarkdown-guide]
-
-
-# Basics
-
-XMarkdown is more or less like regular Markdown, but there
-are both differences and additions
-
-*Bold text*  @[term_ bold]
-
-```
-*Bold text*
-```
-
-_italic text_ @[term_ italic]
-
-
-```
-_italic text_
-```
-
-@[bi bold italic text]  @[term_ bold-italic]
-
-```
-@[bi bold italic text]
-```
 
 
 
-_Links:_ @[term_ links]
+@[tags check]
 
-```
-[New York Times](https://nytimes.com)
-```
 
-| indent
+# Typography
+
+
+Some *italic* and  **bold** text.  @[blue Blue stuff.]
+(Cool, no!)
+
+
+# Link
+
 [New York Times](https://nytimes.com)
 
-_Images_
-
-```
-![Cardinal in Winter](https://news.wttw.com ...)
-
-![Cardinal in Winter](https://news.wttw.com/sites/default/files/styles/full/public/field/image/CardinalSnowtlparadisPixabayCrop.jpg?itok=iyp0zGMz)
-
-_Bullet lists:_ @[term_ lists, bullet]
-
-```
-- Get food for the party
-
-- Pick up the kids after school
-```
-
-- Get food for the party
-
-- Pick up the kids after school
+# Image
 
 
-_Numbered lists:_ @[term_ lists, numbered]
 
-```
-. Get food for the party
+![Bird](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhXplhW5-ydbNOJiJe1fp7oAM9xjRwX28ung&usqp=CAU)
 
-. Pick up the kids after school
-```
+# Mathematics
 
-. Get food for the party
+This is a formula: $a^2 + b^2 = c^2$.
 
-. Pick up the kids after school
-
-
-_Quotations_
-
-|| code
-> Marcus Tullius Cicero
-Times are bad. Children no longer obey
-their parents, and everyone is writing
-a book.
-
-> Marcus Tullius Cicero
-Times are bad. Children no longer obey
-their parents, and everyone is writing
-a book.
-
-If there is no text after the `>` sign, no attributon will be rendered.
-
-# Additions
-
-## Title and table contents
-
-Put the text `| contents` underneath the title automatically generate a table of contents:
-
-```
-| title
-XMarkdown Cheat Sheet
-
-| contents
-
-This little passage borrows from @[ilink L0 syntax id-go206-ak343].
-
-
-## Math
-
-Inline formulas, e.g., $a^2 + b^2 = c^2$, are done like this:
-
-```
-$a^2 + b^2 = c^2$
-```
-
-You can also make displayed formulas:
+## Displayed formula
 
 $$
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
+
+
+## Numbered formula
+
+|| equation
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+
+## Aligned equations
+
+
+|| aligned
+\\label{foo}
+a &= b + 1 \\\\
+c &= a^2 \\\\
+ &= b^2 + 2b + 1 \\\\
+
+
+## Theorems
+
+| theorem
+There are infinitely many primes $p \\equiv 1\\ mod\\ 4$. Isn't that nice?
+
+
+# Code
+
+Some inline code `a[0] := a[0] + 1`.  A block of code:
+
+```
+# multiplication table
+  for x in range(1, 11):
+      for y in range(1, 11):
+          print('%d ** %d = %d' % (x, y, x**y)
+```
 
 Here is the source text:
 
+|| code
 ```
-$$
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
+# multiplication table
+  for x in range(1, 11):
+      for y in range(1, 11):
+          print('%d ** %d = %d' % (x, y, x**y)
 ```
 
-# Missing things
+# Bulleted Lists
 
-The following have not yet been implemented, but they will be:
+- One
 
-- Tables
+- Two
 
-- SVG images
+  - Alpha
 
-# Index
+  - Beta
 
-| index
-"""
+    - Ho ho ho!
+
+    - Ha ha !
 
 
-xMarkdown2 =
-    """
-| title
-Demo (XMarkdown)
+# Numbered Lists
 
-| banner
-[Scripta.io](https://scripta.io)
 
-| contents
+. One
 
-# Images
+. Two
 
-![Yellow bird](https://i.ibb.co/XFzZYby/image.png width:400)
+  . Alpha
 
-# Math
+  . Beta
 
-Pythagoras says: $a^2 + b^2 = c^2$
+    . Ho ho ho!
 
-From calculus:
-
-$$
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
-
-*Tip:* Click on a section title to go back to the table of contents.
-
+    . Ha ha!
 """
 
 
