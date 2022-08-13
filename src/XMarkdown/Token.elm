@@ -1,8 +1,8 @@
 module XMarkdown.Token exposing
     ( Token(..)
     , TokenType(..)
-    , changeTokenIndicesFrom
     , changeTokenContentAt
+    , changeTokenIndicesFrom
     , idem
     , idemTest
     , imageParser
@@ -697,13 +697,17 @@ codeParser start index =
 
 changeTokenContentAt : Int -> String -> List Token -> List Token
 changeTokenContentAt k newContent tokens =
-   case List.Extra.getAt k tokens of
-       Nothing -> tokens
-       Just tok ->
-           case tok of
-               (S _ meta) ->
-                   List.Extra.setAt k (S newContent meta) tokens
-               _ -> tokens
+    case List.Extra.getAt k tokens of
+        Nothing ->
+            tokens
+
+        Just tok ->
+            case tok of
+                S _ meta ->
+                    List.Extra.setAt k (S newContent meta) tokens
+
+                _ ->
+                    tokens
 
 
 changeTokenIndicesFrom : Int -> Int -> List Token -> List Token

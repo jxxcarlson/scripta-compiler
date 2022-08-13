@@ -106,7 +106,8 @@ nextStep state =
                 recoverFromError (state |> Tools.forklogBlue "RECOVER" 12 (.stack >> List.reverse >> Token.toString2))
 
         Just token ->
-            state |> advanceTokenIndex
+            state
+                |> advanceTokenIndex
                 |> pushToken token
                 |> Tools.forklogBlue "STACK" forkLogWidth (.stack >> Token.toString2)
                 |> reduceState
@@ -115,7 +116,11 @@ nextStep state =
 
 
 advanceTokenIndex : State -> State
-advanceTokenIndex state = {state | tokenIndex = state.tokenIndex + 1}
+advanceTokenIndex state =
+    { state | tokenIndex = state.tokenIndex + 1 }
+
+
+
 -- PUSH
 
 
@@ -123,16 +128,19 @@ pushToken : Token -> State -> State
 pushToken token state =
     case token of
         S str meta ->
-            if String.right 1 str == " "
-              then
-                  pushOrCommit token state
-              else
-              case List.Extra.getAt (meta.index + 1)  state.tokens of
-                  Just (Italic meta_) ->
-                      state |> push token |> push (Italic meta_) |> advanceTokenIndex
-                  Just (Bold meta_ )  ->
-                      state |> push token |> push (Bold meta_ ) |> advanceTokenIndex
-                  _ -> pushOrCommit token state
+            if String.right 1 str == " " then
+                pushOrCommit token state
+
+            else
+                case List.Extra.getAt (meta.index + 1) state.tokens of
+                    Just (Italic meta_) ->
+                        state |> push token |> push (Italic meta_) |> advanceTokenIndex
+
+                    Just (Bold meta_) ->
+                        state |> push token |> push (Bold meta_) |> advanceTokenIndex
+
+                    _ ->
+                        pushOrCommit token state
 
         W _ _ ->
             pushOrCommit token state
@@ -292,8 +300,6 @@ handleBracketedText state =
             Text str meta
     in
     { state | committed = expr :: state.committed, stack = [] }
-
-
 
 
 handleImage : State -> State
@@ -522,24 +528,30 @@ recoverFromError : State -> Step State State
 recoverFromError state =
     case List.reverse state.stack of
         (S content meta) :: (Italic _) :: rest ->
-            Loop { state |
-                     tokens = state.tokens
-                        |> Token.changeTokenContentAt meta.index (String.trim content)
-                        |> insertAt meta.index (Italic meta)
-                        |> Token.changeTokenIndicesFrom (meta.index + 1) 1
-                     , tokenIndex = meta.index
-                     , stack = []
-                     , committed = Fun "pink" [Text " *" dummyLocWithId] dummyLocWithId :: state.committed}
+            Loop
+                { state
+                    | tokens =
+                        state.tokens
+                            |> Token.changeTokenContentAt meta.index (String.trim content)
+                            |> insertAt meta.index (Italic meta)
+                            |> Token.changeTokenIndicesFrom (meta.index + 1) 1
+                    , tokenIndex = meta.index
+                    , stack = []
+                    , committed = Fun "pink" [ Text " *" dummyLocWithId ] dummyLocWithId :: state.committed
+                }
 
         (S content meta) :: (Bold _) :: rest ->
-                   Loop { state |
-                            tokens = state.tokens
-                               |> Token.changeTokenContentAt meta.index (String.trim content)
-                               |> insertAt meta.index (Bold meta)
-                               |> Token.changeTokenIndicesFrom (meta.index + 1) 1
-                            , tokenIndex = meta.index
-                            , stack = []
-                            , committed = Fun "pink" [Text " **" dummyLocWithId] dummyLocWithId :: state.committed}
+            Loop
+                { state
+                    | tokens =
+                        state.tokens
+                            |> Token.changeTokenContentAt meta.index (String.trim content)
+                            |> insertAt meta.index (Bold meta)
+                            |> Token.changeTokenIndicesFrom (meta.index + 1) 1
+                    , tokenIndex = meta.index
+                    , stack = []
+                    , committed = Fun "pink" [ Text " **" dummyLocWithId ] dummyLocWithId :: state.committed
+                }
 
         (LB _) :: (S txt meta) :: (RB _) :: [] ->
             Loop { state | stack = [], committed = Text ("[" ++ txt ++ "]") meta :: [] }
