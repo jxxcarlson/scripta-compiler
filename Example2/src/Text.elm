@@ -168,8 +168,16 @@ $$
 
 """
 
+xMarkdown = """
 
-xMarkdown =
+`italic*` $\\to$ italic*
+
+
+`*italic` $\\to$ *italic
+
+"""
+
+xMarkdown2 =
     """
 | title
 XMarkdown Visual Check

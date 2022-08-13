@@ -583,7 +583,7 @@ recoverFromError state =
                 { state
                     | stack = []
                     , committed =
-                        Fun "pink" [ Text "* << missing? " dummyLocWithId ] dummyLocWithId
+                        Fun "pink" [ Text "* " dummyLocWithId ] dummyLocWithId
                             :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
                             :: state.committed
                     , tokenIndex = meta2.index + 1
@@ -606,7 +606,7 @@ recoverFromError state =
                     { state
                         | stack = []
                         , committed =
-                            Fun "pink" [ Text "* << missing? " dummyLocWithId ] dummyLocWithId
+                            Fun "pink" [ Text "* " dummyLocWithId ] dummyLocWithId
                                 :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
                                 :: state.committed
                         , tokenIndex = meta3.index
@@ -628,7 +628,7 @@ recoverFromError state =
                 { state
                     | stack = []
                     , committed =
-                        Fun "pink" [ Text "* <<missing? " dummyLocWithId ] dummyLocWithId
+                        Fun "pink" [ Text "* " dummyLocWithId ] dummyLocWithId
                             :: Fun "italic" [ Text str dummyLocWithId ] dummyLocWithId
                             :: state.committed
                     , tokenIndex = meta2.index + 1
@@ -691,7 +691,7 @@ recoverFromError state =
             Loop
                 { state
                     | stack = []
-                    , committed = errorMessage "** << missing?" :: Fun "bold" [ Text str meta ] meta :: state.committed
+                    , committed = errorMessage "** " :: Fun "bold" [ Text str meta ] meta :: state.committed
                     , tokenIndex = meta.index + 1
                     , messages = [ "!!" ]
                 }
@@ -701,7 +701,7 @@ recoverFromError state =
                 { state
                     | stack = []
                     , committed =
-                        errorMessage "* << missing"
+                        errorMessage "* "
                             :: Fun "bold" [ Text str dummyLocWithId ] dummyLocWithId
                             :: state.committed
                     , tokenIndex = meta3.index + 1
