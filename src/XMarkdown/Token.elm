@@ -2,6 +2,7 @@ module XMarkdown.Token exposing
     ( Token(..)
     , TokenType(..)
     , changeTokenIndicesFrom
+    , changeTokenContentAt
     , idem
     , idemTest
     , imageParser
@@ -236,10 +237,10 @@ stringValue token =
             ")"
 
         Bold _ ->
-            "*"
+            "**"
 
         Italic _ ->
-            "_"
+            "*"
 
         Image _ ->
             "image"
@@ -692,6 +693,17 @@ codeParser : Int -> Int -> TokenParser
 codeParser start index =
     PT.text (\c -> c == '`') (\_ -> False)
         |> Parser.map (\_ -> CodeToken { begin = start, end = start, index = index, id = makeId start index })
+
+
+changeTokenContentAt : Int -> String -> List Token -> List Token
+changeTokenContentAt k newContent tokens =
+   case List.Extra.getAt k tokens of
+       Nothing -> tokens
+       Just tok ->
+           case tok of
+               (S _ meta) ->
+                   List.Extra.setAt k (S newContent meta) tokens
+               _ -> tokens
 
 
 changeTokenIndicesFrom : Int -> Int -> List Token -> List Token
