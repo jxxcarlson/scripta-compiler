@@ -26,6 +26,7 @@ import Scripta.Language exposing (Language(..))
 import Task
 import Text
 import Time
+import Experimental
 
 
 main =
@@ -96,9 +97,9 @@ settings counter =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { input = Text.microLaTeXDemo
+    ( { input = Experimental.text
       , count = 0
-      , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Text.microLaTeXDemo
+      , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Experimental.text
       , language = MicroLaTeXLang
       , documentType = Example
       , currentTime = Time.millisToPosix 0

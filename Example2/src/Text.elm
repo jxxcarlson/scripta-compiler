@@ -106,8 +106,9 @@ I am on the Elm Slack and Github as jxxcarlson and on Twitter as @epsilon2718.
 
 """
 
-
-microLaTeXDemo =
+microLaTeXDemo = """
+"""
+microLaTeXDemo2 =
     """
 \\title{Demo (MicroLaTeX)}
 

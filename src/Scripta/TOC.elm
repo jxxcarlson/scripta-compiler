@@ -2,6 +2,7 @@ module Scripta.TOC exposing (view)
 
 import Compiler.ASTTools
 import Compiler.Acc exposing (Accumulator)
+import Dict
 import Either exposing (Either(..))
 import Element exposing (Element)
 import Element.Events as Events
@@ -26,8 +27,13 @@ view counter acc _ ast =
                 (prepareFrontMatter counter acc Render.Settings.defaultSettings ast)
 
         _ ->
+            let
+                maximumLevel = case Dict.get "contentslevel" acc.keyValueDict of
+                    Just level -> String.toInt level |> Maybe.withDefault 3
+                    Nothing -> 3
+            in
             Element.column [ Element.spacing 8, Element.paddingEach { left = 0, right = 0, top = 0, bottom = 0 } ]
-                (prepareTOC counter acc Render.Settings.defaultSettings ast)
+                (prepareTOC maximumLevel counter acc Render.Settings.defaultSettings ast)
 
 
 viewTocItem : Int -> Accumulator -> Render.Settings.Settings -> ExpressionBlock -> Element MarkupMsg
@@ -60,12 +66,22 @@ viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber }) =
                 (Element.link [ Font.color (Element.rgb 0 0 0.8) ] { url = Render.Utility.internalLink id, label = label })
 
 
-prepareTOC : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)
-prepareTOC count acc settings ast =
+
+tocLevel : Int -> ExpressionBlock -> Bool
+tocLevel k (ExpressionBlock { args} ) =
+    case List.Extra.getAt 0 args of
+        Nothing -> True
+        Just level ->
+            (String.toInt level |> Maybe.withDefault 4) <= k
+
+
+prepareTOC : Int -> Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)
+prepareTOC maximumLevel count acc settings ast =
     let
         rawToc : List ExpressionBlock
         rawToc =
-            Compiler.ASTTools.tableOfContents ast
+            Compiler.ASTTools.tableOfContents maximumLevel ast
+            |> List.filter (tocLevel maximumLevel)
 
         toc =
             Element.el [ Font.bold, Font.size 18 ] (Element.text "Contents")
@@ -106,6 +122,8 @@ prepareTOC count acc settings ast =
 
     else
         banner :: title :: subtitle :: spaceBelow 8 :: toc
+
+
 
 
 prepareFrontMatter : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)

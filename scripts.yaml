@@ -22,6 +22,9 @@ scripts:
   clean-macros:
     cat macros.txt | sed 's/^, (//g' | sed 's/,.*//g' | sed 's/"//g'
 
+  clean-macros2:
+    sed 's/^.*(//' macros.txt | sed 's/\",.*//'  | sed 's/^ //' | sed 's/^\"//' | grep -v "^ " | grep -v "^E"
+
   server: fs -p 3300 initialDocs
 
   # vendor: cp -r  /Users/carlson/dev/lamdera/bluesky/scripta-compiler/compiler/* ./compiler/

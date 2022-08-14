@@ -96,19 +96,18 @@ blockDict =
         [ ( "indent", indented )
         , ( "quotation", quotation )
         , ( "comment", comment )
-        , ( "q", question )
-        , ( "a", answer )
+        , ("key", \_ _ _ _ _ _ -> Element.none)
+        , ( "q", question ) -- xx
+        , ( "a", answer ) -- xx
         , ( "document", document )
         , ( "collection", collection )
         , ( "bibitem", bibitem )
-
-        -- , ( "heading", section )
-        , ( "section", section )
-        , ( "subheading", subheading )
+        , ( "section", section ) -- xx
+        , ( "subheading", subheading ) -- xx
         , ( "runninghead", \_ _ _ _ _ _ -> Element.none )
-        , ( "runninghead_", runninghead )
+        , ( "runninghead_", runninghead ) -- ??
         , ( "banner", \_ _ _ _ _ _ -> Element.none )
-        , ( "banner_", banner )
+        , ( "banner_", banner ) -- ??
         , ( "title", \_ _ _ _ _ _ -> Element.none )
         , ( "subtitle", \_ _ _ _ _ _ -> Element.none )
         , ( "author", \_ _ _ _ _ _ -> Element.none )

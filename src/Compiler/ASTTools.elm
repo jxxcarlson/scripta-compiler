@@ -373,8 +373,8 @@ extractTextFromSyntaxTreeByKey key syntaxTree =
     syntaxTree |> filterBlocksByArgs key |> expressionBlockToText
 
 
-tableOfContents : Forest ExpressionBlock -> List ExpressionBlock
-tableOfContents ast =
+tableOfContents : Int -> Forest ExpressionBlock -> List ExpressionBlock
+tableOfContents maximumLevel ast =
     filterBlocksOnName "section" (List.map Tree.flatten ast |> List.concat)
 
 

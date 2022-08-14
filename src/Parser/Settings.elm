@@ -41,6 +41,7 @@ blockData =
     , ( "remark", { prefix = "|", arity = Arity 0 } )
     , ( "theorem", { prefix = "|", arity = Arity 0 } )
     , ( "indent", { prefix = "|", arity = Arity 0 } )
+    , ( "quotation", { prefix = "|", arity = Arity 0 } )
     , ( "numbered", { prefix = "|", arity = Arity 0 } )
     , ( "abstract", { prefix = "|", arity = Arity 0 } )
     , ( "bibitem", { prefix = "|", arity = Arity 1 } )

@@ -41,6 +41,7 @@ type alias Accumulator =
     , footnoteNumbers : Dict String Int
     , mathMacroDict : Parser.MathMacro.MathMacroDict
     , textMacroDict : Dict String Macro
+    , keyValueDict : Dict String String
     }
 
 
@@ -85,6 +86,7 @@ init k =
     , footnoteNumbers = Dict.empty
     , mathMacroDict = Dict.empty
     , textMacroDict = Dict.empty
+    , keyValueDict = Dict.empty
     }
 
 
@@ -213,6 +215,12 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
     -- Update the accumulator for expression blocks with selected name
     case ( name, blockType ) of
         -- provide numbering for sections
+        (Just "key", OrdinaryBlock _) ->
+            case args of
+                key :: value :: rest ->
+                  { accumulator | keyValueDict = Dict.insert key value accumulator.keyValueDict}
+                _ -> accumulator
+
         ( Just "section", OrdinaryBlock _ ) ->
             let
                 level =
