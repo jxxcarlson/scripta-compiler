@@ -8,7 +8,7 @@ text = """
 
 \\tags{jxxcarlson:microlatex-test}
 
-| key contentslevel 1
+| key contentsdepth 1
 
 
 

@@ -28,7 +28,7 @@ view counter acc _ ast =
 
         _ ->
             let
-                maximumLevel = case Dict.get "contentslevel" acc.keyValueDict of
+                maximumLevel = case Dict.get "contentsdepth" acc.keyValueDict of
                     Just level -> String.toInt level |> Maybe.withDefault 3
                     Nothing -> 3
             in
