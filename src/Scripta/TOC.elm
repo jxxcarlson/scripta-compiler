@@ -28,9 +28,13 @@ view counter acc _ ast =
 
         _ ->
             let
-                maximumLevel = case Dict.get "contentsdepth" acc.keyValueDict of
-                    Just level -> String.toInt level |> Maybe.withDefault 3
-                    Nothing -> 3
+                maximumLevel =
+                    case Dict.get "contentsdepth" acc.keyValueDict of
+                        Just level ->
+                            String.toInt level |> Maybe.withDefault 3
+
+                        Nothing ->
+                            3
             in
             Element.column [ Element.spacing 8, Element.paddingEach { left = 0, right = 0, top = 0, bottom = 0 } ]
                 (prepareTOC maximumLevel counter acc Render.Settings.defaultSettings ast)
@@ -66,11 +70,12 @@ viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber }) =
                 (Element.link [ Font.color (Element.rgb 0 0 0.8) ] { url = Render.Utility.internalLink id, label = label })
 
 
-
 tocLevel : Int -> ExpressionBlock -> Bool
-tocLevel k (ExpressionBlock { args} ) =
+tocLevel k (ExpressionBlock { args }) =
     case List.Extra.getAt 0 args of
-        Nothing -> True
+        Nothing ->
+            True
+
         Just level ->
             (String.toInt level |> Maybe.withDefault 4) <= k
 
@@ -81,7 +86,7 @@ prepareTOC maximumLevel count acc settings ast =
         rawToc : List ExpressionBlock
         rawToc =
             Compiler.ASTTools.tableOfContents maximumLevel ast
-            |> List.filter (tocLevel maximumLevel)
+                |> List.filter (tocLevel maximumLevel)
 
         toc =
             Element.el [ Font.bold, Font.size 18 ] (Element.text "Contents")
@@ -122,8 +127,6 @@ prepareTOC maximumLevel count acc settings ast =
 
     else
         banner :: title :: subtitle :: spaceBelow 8 :: toc
-
-
 
 
 prepareFrontMatter : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)

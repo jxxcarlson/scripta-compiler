@@ -215,11 +215,13 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
     -- Update the accumulator for expression blocks with selected name
     case ( name, blockType ) of
         -- provide numbering for sections
-        (Just "key", OrdinaryBlock _) ->
+        ( Just "key", OrdinaryBlock _ ) ->
             case args of
                 key :: value :: rest ->
-                  { accumulator | keyValueDict = Dict.insert key value accumulator.keyValueDict}
-                _ -> accumulator
+                    { accumulator | keyValueDict = Dict.insert key value accumulator.keyValueDict }
+
+                _ ->
+                    accumulator
 
         ( Just "section", OrdinaryBlock _ ) ->
             let

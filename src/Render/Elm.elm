@@ -63,8 +63,7 @@ errorBackgroundColor =
 markupDict : Dict String (Int -> Accumulator -> Settings -> List Expr -> Element MarkupMsg)
 markupDict =
     Dict.fromList
-        [
-         ( "bibitem", \_ _ _ exprList -> bibitem exprList )
+        [ ( "bibitem", \_ _ _ exprList -> bibitem exprList )
 
         -- STYLE
         , ( "strong", \g acc s exprList -> strong g acc s exprList )

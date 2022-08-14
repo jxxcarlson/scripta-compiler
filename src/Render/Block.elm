@@ -96,7 +96,7 @@ blockDict =
         [ ( "indent", indented )
         , ( "quotation", quotation )
         , ( "comment", comment )
-        , ("key", \_ _ _ _ _ _ -> Element.none)
+        , ( "key", \_ _ _ _ _ _ -> Element.none )
         , ( "q", question ) -- xx
         , ( "a", answer ) -- xx
         , ( "document", document )
