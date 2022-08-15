@@ -1,5 +1,6 @@
 module Compiler.Util exposing
     ( compressWhitespace
+    , removeNonAlphaNum
     , depth
     , dropLast
     , eraseItem
@@ -47,6 +48,11 @@ userReplace userRegex replacer string =
 compressWhitespace : String -> String
 compressWhitespace string =
     userReplace "\\s\\s+" (\_ -> " ") string
+
+
+removeNonAlphaNum : String -> String
+removeNonAlphaNum string =
+    userReplace "[^a-zA-Z0-9 ]" (\_ -> "") string
 
 
 {-| Apply a parser zero or more times and return a list of the results.

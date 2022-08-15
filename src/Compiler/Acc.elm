@@ -300,7 +300,7 @@ updateWithOrdinarySectionBlock accumulator name content level id =
 
         sectionTag =
             -- TODO: the below is a bad solution
-            titleWords |> List.map (String.toLower >> String.replace " " "-") |> String.join ""
+            titleWords |> List.map (String.toLower >> Compiler.Util.compressWhitespace >> Compiler.Util.removeNonAlphaNum >>     String.replace " " "-") |> String.join ""
 
         headingIndex =
             Vector.increment (String.toInt level |> Maybe.withDefault 0) accumulator.headingIndex

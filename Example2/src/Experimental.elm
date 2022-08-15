@@ -2,36 +2,205 @@ module Experimental exposing (text)
 
 
 text = """
-\\title{MicroLaTeX Test}
+\\title{MicroLaTeX Glossary}
 
-\\contents 2
+| contents
 
-\\tags{jxxcarlson:microlatex-test}
+|| docinfo
+author: James Carlson
+date: Auguest 15, 2022
+subtitle: List of all macros and environments
 
-| key contentsdepth 1
+| set-key contentsdepth 1
+
+
+\\tags{jxxcarlson:microlatex-glossary}
+
+
+\\section{Introduction}
+
+What follows is a complete list of the macros and
+environments available in Scripta for MicroLaTeX.
+Most of the macros work as in LaTeX.  There are however,
+a few exceptions, detailed in section \\ref{differences-from-standard-latex}, and  and additions, detailed in section
+\\ref{addtions-to-standard-latex}.
+
+If there are macros or environments that you need but
+are missing, please contact me (James Carlson, jxxcarlson at
+gmail), or used the "bug" icon in the header (upper right corner)
+
+
+\\section{Addtions to standard LaTeX}
+
+There are features of Scripta that are accessible in
+MicroLaTeX using Scripta syntax.   As an example, the
+Figure A below is is placed using
+
+|| code
+|| svg Figure A
+<SVG CODE>
+
+
+
+|| svg Figure A
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="286.13466" height="299.53867" viewBox="0 0 286.13466 299.53867">
+<!-- Original BoundingBox: -141.8174 -142.55246 144.31726 156.9862 -->
+  <defs>
+    <g transform="scale(0.00995,0.00995)" id="GLYPHcmr10_65">
+      <path style="fill-rule: evenodd;" d="M398 -696C393 -709,391 -716,375 -716C359 -716,356 -710,351 -696L144 -98C126 -47,86 -32,32 -31L32 0C55 -1,98 -3,134 -3C165 -3,217 -1,249 0L249 -31C199 -31,174 -56,174 -82C174 -85,175 -95,176 -97L222 -228L469 -228L522 -75C523 -71,525 -65,525 -61C525 -31,469 -31,442 -31L442 0C478 -3,548 -3,586 -3C629 -3,675 -2,717 0L717 -31L699 -31C639 -31,625 -38,614 -71M345 -584L458 -259L233 -259"></path>
+    </g>
+    <g transform="scale(0.00995,0.00995)" id="GLYPHcmr10_66">
+      <path style="fill-rule: evenodd;" d="M222 -366L222 -612C222 -645,224 -652,271 -652L395 -652C492 -652,527 -567,527 -514C527 -450,478 -366,367 -366M458 -357C555 -376,624 -440,624 -514C624 -601,532 -683,402 -683L36 -683L36 -652L60 -652C137 -652,139 -641,139 -605L139 -78C139 -42,137 -31,60 -31L36 -31L36 0L428 0C561 0,651 -89,651 -183C651 -270,569 -345,458 -357M396 -31L271 -31C224 -31,222 -38,222 -71L222 -344L410 -344C509 -344,551 -251,551 -184C551 -113,499 -31,396 -31"></path>
+    </g>
+    <g transform="scale(0.00995,0.00995)" id="GLYPHcmr10_77">
+      <path style="fill-rule: evenodd;" d="M241 -661C232 -683,229 -683,206 -683L37 -683L37 -652L61 -652C138 -652,140 -641,140 -605L140 -105C140 -78,140 -31,37 -31L37 0C72 -1,121 -3,154 -3C187 -3,236 -1,271 0L271 -31C168 -31,168 -78,168 -105L168 -644L169 -644L410 -22C415 -9,420 0,430 0C441 0,444 -8,448 -19L694 -652L695 -652L695 -78C695 -42,693 -31,616 -31L592 -31L592 0C629 -3,697 -3,736 -3C775 -3,842 -3,879 0L879 -31L855 -31C778 -31,776 -42,776 -78L776 -605C776 -641,778 -652,855 -652L879 -652L879 -683L710 -683C684 -683,684 -682,677 -664L458 -101"></path>
+    </g>
+    <g transform="scale(0.00995,0.00995)" id="GLYPHcmr10_79">
+      <path style="fill-rule: evenodd;" d="M721 -339C721 -543,570 -705,388 -705C209 -705,56 -545,56 -339C56 -134,210 22,388 22C570 22,721 -137,721 -339M389 -4C293 -4,159 -92,159 -353C159 -612,305 -680,388 -680C475 -680,618 -609,618 -353C618 -88,481 -4,389 -4"></path>
+    </g>
+  </defs>
+  <path d="M141.8174 15.25395C177.1848 14.0784,211.1995 27.9649,237.12119 52.0789C282.05598 93.8801,297.15334 159.23988,271.33234 214.555C225.1936 313.39583,91.44423 328.21483,28.26982 241.81015C-39.12485 149.63335,25.80164 19.11014,141.8174 15.25395Z" style="stroke:rgb(0%,0%,0%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <path d="M271.33234 214.555C225.1936 313.39583,91.44423 328.21483,28.26982 241.81015C-39.12485 149.63335,25.80164 19.11014,141.8174 15.25395" style="stroke:rgb(0%,0%,100%); stroke-width: 1.99252;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <path d="M141.8174 15.25395L237.12119 52.0789L271.33234 214.555" style="stroke:rgb(100%,0%,0%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <path d="M223.9006 46.97047C219.84766 57.45949,229.0379 68.26492,240.04143 65.94806" style="stroke:rgb(100%,0%,0%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <g transform="matrix(1.79999,0,0,1.79999,135.09264 12.25395)" style="fill: rgb(0%,0%,0%);">
+    <use xlink:href="#GLYPHcmr10_65"></use>
+  </g>
+  <g transform="matrix(1.79999,0,0,1.79999,273.43233 228.90894)" style="fill: rgb(0%,0%,0%);">
+    <use xlink:href="#GLYPHcmr10_66"></use>
+  </g>
+  <g transform="matrix(1.79999,0,0,1.79999,239.22118 49.97891)" style="fill: rgb(0%,0%,0%);">
+    <use xlink:href="#GLYPHcmr10_77"></use>
+  </g>
+  <path d="M141.8174 15.25395L141.8174 156.9862L271.33234 214.555" style="stroke:rgb(0%,0%,100%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <path d="M141.8174 142.81297C130.1504 142.81297,123.48027 156.12177,130.46277 165.46861" style="stroke:rgb(0%,0%,100%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <path d="M130.46277 165.46861C136.94482 174.14554,150.3695 172.64014,154.76872 162.743" style="stroke:rgb(0%,0%,100%); stroke-width: 0.99626;stroke-linecap: round;stroke-linejoin: round;stroke-miterlimit: 10;fill: none;"></path>
+  <g transform="matrix(1.79999,0,0,1.79999,143.91739 154.88622)" style="fill: rgb(0%,0%,0%);">
+    <use xlink:href="#GLYPHcmr10_79"></use>
+  </g>
+</svg>
+
+\\vskip{30}
+
+The text `|| svg ...` is a Scripta \\term{verbatim block}.
+The general form is
+
+|| code
+HEADER
+BODY
+
+where the header has the form `|| BLOCK-NAME ARGS`,
+where `ARGS` is a possible empty sequence of words
+separated by spaces.  The body of a verbatim block
+is any sequence of nonempty lines.  If you have
+somethings with empty lines, just indent the entire
+text, so that empty lines become lines consisting of
+a certain number of spaces.
+
+There is also the notion of a Scripta \\term{ordinary block},
+e.g., the below, which places an active index of terms
+that have been marked using the `\\term` or `\\term_` macro.
+See section \\ref{index} of this document for an example.
+Click on an item in the index to view the associated text.
+
+|| code
+| index
+
+
+\\section{Differences from standard LaTeX}
+
+For example, the `\\item` macro is used
+as in the exmple below.  Notice that there is no
+`\\begin{itemized} ... \\end{itemized}`
+\\vskip{15}
+
+
+  `\\item` \\vskip{}
+  `Fertilizer for the garden`
+   \\vskip{20}
+
+  `\\item` \\vskip{}
+  `Four 20 lb. bags of compost`
+   \\vskip{20}
+
+  `\\item` \\vskip{}
+  `Shovel`
+
+
+\\section{Frontmatter}
+
+Frontmatter for a document is defined by
+two things:
+
+\\item
+The \\term{title} macro, which is mandatory
+and should appear at the top of your document.
+
+\\item
+The \\term{docinfo} block as in the example below.
+
+|| code
+|| docinfo
+author: James Carlson
+date: August 15, 2022
+subtitle: Complete list of macros and environments
+
+\\subsection{subtitle}
+
+\\subsection{today}
 
 
 
 \\section{Document}
 
-
+\\strong{Topics} \\vskip{}
+\\ref{contents} contents, set-key contents-depth \\vskip{}
+\\ref{link-href} link, href \\vskip{}
+\\ref{term-index} term, term_, index \\vskip{}
+\\ref{ref} ref \\vskip{}
+\\ref{abstract} abstract \\vskip{}
+\\ref{footnote-endnotes} footnote, endnotes \\vskip{}
+\\ref{abstract} abstract \\vskip{}
+\\ref{bibitem-cite} bibitem, cite \\vskip{}
 
 \\subsection{Contents}
 
 
-Use `\\contents` to place a table of contents
 
+
+Use the Scripta block \\term_{contents}
+
+|| code
+| axiom
+
+to place a table of contents.  The depth of the table
+of contents can be limited via an (optional) block like
+\\term_{contents-depth}
+
+|| code
+set-key contents-depth 1
+
+In this case only sections will appear in the table of
+contents.  If you say
+
+|| code
+set-key contents-depth 2
+
+the table of contents will display both sections
+and subsections.
 
 
 \\subsection{link, href}
 
-The text `\\link{New York Times https://nytimes.com}` will 
+The text `\\link{New York Times https://nytimes.com}` will
 render as the link \\link{New York Times https://nytimes.com}.
+\\term_{link}
 
 The `text \\href{https://nytimes.com}{New York Times}` also renders as the active link \\href{https://nytimes.com}{New York Times}.
+\\term_{href}
 
 
-\\subsection{term, term_, index}
+\\subsection{term, index}
 
 Use \\bs{term}\\texarg{derivative} to mark the word "derivatve" for
 inclusion in the index.  It will be rendered in italic in the
@@ -46,20 +215,22 @@ To display the index, use this:
 
 \\subsection{ref}
 
-`For information about labeling equations, 
-see section \\ref{label}.` $\\to$ For information about labeling equations, 
+`For information about labeling equations,
+see section \\ref{label}.` $\\to$ For information about labeling equations,
 see section \\ref{label}.
+\\term_{ref}
 
 The text `4.1.1` is an active link.  The argument of
-\\bs{ref} is the normalized section title.  For example, 
+\\bs{ref} is the normalized section title.  For example,
 if the section title is `Label Stuff`, the normalized
 title will be `label-stuff`.
 
-\\subsection{abstract}
+\\subsection{abstract}\\term_{abstract}
 
 || code
 \\abstract
 We show that $x = y$ in all contexts.
+
 
 renders as
 
@@ -67,29 +238,70 @@ renders as
 \\abstract
 We show that $x = y$ in all contexts.
 
+\\term_{abstract}
+
 
 \\subsection{footnote, endnotes}
 
-The the lawyer asserted\\footnote{See Jason York, Memoirs, 1988}
+The text
+
+|| code
+The the lawyer
+asserted\\footnote{See Jason York, Memoirs, 1988}
+\\term_{footnote}
+
+renders as
+\\vskip{10}
+
+ The the lawyer asserted\\footnote{See Jason York, Memoirs, 1988}
 
 The \\bs{footnote} macro will act as usual when your document
 is exported to standard LaTeX.  In Scripta, use `| endnotes`
-to display the footnotes.
+to display the footnotes.\\term_{endnotes}
 
-Not yet implemented except via Scripta
 
-\\subsubsection{bibitem, cite}
+\\subsection{bibitem, cite}
 
+To make bibliographical entries, use this model:
+
+|| code
 \\bibitem VX
 Victor Xaha, Introduction to Magic
 
-He said that \\cite{VX} is the place to read about it.
+
+\\bibitem VX
+Victor Xaha, Introduction to Magic
+\\term_{bibitem}
+
+Here \\strong{VX} is the label of the bibliographical
+entry.  Use the label to refer to that entry as in the
+model below:
+
+|| code
+He said that \\cite{VX} is
+the place to read about it.
+
+which renders as
+
+He said that \\cite{VX} is
+the place to read about it.
 
 
-\\subsubsection{vskip}
+\\subsection{Setcounter}
+
+Use `setcounter` to set the section number.  This is
+useful when a document is part of a multi-section document
+such as \\link{these notes jxxcarlson:quantum-mechanics-notes}.
+Thus, if we want the section number to be 4, we say `\\setcounter{4}`. \\term_{setcounter}
+
+\\section{Formatting}
+
+\\subsection{vskip}
+
 
 Use `\\vskip` to insert vertical space, e.g. `\\vskip{10}`
-for 10 pixels of vertical space.
+for 10 pixels of vertical space. \\term_{vskip}
+
 
 
 
@@ -104,52 +316,48 @@ for 10 pixels of vertical space.
 
 \\section{Font}
 
+\\strong{Font} \\vskip{}
+\\ref{large} large \\vskip{}
+\\ref{strong-bold-b} strong, bold, b \\vskip{}
+\\ref{italic-emph} italic, emph \\vskip{}
+\\ref{bolditalic-bi} bolditalic, bi \\vskip{}
+\\ref{stike} strike \\vskip{}
+\\ref{underline} underline \\vskip{}
+
 \\subsection{large}
 
-`This is \\large{large text}` $\\to$ This is \\large{large text}
+`This is \\large{large text}` $\\to$ This is \\large{large text}.
+ \\term_{large}
 
-\\subsection{strong}
+\\subsection{strong, bold, b}
 
-This is \\strong{strong stuff}.
+`This is \\strong{strong stuff}.` $\\to$
+``This is \\strong{strong stuff}.
 
-\\subsection{bold}
+Aliases: \\term{bold}, \\term{b} \\term_{strong}
 
-This is also \\bold{strong stuff}.
+\\subsection{italic, emph}
 
-\\subsection{b}
+`This is \\italic{italic text}.` $\\to$ This is \\italic{italic text}.  \\term_{italic}
 
-
-This too is \\b{strong stuff}
-
-
-\\subsection{italic}
-
-This is \\italic{italic text}.
-
-\\subsection{i}
-
-This too is \\i{italic text}.
-
-\\subsection{emph}
-
-`\\emph{important stuff}` $\\to$ \\emph{important stuff}.
-
-\\subsection{bolditalic}
-
-This is \\bolditalic{bold italic text}.
+Aliases: \\term{i}, \\term{emph}
 
 
-\\subsection{bi}
+\\subsection{bolditalic, bi}
 
-This is \\bi{bold italic text}.
+`This is \\bolditalic{bold italic text}.` $\\to$ This is \\bolditalic{bold italic text}.  \\term_{bolditalic}
+
+Aliases: \\term{bi}
+
 
 \\subsection{strike}
 
-This is \\strike{stricken from the record}.
+`This is \\strike{stricken from the record}.` $\\to$ This is \\strike{stricken from the record}.
+\\term_{strike}
 
 \\subsection{underline}
 
-This text is \\underline{underlined}.
+`This text is \\underline{underlined}.` $\\to$ This text is \\underline{underlined}. \\term_{underline}
 
 
 
@@ -157,37 +365,19 @@ This text is \\underline{underlined}.
 
 \\section{Color}
 
-\\subsection{red}
+There are a number of macros for colored text, e.g.,
 
-This text is \\red{red}.
 
-\\subsection{blue}
+`This text is \\red{red}` $\\to$ This text is \\red{red}.
+\\term_{red}
 
-This text is \\blue{blue}.
+They all work in the same way. The others are
+\\term{blue}, \\term{pink}, \\term{magenta}, \\term{violet}, and
+\\term{gray}.
 
-\\subsection{green}
+There is also the \\term{highlight} macro:
 
-This text is \\green{green}.
-
-\\subsection{pink}
-
-This text is \\pink{pink}.
-
-\\subsection{magenta}
-
-This text is \\magenta{magenta}.
-
-\\subsection{violet}
-
-This text is \\violet{violet}.
-
-\\subsection{gray}
-
-This text is \\gray{gray}.
-
-\\subsection{highlight}
-
-This text is \\highlight{highlighted}.
+`This text is \\highlight{highlighted}.` $\\to$ This text is \\highlight{highlighted}.
 
 
 
@@ -198,25 +388,26 @@ This text is \\highlight{highlighted}.
 
 \\subsection{brackets}
 
-`\\brackets{1,2,3}` $\\to$ \\brackets{1,2,3}
+`\\brackets{1,2,3}` $\\to$ \\brackets{1,2,3}  \\term_{brackets}
 
 \\subsection{rb}
 
-`\\rb` $\\to$ \\rb
+`\\rb` $\\to$ \\rb  \\term_{rb}
 
 \\subsection{lb}
 
-`\\lb` $\\to$ \\lb
+`\\lb` $\\to$ \\lb  \\term_{lb}
 
 \\subsection{bt}
 
-`\\bt abc\\bt` $\\to$ \\bt abc \\bt
+`\\bt abc\\bt` $\\to$ \\bt abc \\bt  \\term_{bt}
 
 \\subsection{bs, texarg}
 
-`\\bs{foo}` $\\to$ \\bs{foo}
+`\\bs{foo}` $\\to$ \\bs{foo}  \\term_{bs}
 
 `\\bs{foo}\\texarg{bar}` $\\to$ \\bs{foo}\\texarg{bar}
+ \\term_{texarg}
 
 
 
@@ -225,10 +416,14 @@ This text is \\highlight{highlighted}.
 
 \\section{Lists}
 
+Below, we describe bulleted, numbered and definition lists.
+
 \\subsection{Item}
 
 \\item
 Groceries
+
+\\term_{item, bullets}
 
 \\item
 Parent-teacher conference
@@ -240,18 +435,51 @@ This is a test.
 \\numbered
 Mortgage payment
 
+\\term_{item, numbered}
+
 \\numbered
 File taxes
+
+
+\\subsection{Desc}
+
+The `\\desc` macro is used for description or definition lists:
+\\term_{item, desc}.
+
+|| code
+\\desc Sets
+A set is a collection of things.
+
+renders as
+
+  \\desc Sets
+  A set is a collection of things.
+
 
 \\section{Environments: general}
 
 \\subsection{Quotation}
 
+The \\term{quotation} environemnt:
+
+|| code
 \\begin{quotation} W.F Snodgrass
 He who asks for little shall receive much.
 \\end{quotation}
 
+\\begin{quotation} W.F Snodgrass
+He who asks for little shall receive much.
+\\end{quotation}
+
+
 \\subsection{Indent}
+
+The \\term{indent} environment:
+
+|| code
+\\begin{indent}
+He who wishes little receives much.
+\\end{indent}
 
 \\begin{indent}
 He who wishes little receives much.
@@ -261,6 +489,8 @@ He who wishes little receives much.
 
 \\subsection{Equation}
 
+The \\term{equation} environment is automatically numbered
+
 || code
 \\begin{equation}
 \\int_0^1 x^n dx = \\frac{1}{n+1}
@@ -272,9 +502,10 @@ renders as
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 
+
 \\subsubsection{label}
 
-Equations can be labeled:
+Equations can be labeled: \\term_{label}
 
 || code
 \\begin{equation}
@@ -287,20 +518,29 @@ Equations can be labeled:
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 \\end{equation}
 
-`The equation \\eqref{newton} will be on the test.` $\\to$ 
-The equation \\eqref{newton} will be on the test.
+
+The label is used for cross-referencing by the \\term{cite}
+macro:
+
+`The equation \\eqref{newton} will be on the test.` $\\to$
+The equation \\eqref{newton} will be on the test.  \\term_{label}
 
 \\subsection{Aligned}
 
 \\begin{aligned}
-x &= a + b \\
-y &= a - b \\
+x &= a + b \\\\
+y &= a - b \\\\
 z &= xy = a^2 - b^2
 \\end{aligned}
+
+\\term_{aligned}
 
 
 \\subsection{Mathmacros}
 
+Use a `mathmacro` block to define math-mode macros:
+\\term_{mathmacro}.
+
 || code
 \\begin{mathmacros}
 \\newcommand{\\cA}{\\mathcal{A}}
@@ -310,97 +550,76 @@ z &= xy = a^2 - b^2
 \\newcommand{\\cA}{\\mathcal{A}}
 \\end{mathmacros}
 
-$\\cA$
+Then if we say `$\\cA$`, we obtain $\\cA$. See
+\\ilink{this document jxxcarlson:manual-tex-macros-2}
+for more information.
+
+
+
+\\subsection{Textmacros}
+
+
+Text-mode macros are defined using a
+Scripta `textmacros` block: \\term_{texmacros}
+
+|| textmacros
+\\newcommand{\\hello}{\\blue{\\bold{Hello #1}}!}
+
+
+|| code
+|| texmacros
+\\newcommand{\\hello}{\\blue{\\bold{Hello #1}}!}
+
+Then, if you say `\\hello{John}`, you will get
+
+| indent
+\\hello{John}
+
+Notice that we \\bold{do not} say
+
+
+|| code
+\\newcommand{\\hello}[1]{\\blue{\\bold{Hello #1}}!}
+
+MicroLaTeX will figure out by itself how many arguments
+the macro takes.  When a MicroLaTeX document is exported
+to standard LaTeX, the exported macro definition will
+contain the `[1]`.
+
+\\strong{Note.}
+Math-mode macros and Text-mode macros must be defined
+in separate blocks — `mathmacros` and `textmacros`, respectively.
+
+
+
+\\term_{textmacros}
+
+
 
 \\section{Theorem-like environments}
 
-\\subsection{Axiom}
+The theorem-like environments all function alike. Here is
+the theorem environment: \\term_{theorem}
 
-\\begin{axiom}
-Given any collection $\\cA$n of subsets of $B$, there is a function
-$\\gamma : \\cA \\to B$ that picks out an element of $A \\in \\cA$
-for each $A$.
-\\end{axiom}
-
-
-\\subsection{Theorem}
-
-\\begin{theorem}
-Whatever
-\\end{theorem}
-
-\\subsection{Proposition}
-
-\\begin{proposition}
-Whatever
-\\end{proposition}
-
-
-\\subsection{Corollary}
-
-\\begin{corollary}
-Whatever
-\\end{corollary}
-
-\\subsection{Definition}
-
-\\begin{definition}
-Whatever
-\\end{definition}
-
-\\subsection{Lemma}
-
-\\begin{lemma}
-Whatever
-\\end{lemma}
-
-
-\\subsection{Problem}
-
-\\begin{problem}
-Whatever
-\\end{problem}
-
-\\subsection{Example}
-
-\\begin{example}
-Whatever
-\\end{example}
-
-
-\\subsection{Note}
-
-\\begin{note}
-Whatever
-\\end{note}
-
-
-\\subsection{Remark}
-
-\\begin{remark}
-Whatever
-\\end{remark}
-
-\\subsection{Abstract}
-
-\\abstract
-This is an abstract.
-
-
-\\subsection{Bibitem}
-
-\\bibitem AB
-John Jones, On the Nature of Things
-
-\\subsection{Desc}
-
-\\desc Sets
-A set is a collection of things. 
-
-\\subsection{Setcounter}
 
 || code
-\\setcounter{4}
+\\begin{theorem} (Euclid)
+There are infinitely primes.
+\\end{theorem}
+
+
+It renders like this:
+
+\\begin{theorem} (Euclid)
+There are infinitely primes.
+\\end{theorem}
+
+The other environtments are:
+
+| indent
+\\term{axiom}, \\term{proposition}, \\term{corollary},
+\\term{definition}, \\term{lemma}, \\term{problem},
+\\term{example}, \\term{note}, \\term{remark}
 
 
 
@@ -410,32 +629,56 @@ A set is a collection of things.
 
 \\subsection{datatable}
 
+The Scripta \\term{datable} block gives an easy way of displaying
+raw data.  The text below
 
+|| code
+|| datatable
+a b c
+1 2 3
+10 17 46
+
+
+renders as
+
+|| datatable
+a b c
+1 2 3
+10 17 46
 
 \\section{Graphics}
 
 \\subsection{image}
 
-The  text
+Uwe the \\term{image} macro to display online images.
+The text
 
 || code
-\\image{https://ibb.co/ZzbzjgF}
+\\image{https://i.ibb.co/m5P5jy2/tree-frog.jpg}
 
 renders as
 
-\\image{https://ibb.co/ZzbzjgF}
+\\image{https://i.ibb.co/m5P5jy2/tree-frog.jpg}
 
-Options ...
+The image macro accepts various options:
+\\term_{caption (image)} \\term_{width (image)}
 
+|| code
+\\image{https://.. width:300 caption: Tree frog}
+
+
+\\image{https://i.ibb.co/m5P5jy2/tree-frog.jpg width:300 caption: Tree frog}
+
+The caption options should come last.
 
 \\subsection{Chart}
 
-Use the Scripta `chart` block to visualize csv data, as 
+Use the Scripta `chart` \\term_{chart} block to visualize csv data, as
 in the example below.  For more information see the
 \\ilink{Image Gallery jxxcarlson:jxxcarlson:gallery}.
 
 || code
-|| chart timeseries reverse columns:1 lowest:3700 
+|| chart timeseries reverse columns:1 lowest:3700
 label:S&P  Index, 06/14/2021 to 06/10/2022
 Date,Close/Last,Volume,Open,High,Low
 06/10/2022,3900.86,--,3974.39,3974.39,3900.16
@@ -699,7 +942,7 @@ Date,Close/Last,Volume,Open,High,Low
 
 \\subsection{Svg}
 
-Use  the Scripta verbatim block to render svg: \\term_{svg}
+Use  the Scripta verbatim block to render svg graphics: \\term_{svg}
 
 || code
 || svg
@@ -755,7 +998,7 @@ As an example, we have this:
 \\subsection{Commutative diagrams: q.uiver.app}
 
 There is an excellent online editor, \\link{q.uiver.app https://q.uiver.app}, for constructing  commutative
-diagrams.
+diagrams. \\term_{quiver} \\term_{q.uiver.app}
 
 You can insert q.uiver.app images and LaTeX code
 in Scripta like this:
@@ -768,7 +1011,7 @@ QUIVER LATEX CODE
 
 
 The image will be useed to render the diagram in Scripta.
-If the document is exported to LaTeX, the q.uiver.app 
+If the document is exported to LaTeX, the q.uiver.app
 LaTeX code will be used.
 
 || quiver
@@ -776,9 +1019,9 @@ https://d.img.vision/scripta/3471908172-image.png Figure 1
 ---
 % https://q.uiver.app/?q=WzAsNixbMiwzLCJBIl0sWzQsMywiQiJdLFszLDIsIlUiXSxbMywwLCJYIl0sWzAsMywiUyJdLFs2LDMsIlQiXSxbMiwwLCJwIiwxXSxbMiwxLCJxIiwxXSxbMywwLCJmIiwxLHsiY3VydmUiOjJ9XSxbMywxLCJnIiwxLHsiY3VydmUiOi0yfV0sWzMsMiwibSIsMV0sWzAsNF0sWzEsNV0sWzMsNCwiZSIsMSx7ImN1cnZlIjozfV0sWzMsNSwiaCIsMSx7ImN1cnZlIjotM31dXQ==
 \\[\\begin{tikzcd}
-	&&& X \\
-	\\
-	&&& U \\
+	&&& X \\\\
+	\\\\
+	&&& U \\\\
 	S && A && B && T
 	\\arrow["p"{description}, from=3-4, to=4-3]
 	\\arrow["q"{description}, from=3-4, to=4-5]
@@ -792,8 +1035,6 @@ https://d.img.vision/scripta/3471908172-image.png Figure 1
 \\end{tikzcd}\\]
 
 
-
-
 \\ilink{More info ... jxxcarlson:manual-commutative-diagrams}
 
 
@@ -802,7 +1043,7 @@ https://d.img.vision/scripta/3471908172-image.png Figure 1
 
 
 In LaTeX, Tikz provides a way to do complex graphics, often
-through a tool that generates the LaTeX, e.g., \\link{mathcha.io https://mathcha.io}.  
+through a tool that generates the LaTeX, e.g., \\link{mathcha.io https://mathcha.io}.  \\term_{tikz}  \\term_{mathcha.io}
 
 
 We can insert tikz
@@ -821,30 +1062,30 @@ Here is an example
 || tikz width:300 caption:Triangle
 https://i.postimg.cc/jj2d9YNs/image.png
 ---
-\\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+\\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt
 %
 \\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
 %uncomment if require: \\path (0,300); %set diagram left start at 0, and has height of 300
 %
-%Straight Lines [id:da5728995010079783] 
+%Straight Lines [id:da5728995010079783]
 \\draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ]   (294,51) -- (294,124.29) ;
 \\draw [shift={(294,124.29)}, rotate = 90] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
 \\draw [shift={(294,51)}, rotate = 90] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
-%Straight Lines [id:da45604615155427286] 
+%Straight Lines [id:da45604615155427286]
 \\draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ]   (447.58,121) -- (289.5,121) ;
 \\draw [shift={(289.5,121)}, rotate = 180] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
 \\draw [shift={(447.58,121)}, rotate = 180] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
-%Straight Lines [id:da36278375740570823] 
+%Straight Lines [id:da36278375740570823]
 \\draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ]   (290.5,53) -- (447.5,121) ;
 \\draw [shift={(447.5,121)}, rotate = 23.42] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
 \\draw [shift={(290.5,53)}, rotate = 23.42] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
-%Straight Lines [id:da47493855001371243] 
+%Straight Lines [id:da47493855001371243]
 \\draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ]   (291.5,52) -- (341.5,124) ;
 \\draw [shift={(341.5,124)}, rotate = 55.22] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
 \\draw [shift={(291.5,52)}, rotate = 55.22] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=1 ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
-%Shape: Arc [id:dp5434791661893299] 
+%Shape: Arc [id:dp5434791661893299]
 \\draw  [draw opacity=0][fill={rgb, 255:red, 74; green, 144; blue, 226 }  ,fill opacity=0.22 ] (331.81,108.37) .. controls (333.42,108.12) and (335.12,107.99) .. (336.87,108) .. controls (347.75,108.07) and (356.54,113.5) .. (356.5,120.12) .. controls (356.5,120.34) and (356.49,120.56) .. (356.47,120.78) -- (336.8,120) -- cycle ; \\draw  [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ] (331.81,108.37) .. controls (333.42,108.12) and (335.12,107.99) .. (336.87,108) .. controls (347.75,108.07) and (356.54,113.5) .. (356.5,120.12) .. controls (356.5,120.34) and (356.49,120.56) .. (356.47,120.78) ;
-%Straight Lines [id:da9645777961014412] 
+%Straight Lines [id:da9645777961014412]
 \\draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ]   (294,111) -- (307.04,111) -- (307.04,121.78) ;
 % Text Node
 \\draw (359,105) node  [font=\\footnotesize,color={rgb, 255:red, 74; green, 144; blue, 226 }  ,opacity=1 ,rotate=-333.43]  {$\\alpha $};
@@ -868,7 +1109,7 @@ it in place of `IMAGE URL`. Then copy the LaTeXand past in place of `TIKZ CODE`.
 \\section{Scripta}
 
 syspar,  var,
-reflink, hide, comment, 
+reflink, hide, comment,
 
 \\subsection{Not for user}
 
@@ -878,11 +1119,6 @@ group, lambda, ulink,  cslink, errorHighlight
 
 \\subsection{include}
 
-\\subsection{docinfo}
-
-\\subsedction{textmacros}
-
-\\subsection{document}
 
 \\subsection{collection}
 
@@ -892,37 +1128,19 @@ group, lambda, ulink,  cslink, errorHighlight
 
 \\subsection{ilink}
 
-Use `\\ilink}{joe1234:intro-chem101}` to make a
+Use `\\ilink}{joe1234:intro-chem101}` \\term_{ilink} to make a
 link to the scripta document tagged by user `joe1234` as
 `joe1234:intro-chem101`
 
 \\subsection{tags}
 
-Uses `\\tags{foo, bar}` to tag your document with the 
-workds "foo" and "bar".
+Uses `\\tags{foo, bar}` \\term_{tag} to tag your document with the
+workd "foo" and "bar".
 
 \\subsection{type}
 
 \\subsection{env}
 
-
-\\section{Document}
-
-\\subsection{endnotes}
-
-\\subsection{index}
-
-\\section{Frontmatter}
-
-\\subsection{title}
-
-\\subsection{subtitle}
-
-\\subsection{author}
-
-\\subsection{date}
-
-\\subsection{today}
 
 
 \\section{Verbatim}
@@ -943,12 +1161,21 @@ a := 1
    b := 2
 \\end{verbatim}
 
+|| verbatim
+a := 1
+   b := 2
+
 \\subsection{Verse}
 
 \\begin{verse}
 Roses are red
 Violets are blue
 \\end{verse}
+
+|| verse
+  Roses are red
+    Violets are blue
+Etc., etc.
 
 
 \\subsection{Hide}
@@ -957,6 +1184,8 @@ Violets are blue
 Whatever
 \\end{hide}
 
+|| hide
+Whatever
 
 | endnotes
 
