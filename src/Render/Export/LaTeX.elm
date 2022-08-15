@@ -466,6 +466,7 @@ macroDict =
         , ( "index_", \_ _ -> blindIndex )
         , ( "code", code )
         , ( "image", Render.Export.Image.export )
+        , ( "vspace", \_ -> vspace )
         ]
 
 
@@ -513,7 +514,7 @@ verbatimExprDict =
 
 code : Settings -> List Expr -> String
 code _ exprs =
-    Render.Export.Util.getOneArg exprs |> fixChars
+    Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
 
 
 link : List Expr -> String
@@ -523,6 +524,19 @@ link exprs =
             Render.Export.Util.getTwoArgs exprs
     in
     [ "\\href{", args.second, "}{", args.first, "}" ] |> String.join ""
+
+vspace : List Expr -> String
+vspace exprs =
+    let
+        arg =
+            Render.Export.Util.getOneArg exprs
+               |> String.toFloat
+               |> Maybe.withDefault 0
+               |> (\x -> x/4.0)
+               |> String.fromFloat
+               |> (\x -> x ++ "mm")
+    in
+    [ "\\vspace{", arg, "}" ] |> String.join ""
 
 
 ilink : List Expr -> String

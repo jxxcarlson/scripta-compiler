@@ -117,7 +117,7 @@ markupDict =
         , ( "table", \g acc s exprList -> table g acc s exprList )
         , ( "image", \_ _ s exprList -> Render.Graphics.image s exprList )
         , ( "tags", \_ _ _ _ -> Element.none )
-        , ( "vskip", vskip )
+        , ( "vspace", vspace )
         , ( "syspar", syspar )
 
         -- MiniLaTeX stuff
@@ -359,10 +359,10 @@ skip exprList =
     f1 f exprList
 
 
-vskip _ _ _ exprList =
+vspace _ _ _ exprList =
     let
         h =
-            ASTTools.exprListToStringList exprList |> String.join "" |> String.toInt |> Maybe.withDefault 0
+            ASTTools.exprListToStringList exprList |> String.join "" |> String.toInt |> Maybe.withDefault 1
     in
     -- Element.column [ Element.paddingXY 0 100 ] (Element.text "-")
     Element.column [ Element.height (Element.px h) ] [ Element.text "" ]
