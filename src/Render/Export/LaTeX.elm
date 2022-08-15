@@ -1,7 +1,7 @@
 module Render.Export.LaTeX exposing (export, exportExpr, rawExport)
 
 import Compiler.ASTTools as ASTTools
-import Compiler.TextMacro as Lambda
+import Compiler.TextMacro
 import Dict exposing (Dict)
 import Either exposing (Either(..))
 import List.Extra
@@ -34,9 +34,11 @@ export currentTime settings_ ast =
             ASTTools.rawBlockNames ast
 
         expressionNames =
-            ASTTools.expressionNames ast
+            ASTTools.expressionNames ast ++ macrosInTextMacroDefinitions
 
-        -- imageList : List String
+        textMacroDefinitions = ASTTools.getVerbatimBlockValue "textmacros" ast
+
+        macrosInTextMacroDefinitions =  Compiler.TextMacro.getTextMacroFunctionNames textMacroDefinitions
     in
     Render.Export.Preamble.make
         rawBlockNames
@@ -371,7 +373,7 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                             str
 
                         Just "textmacros" ->
-                            Lambda.exportTexMacros str
+                            Compiler.TextMacro.exportTexMacros str
 
                         Just "quiver" ->
                             let
@@ -645,9 +647,9 @@ exportExpr settings expr =
     case expr of
         Fun name exps_ _ ->
             if name == "lambda" then
-                case Lambda.extract expr of
+                case Compiler.TextMacro.extract expr of
                     Just lambda ->
-                        Lambda.toString (exportExpr settings) lambda
+                        Compiler.TextMacro.toString (exportExpr settings) lambda
 
                     Nothing ->
                         "Error extracting lambda"

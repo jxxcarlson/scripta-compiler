@@ -16,6 +16,7 @@ import Element.Background as Background
 import Element.Events
 import Element.Font as Font
 import Element.Input as Input
+import Experimental
 import File.Download
 import Html exposing (Html)
 import Html.Attributes
@@ -26,7 +27,6 @@ import Scripta.Language exposing (Language(..))
 import Task
 import Text
 import Time
-import Experimental
 
 
 main =

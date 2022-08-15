@@ -4,6 +4,7 @@ module Compiler.TextMacro exposing
     , applyMacroS
     , applyMacroS2
     , buildDictionary
+    , getTextMacroFunctionNames
     , expand
     , extract
     , listSubst
@@ -217,6 +218,31 @@ buildDictionary : List String -> Dict String Macro
 buildDictionary lines =
     List.foldl (\line acc -> insert (macroFromString line) acc) Dict.empty lines
 
+
+getTextMacroFunctionNames : String -> List String
+getTextMacroFunctionNames str =
+    str
+    |> String.lines
+    |> buildDictionary
+    |> Dict.toList
+    |> List.map Tuple.second
+    |> List.map .body
+    |> List.map functionNames
+    |> List.concat
+    |> List.Extra.unique
+    |> List.sort
+
+functionNames : List Expr -> List String
+functionNames exprs =
+    List.map functionNames_ exprs |> List.concat
+
+
+functionNames_ : Expr -> List String
+functionNames_ expr  =
+    case expr of
+        Fun name body _ -> name :: (List.map functionNames_ body |> List.concat)
+        Text _ _ -> []
+        Verbatim _ _ _ -> []
 
 
 exportTexMacros: String -> String
