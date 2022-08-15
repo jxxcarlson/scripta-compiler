@@ -371,7 +371,7 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                             str
 
                         Just "textmacros" ->
-                            str
+                            Lambda.exportTexMacros str
 
                         Just "quiver" ->
                             let
@@ -483,6 +483,7 @@ blockDict =
         , ( "tags", \_ _ _ -> "" )
         , ( "docinfo", \_ _ _ -> "" )
         , ( "banner", \_ _ _ -> "" )
+        , ( "set-key", \_ _ _ -> "" )
 
         --
         , ( "section", \settings_ args body -> section settings_ args body )

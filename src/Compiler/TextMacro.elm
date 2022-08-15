@@ -11,6 +11,7 @@ module Compiler.TextMacro exposing
     , macroFromString
     , parseMicroLaTeX
     , printMacro
+    , exportTexMacros
     , toString
     )
 
@@ -68,6 +69,61 @@ printMacro macro =
         ++ String.join ", " macro.vars
         ++ "], expr:  "
         ++ L0.Test.toStringFromList macro.body
+
+printLaTeXMacro : Macro -> String
+printLaTeXMacro macro =
+    if List.length macro.vars == 0 then
+        "\\newcommand{\\"
+            ++ macro.name
+            ++ "}{"
+            ++ (List.map toLaTeXString macro.body |> String.join "")
+            ++ "}"
+    else
+      "\\newcommand{\\"
+      ++ macro.name
+      ++ "}"
+      ++ "["
+      ++ String.fromInt (List.length macro.vars)
+      ++ "]{"
+      ++ (List.map toLaTeXString macro.body |> String.join "")
+      ++ "}"
+
+toLaTeXString : Expr -> String
+toLaTeXString expr =
+    case expr of
+        Fun name expressions _ ->
+            let
+                body_ =
+                    List.map toLaTeXString expressions |> String.join ""
+
+                body =
+                    if body_ == "" then
+                        body_
+
+                    else if String.left 1 body_ == "[" then
+                        body_
+
+                    else if String.left 1 body_ == " " then
+                        body_
+
+                    else
+                        " " ++ body_
+            in
+            "\\" ++ name ++ "{" ++  body ++ "}"
+
+        Text str _ ->
+            str
+
+        Verbatim name str _ ->
+            case name of
+                "math" ->
+                    "$" ++ str ++ "$"
+
+                "code" ->
+                    "`" ++ str ++ "`"
+
+                _ ->
+                    "error: verbatim " ++ name ++ " not recognized"
 
 
 extract2 : Expr -> Maybe Macro
@@ -161,6 +217,17 @@ buildDictionary : List String -> Dict String Macro
 buildDictionary lines =
     List.foldl (\line acc -> insert (macroFromString line) acc) Dict.empty lines
 
+
+
+exportTexMacros: String -> String
+exportTexMacros str =
+    str
+    |> String.lines
+    |> buildDictionary
+    |> Dict.toList
+    |> List.map Tuple.second
+    |> List.map printLaTeXMacro
+    |> String.join "\n"
 
 {-| Expand the given expression using the given dictionary of lambdas.
 -}

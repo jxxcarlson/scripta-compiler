@@ -110,6 +110,7 @@ blockDict =
     Dict.fromList
         [ ( "indent", indented )
         , ( "quotation", quotation )
+        , ( "set-key", \_ _ _ _ _ _ -> Element.none )
         , ( "comment", comment )
         , ( "set-key", \_ _ _ _ _ _ -> Element.none )
         , ( "q", question ) -- xx
