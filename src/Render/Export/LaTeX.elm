@@ -464,7 +464,6 @@ macroDict =
         [ ( "link", \_ -> link )
         , ( "ilink", \_ -> ilink )
         , ( "index_", \_ _ -> blindIndex )
-        , ( "code", code )
         , ( "image", Render.Export.Image.export )
         , ( "vspace", \_ -> vspace )
         ]
@@ -504,7 +503,7 @@ blockDict =
 
 verbatimExprDict =
     Dict.fromList
-        [ ( "code", code )
+        [ ( "code", inlineCode )
         ]
 
 
@@ -512,8 +511,8 @@ verbatimExprDict =
 -- END DICTIONARIES
 
 
-code : Settings -> List Expr -> String
-code _ exprs =
+inlineCode : Settings -> List Expr -> String
+inlineCode _ exprs =
     Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
 
 
