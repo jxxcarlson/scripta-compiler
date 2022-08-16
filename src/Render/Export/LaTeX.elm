@@ -2,6 +2,7 @@ module Render.Export.LaTeX exposing (export, exportExpr, rawExport)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.TextMacro
+import Compiler.Util
 import Dict exposing (Dict)
 import Either exposing (Either(..))
 import List.Extra
@@ -511,6 +512,10 @@ verbatimExprDict =
 -- END DICTIONARIES
 
 
+inlineCode0 : Settings -> List Expr -> String
+inlineCode0 _ exprs =
+    Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
+
 inlineCode : Settings -> List Expr -> String
 inlineCode _ exprs =
     Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
@@ -574,6 +579,14 @@ section settings args body =
 section1 : List String -> String -> String
 section1 args body =
     let
+        tag =
+            body
+              |> String.words
+              |> Compiler.Util.normalizedWord
+
+        label = " \\label{" ++ tag ++ "}"
+
+
         suffix =
             case List.Extra.getAt 1 args of
                 Nothing ->
@@ -587,25 +600,32 @@ section1 args body =
     in
     case Utility.getArg "4" 0 args of
         "1" ->
-            macro1 ("title" ++ suffix) body
+            macro1 ("title" ++ suffix) body ++ label
 
         "2" ->
-            macro1 ("section" ++ suffix) body
+            macro1 ("section" ++ suffix) body ++ label
 
         "3" ->
-            macro1 ("subsection" ++ suffix) body
+            macro1 ("subsection" ++ suffix) body ++ label
 
         "4" ->
-            macro1 ("subheading" ++ suffix) body
+            macro1 ("subsubsection" ++ suffix) body ++ label
 
         _ ->
-            macro1 ("subheading" ++ suffix) body
+            macro1 ("subheading" ++ suffix) body ++ label
 
 
 section2 : List String -> String -> String
 section2 args body =
     let
-        suffix =
+         tag =
+                    body
+                      |> String.words
+                      |> Compiler.Util.normalizedWord
+
+         label = " \\label{" ++ tag ++ "}"
+
+         suffix =
             case List.Extra.getAt 1 args of
                 Nothing ->
                     ""
@@ -618,16 +638,16 @@ section2 args body =
     in
     case Utility.getArg "4" 0 args of
         "1" ->
-            macro1 ("section" ++ suffix) body
+            macro1 ("section" ++ suffix) body ++ label
 
         "2" ->
-            macro1 ("subsection" ++ suffix) body
+            macro1 ("subsection" ++ suffix) body ++ label
 
         "3" ->
-            macro1 ("subsubsection" ++ suffix) body
+            macro1 ("subsubsection" ++ suffix) body ++ label
 
         _ ->
-            macro1 ("subheading" ++ suffix) body
+            macro1 ("subheading" ++ suffix) body ++ label
 
 
 macro1 : String -> String -> String
@@ -686,10 +706,11 @@ renderVerbatim : String -> String -> String
 renderVerbatim name body =
     case Dict.get name verbatimExprDict of
         Nothing ->
-            macro1 name body
+            name ++ "(" ++ body ++ ") — unimplemented "
 
-        Just _ ->
-            body |> fixChars
+
+        Just f ->
+            body |> fixChars |> (\x -> "\\code{" ++ x  ++ "}")
 
 
 

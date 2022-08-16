@@ -10,6 +10,7 @@ module Compiler.Util exposing
     , getMarkdownImageArgs
     , getMicroLaTeXItem
     , macroValParser
+    , normalizedWord
     , many
     , middle
     , size
@@ -20,6 +21,14 @@ import Regex
 import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
 
+normalizedWord : List String -> String
+normalizedWord words =
+  words
+    |> List.map (String.toLower
+        -->> compressWhitespace
+        >> removeNonAlphaNum)
+        -- >> String.replace " " "-")
+     |> String.join "-"
 
 dropLast : List a -> List a
 dropLast list =
