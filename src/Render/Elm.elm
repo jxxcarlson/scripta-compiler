@@ -75,6 +75,7 @@ markupDict =
         , ( "i", \g acc s exprList -> italic g acc s exprList )
         , ( "boldItalic", \g acc s exprList -> boldItalic g acc s exprList )
         , ( "strike", \g acc s exprList -> strike g acc s exprList )
+        , ( "underscore", \g acc s exprList -> underscore g acc s exprList )
         , ( "ref", \_ acc _ exprList -> ref acc exprList )
         , ( "reflink", \_ acc _ exprList -> reflink acc exprList )
         , ( "eqref", \_ acc _ exprList -> eqref acc exprList )
@@ -594,8 +595,11 @@ eqref acc exprList =
 
 
 strike g acc s exprList =
-    simpleElement [ Font.strike ] g acc s exprList
+        simpleElement [ Font.strike ] g acc s exprList
 
+
+underscore _ _ _ _ =
+    Element.el [] (Element.text "_")
 
 underline g acc s exprList =
     simpleElement [ Font.underline ] g acc s exprList

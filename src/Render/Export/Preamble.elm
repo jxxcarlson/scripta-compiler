@@ -139,6 +139,8 @@ standardPackages =
 \\usepackage{amsmath}
 
 \\usepackage{amscd}
+
+\\usepackage{fancyvrb} %% for inline verbatim
 """
 
 

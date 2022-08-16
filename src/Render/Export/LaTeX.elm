@@ -37,9 +37,11 @@ export currentTime settings_ ast =
         expressionNames =
             ASTTools.expressionNames ast ++ macrosInTextMacroDefinitions
 
-        textMacroDefinitions = ASTTools.getVerbatimBlockValue "textmacros" ast
+        textMacroDefinitions =
+            ASTTools.getVerbatimBlockValue "textmacros" ast
 
-        macrosInTextMacroDefinitions =  Compiler.TextMacro.getTextMacroFunctionNames textMacroDefinitions
+        macrosInTextMacroDefinitions =
+            Compiler.TextMacro.getTextMacroFunctionNames textMacroDefinitions
     in
     Render.Export.Preamble.make
         rawBlockNames
@@ -169,7 +171,18 @@ exportTree settings tree =
                     ""
 
                 Just ( lastLine, precedingLines ) ->
-                    precedingLines ++ renderedChildren ++ [ lastLine ] |> String.join "\n"
+                    let
+                        _ =
+                            precedingLines
+
+                        _ =
+                            renderedChildren
+
+                        _ =
+                            lastLine
+                    in
+                    -- precedingLines ++ renderedChildren ++ [ lastLine ] |> String.join "\n"
+                    lastLine :: "\\begin{indent}" :: renderedChildren ++ [ "\\end{indent}" ] |> String.join "\n"
 
 
 rawExport : Settings -> List (Tree ExpressionBlock) -> String
@@ -185,6 +198,42 @@ rawExport settings ast =
         |> Parser.Forest.map (deltaShift |> oneOrTwo |> shiftSection)
         |> List.map (exportTree settings)
         |> String.join "\n\n"
+
+
+
+-- rawExport1 : Settings -> Forest ExpressionBlock -> Forest ExpressionBlock
+
+
+rawExport1 : a -> Forest ExpressionBlock -> Forest ExpressionBlock
+rawExport1 settings ast =
+    let
+        deltaShift =
+            counterValue ast
+    in
+    ast
+        |> ASTTools.filterForestOnLabelNames (\name -> not (name == Just "runninghead"))
+        |> Parser.Forest.map Parser.Block.condenseUrls
+        |> encloseLists
+        |> Parser.Forest.map (deltaShift |> oneOrTwo |> shiftSection)
+
+
+
+--
+--unravel : Tree (Element MarkupMsg) -> Element MarkupMsg
+--unravel tree =
+--    let
+--        children =
+--            Tree.children tree
+--    in
+--    if List.isEmpty children then
+--        Tree.label tree
+--
+--    else
+--        Element.column []
+--            --  Render.Settings.leftIndentation,
+--            [ Tree.label tree
+--            , Element.column [ Element.paddingEach { top = Render.Settings.topMarginForChildren, left = Render.Settings.leftIndent, right = 0, bottom = 0 } ] (List.map unravel children)
+--            ]
 
 
 type Status
@@ -467,6 +516,11 @@ macroDict =
         , ( "index_", \_ _ -> blindIndex )
         , ( "image", Render.Export.Image.export )
         , ( "vspace", \_ -> vspace )
+        , ( "bolditalic", \_ -> bolditalic )
+        , ( "brackets", \_ -> brackets )
+        , ( "lb", \_ -> lb )
+        , ( "rb", \_ -> rb )
+        , ( "underscore", \_ -> underscore )
         ]
 
 
@@ -505,6 +559,7 @@ blockDict =
 verbatimExprDict =
     Dict.fromList
         [ ( "code", inlineCode )
+        , ( "math", inlineMath )
         ]
 
 
@@ -512,13 +567,14 @@ verbatimExprDict =
 -- END DICTIONARIES
 
 
-inlineCode0 : Settings -> List Expr -> String
-inlineCode0 _ exprs =
-    Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
+inlineMath : String -> String
+inlineMath str =
+    "$" ++ str ++ "$"
 
-inlineCode : Settings -> List Expr -> String
-inlineCode _ exprs =
-    Render.Export.Util.getOneArg exprs |> fixChars |> (\x -> "code{" ++ x ++ "}")
+
+inlineCode : String -> String
+inlineCode str =
+    "\\verb`" ++ str ++ "`"
 
 
 link : List Expr -> String
@@ -529,16 +585,17 @@ link exprs =
     in
     [ "\\href{", args.second, "}{", args.first, "}" ] |> String.join ""
 
+
 vspace : List Expr -> String
 vspace exprs =
     let
         arg =
             Render.Export.Util.getOneArg exprs
-               |> String.toFloat
-               |> Maybe.withDefault 0
-               |> (\x -> x/4.0)
-               |> String.fromFloat
-               |> (\x -> x ++ "mm")
+                |> String.toFloat
+                |> Maybe.withDefault 0
+                |> (\x -> x / 4.0)
+                |> String.fromFloat
+                |> (\x -> x ++ "mm")
     in
     [ "\\vspace{", arg, "}" ] |> String.join ""
 
@@ -550,6 +607,35 @@ ilink exprs =
             Render.Export.Util.getTwoArgs exprs
     in
     [ "\\href{", "https://scripta.io/s/", args.second, "}{", args.first, "}" ] |> String.join ""
+
+
+bolditalic : List Expr -> String
+bolditalic exprs =
+    let
+        args =
+            Render.Export.Util.getArgs exprs |> String.join " "
+    in
+    "\\textbf{\\emph{" ++ args ++ "}}"
+
+
+brackets : List Expr -> String
+brackets exprs =
+    "[" ++ (Render.Export.Util.getArgs exprs |> String.join " ") ++ "]"
+
+
+lb : List Expr -> String
+lb _ =
+    "["
+
+
+rb : List Expr -> String
+rb _ =
+    "]"
+
+
+underscore : List Expr -> String
+underscore _ =
+    "$\\_$"
 
 
 blindIndex : String
@@ -581,11 +667,11 @@ section1 args body =
     let
         tag =
             body
-              |> String.words
-              |> Compiler.Util.normalizedWord
+                |> String.words
+                |> Compiler.Util.normalizedWord
 
-        label = " \\label{" ++ tag ++ "}"
-
+        label =
+            " \\label{" ++ tag ++ "}"
 
         suffix =
             case List.Extra.getAt 1 args of
@@ -618,14 +704,15 @@ section1 args body =
 section2 : List String -> String -> String
 section2 args body =
     let
-         tag =
-                    body
-                      |> String.words
-                      |> Compiler.Util.normalizedWord
+        tag =
+            body
+                |> String.words
+                |> Compiler.Util.normalizedWord
 
-         label = " \\label{" ++ tag ++ "}"
+        label =
+            " \\label{" ++ tag ++ "}"
 
-         suffix =
+        suffix =
             case List.Extra.getAt 1 args of
                 Nothing ->
                     ""
@@ -708,9 +795,9 @@ renderVerbatim name body =
         Nothing ->
             name ++ "(" ++ body ++ ") — unimplemented "
 
-
         Just f ->
-            body |> fixChars |> (\x -> "\\code{" ++ x  ++ "}")
+            -- body |> fixChars |> (\x -> "\\code{" ++ x  ++ "}")
+            body |> fixChars |> f
 
 
 
