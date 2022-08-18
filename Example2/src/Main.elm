@@ -252,7 +252,7 @@ update msg model =
             ( model, Cmd.none )
 
         GotPdfLink result ->
-            ( { model | printingState = PDF.PrintReady, message = "Got PDF Link" ++ Debug.toString result }, Cmd.none )
+            ( { model | printingState = PDF.PrintReady, message = "Got PDF Link" }, Cmd.none )
 
         ChangePrintingState printingState ->
             ( { model | printingState = printingState, message = "Changing printing state" }, Cmd.none )
@@ -268,7 +268,7 @@ update msg model =
             ( { model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF" }, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF )
 
         GotTarFile result ->
-            ( { model | printingState = PDF.PrintReady, message = "Got TarFile" ++ Debug.toString result }, Cmd.none )
+            ( { model | printingState = PDF.PrintReady, message = "Got TarFile" }, Cmd.none )
 
         ChangeTarFileState tarFileState ->
             ( { model | tarFileState = tarFileState, message = "Changing tar file state" }, Cmd.none )
