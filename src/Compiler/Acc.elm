@@ -2,8 +2,7 @@ module Compiler.Acc exposing
     ( Accumulator
     , init
     , transformAccumulate
-    , transformST
-    )
+    , transformST)
 
 import Compiler.ASTTools
 import Compiler.TextMacro exposing (Macro)
@@ -136,25 +135,28 @@ transformBlock acc (ExpressionBlock block) =
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             if List.member name_ ["equation", "aligned"] then
               ExpressionBlock
-                              {
-                                -- TODO (UU): is this the right change?
-                                -- block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
-                                -- block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
-                                block | args = (Vector.toString acc.headingIndex ++  "." ++ (getCounterAsString (reduceName name_) acc.counter))::[] }
+                  {
+                    block | args = (vectorPrefix acc.headingIndex ++  (getCounterAsString (reduceName name_) acc.counter))::[] }
 
 
             else
             ExpressionBlock
                 {
-                  -- TODO (UU): is this the right change?
-                  -- block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
-                  -- block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
-                  block | args = (Vector.toString acc.headingIndex ++  "." ++ (String.fromInt acc.blockCounter)) :: [] }
+                  block | args = (vectorPrefix acc.headingIndex ++ (String.fromInt acc.blockCounter)) :: [] }
 
                 |> expand acc.textMacroDict
 
         _ ->
             expand acc.textMacroDict (ExpressionBlock block)
+
+
+vectorPrefix : Vector -> String
+vectorPrefix headingIndex =
+    let
+        prefix = Vector.toString headingIndex
+    in
+    if prefix == "" then ""
+    else Vector.toString headingIndex ++  "."
 
 
 reduceName : String -> String
@@ -352,7 +354,6 @@ updateWithOrdinaryDocumentBlock accumulator name content level id =
             title |> String.toLower |> String.replace " " "-"
 
         documentIndex =
-            --Vector.increment (String.toInt level |> Maybe.withDefault 0 |> (\x -> x - 1)) accumulator.headingIndex
             Vector.increment (String.toInt level |> Maybe.withDefault 0) accumulator.documentIndex
     in
     -- TODO: take care of numberedItemIndex = 0 here and elsewhere
@@ -437,18 +438,8 @@ updateWitOrdinaryBlock accumulator name content tag id indent =
                 |> updateReference tag id (String.fromInt (Vector.get level itemVector))
 
         Just name_ ->
-            let
-
-                blockCounter =
-                        -- TODO: is this the right chang?
-                        --incrementCounter name_ accumulator.counter
-                       --  incrementCounter "block" accumulator.counter
-                         accumulator.blockCounter + 1
-
-                    --else
-                    --    accumulator.counter
-            in
-            { accumulator | blockCounter = blockCounter } |> updateReference tag id tag
+            if name_ == "title" then accumulator else
+            { accumulator | blockCounter = accumulator.blockCounter + 1 } |> updateReference tag id tag
 
         _ ->
             accumulator
