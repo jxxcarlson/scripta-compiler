@@ -130,8 +130,20 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | args = [ id, level, Vector.toString acc.documentIndex ] }
 
+
+
         ( Just name_, _ ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+            if List.member name_ ["equation", "aligned"] then
+              ExpressionBlock
+                              {
+                                -- TODO (UU): is this the right change?
+                                -- block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
+                                -- block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
+                                block | args = (Vector.toString acc.headingIndex ++  "." ++ (getCounterAsString (reduceName name_) acc.counter))::[] }
+
+
+            else
             ExpressionBlock
                 {
                   -- TODO (UU): is this the right change?
@@ -318,6 +330,7 @@ updateWithOrdinarySectionBlock accumulator name content level id =
     { accumulator | inList = inList
        , headingIndex = headingIndex
        , blockCounter = blockCounter
+       , counter = Dict.insert "equation" 0 accumulator.counter
     } |> updateReference sectionTag id (Vector.toString headingIndex)
 
 
