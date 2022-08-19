@@ -31,6 +31,7 @@ type alias Accumulator =
     { headingIndex : Vector
     , documentIndex : Vector
     , counter : Dict String Int
+    , blockCounter : Int
     , itemVector : Vector
     , numberedItemDict : Dict String { level : Int, index : Int }
     , numberedBlockNames : List String
@@ -77,6 +78,7 @@ init k =
     , documentIndex = Vector.init k
     , inList = False
     , counter = Dict.empty
+    , blockCounter = 0
     , itemVector = Vector.init 4
     , numberedItemDict = Dict.empty
     , numberedBlockNames = Parser.Settings.numberedBlockNames
@@ -132,9 +134,11 @@ transformBlock acc (ExpressionBlock block) =
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             ExpressionBlock
                 {
-                  -- TODO: is this the right change?
+                  -- TODO (UU): is this the right change?
                   -- block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
-                  block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
+                  -- block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
+                  block | args = (Vector.toString acc.headingIndex ++  "." ++ (String.fromInt acc.blockCounter)) :: [] }
+
                 |> expand acc.textMacroDict
 
         _ ->
@@ -307,9 +311,14 @@ updateWithOrdinarySectionBlock accumulator name content level id =
 
         headingIndex =
             Vector.increment (String.toInt level |> Maybe.withDefault 0) accumulator.headingIndex
+
+        blockCounter = 0
     in
     -- TODO: take care of numberedItemIndex = 0 here and elsewhere
-    { accumulator | inList = inList, headingIndex = headingIndex } |> updateReference sectionTag id (Vector.toString headingIndex)
+    { accumulator | inList = inList
+       , headingIndex = headingIndex
+       , blockCounter = blockCounter
+    } |> updateReference sectionTag id (Vector.toString headingIndex)
 
 
 updateWithOrdinaryDocumentBlock : Accumulator -> Maybe String -> Either String (List Expr) -> String -> String -> Accumulator
@@ -416,16 +425,17 @@ updateWitOrdinaryBlock accumulator name content tag id indent =
 
         Just name_ ->
             let
-                newCounter =
-                    if List.member name_ accumulator.numberedBlockNames then
+
+                blockCounter =
                         -- TODO: is this the right chang?
                         --incrementCounter name_ accumulator.counter
-                        incrementCounter "block" accumulator.counter
+                       --  incrementCounter "block" accumulator.counter
+                         accumulator.blockCounter + 1
 
-                    else
-                        accumulator.counter
+                    --else
+                    --    accumulator.counter
             in
-            { accumulator | counter = newCounter } |> updateReference tag id tag
+            { accumulator | blockCounter = blockCounter } |> updateReference tag id tag
 
         _ ->
             accumulator
