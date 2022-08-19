@@ -131,7 +131,10 @@ transformBlock acc (ExpressionBlock block) =
         ( Just name_, _ ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             ExpressionBlock
-                { block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
+                {
+                  -- TODO: is this the right change?
+                  -- block | args = insertInStringList (getCounterAsString (reduceName name_) acc.counter) block.args }
+                  block | args = insertInStringList (getCounterAsString "block" acc.counter) block.args }
                 |> expand acc.textMacroDict
 
         _ ->
@@ -415,7 +418,9 @@ updateWitOrdinaryBlock accumulator name content tag id indent =
             let
                 newCounter =
                     if List.member name_ accumulator.numberedBlockNames then
-                        incrementCounter name_ accumulator.counter
+                        -- TODO: is this the right chang?
+                        --incrementCounter name_ accumulator.counter
+                        incrementCounter "block" accumulator.counter
 
                     else
                         accumulator.counter
@@ -457,6 +462,8 @@ updateWithVerbatimBlock accumulator name_ tag id =
         -- Increment the appropriate counter, e.g., "equation"
         newCounter =
             if List.member name accumulator.numberedBlockNames then
+                -- TODO: is this the right change?
+                -- incrementCounter (reduceName name) accumulator.counter
                 incrementCounter (reduceName name) accumulator.counter
 
             else
