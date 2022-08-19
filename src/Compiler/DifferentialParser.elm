@@ -96,7 +96,7 @@ makeBlock tag dict =
                 , name = Just "mathmacros"
                 , content = String.lines content |> List.drop 1 |> List.filter (\line -> line /= "")
                 , named = True
-            } |> Debug.log "!! MACRO BLOCK"
+            }
 
 
 update : EditRecord -> String -> EditRecord
