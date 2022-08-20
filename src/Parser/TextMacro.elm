@@ -1,11 +1,12 @@
-module Parser.TextMacro exposing  (MyMacro(..), eraseLeadingMacro, get, toString)
-
-
+module Parser.TextMacro exposing (MyMacro(..), eraseLeadingMacro, get, toString)
 
 import Parser exposing ((|.), (|=), Parser)
 import Set
 
-foo = 1
+
+foo =
+    1
+
 
 type MyMacro
     = MyMacro String (List String)

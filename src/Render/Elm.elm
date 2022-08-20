@@ -595,11 +595,12 @@ eqref acc exprList =
 
 
 strike g acc s exprList =
-        simpleElement [ Font.strike ] g acc s exprList
+    simpleElement [ Font.strike ] g acc s exprList
 
 
 underscore _ _ _ _ =
     Element.el [] (Element.text "_")
+
 
 underline g acc s exprList =
     simpleElement [ Font.underline ] g acc s exprList

@@ -2,7 +2,8 @@ module Compiler.Acc exposing
     ( Accumulator
     , init
     , transformAccumulate
-    , transformST)
+    , transformST
+    )
 
 import Compiler.ASTTools
 import Compiler.TextMacro exposing (Macro)
@@ -129,22 +130,20 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | args = [ id, level, Vector.toString acc.documentIndex ] }
 
-
-
         ( Just name_, _ ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
-            if List.member name_ ["equation", "aligned"] then
-              ExpressionBlock
-                  {
-                    block | args = (vectorPrefix acc.headingIndex ++  (getCounterAsString (reduceName name_) acc.counter))::[] }
-
+            if List.member name_ [ "equation", "aligned" ] then
+                ExpressionBlock
+                    { block
+                        | args = (vectorPrefix acc.headingIndex ++ getCounterAsString (reduceName name_) acc.counter) :: []
+                    }
 
             else
-            ExpressionBlock
-                {
-                  block | args = (vectorPrefix acc.headingIndex ++ (String.fromInt acc.blockCounter)) :: [] }
-
-                |> expand acc.textMacroDict
+                ExpressionBlock
+                    { block
+                        | args = (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) :: []
+                    }
+                    |> expand acc.textMacroDict
 
         _ ->
             expand acc.textMacroDict (ExpressionBlock block)
@@ -153,10 +152,14 @@ transformBlock acc (ExpressionBlock block) =
 vectorPrefix : Vector -> String
 vectorPrefix headingIndex =
     let
-        prefix = Vector.toString headingIndex
+        prefix =
+            Vector.toString headingIndex
     in
-    if prefix == "" then ""
-    else Vector.toString headingIndex ++  "."
+    if prefix == "" then
+        ""
+
+    else
+        Vector.toString headingIndex ++ "."
 
 
 reduceName : String -> String
@@ -321,19 +324,22 @@ updateWithOrdinarySectionBlock accumulator name content level id =
 
         sectionTag =
             -- TODO: the below is a bad solution
-            titleWords |> List.map (String.toLower >> Compiler.Util.compressWhitespace >> Compiler.Util.removeNonAlphaNum >>     String.replace " " "-") |> String.join ""
+            titleWords |> List.map (String.toLower >> Compiler.Util.compressWhitespace >> Compiler.Util.removeNonAlphaNum >> String.replace " " "-") |> String.join ""
 
         headingIndex =
             Vector.increment (String.toInt level |> Maybe.withDefault 0) accumulator.headingIndex
 
-        blockCounter = 0
+        blockCounter =
+            0
     in
     -- TODO: take care of numberedItemIndex = 0 here and elsewhere
-    { accumulator | inList = inList
-       , headingIndex = headingIndex
-       , blockCounter = blockCounter
-       , counter = Dict.insert "equation" 0 accumulator.counter
-    } |> updateReference sectionTag id (Vector.toString headingIndex)
+    { accumulator
+        | inList = inList
+        , headingIndex = headingIndex
+        , blockCounter = blockCounter
+        , counter = Dict.insert "equation" 0 accumulator.counter
+    }
+        |> updateReference sectionTag id (Vector.toString headingIndex)
 
 
 updateWithOrdinaryDocumentBlock : Accumulator -> Maybe String -> Either String (List Expr) -> String -> String -> Accumulator
@@ -438,8 +444,11 @@ updateWitOrdinaryBlock accumulator name content tag id indent =
                 |> updateReference tag id (String.fromInt (Vector.get level itemVector))
 
         Just name_ ->
-            if name_ == "title" then accumulator else
-            { accumulator | blockCounter = accumulator.blockCounter + 1 } |> updateReference tag id tag
+            if name_ == "title" then
+                accumulator
+
+            else
+                { accumulator | blockCounter = accumulator.blockCounter + 1 } |> updateReference tag id tag
 
         _ ->
             accumulator

@@ -28,7 +28,10 @@ import String.Extra
 
 -- TOPLEVEL
 
-topPaddingForIndentedElements = 10
+
+topPaddingForIndentedElements =
+    10
+
 
 render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 render count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
@@ -46,10 +49,13 @@ render count acc settings (ExpressionBlock { name, indent, args, blockType, cont
                     in
                     List.map (Render.Elm.render count acc settings) exprs
                         |> (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
-                        |> \x -> if indent > 0 then
-                            (Element.el [Element.paddingEach {top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0}] (x))
-                           else
-                             x
+                        |> (\x ->
+                                if indent > 0 then
+                                    Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+
+                                else
+                                    x
+                           )
 
                 Left _ ->
                     Element.none
@@ -68,19 +74,23 @@ render count acc settings (ExpressionBlock { name, indent, args, blockType, cont
                             case Dict.get functionName blockDict of
                                 Nothing ->
                                     env (String.Extra.toTitleCase functionName) count acc settings args id exprs
-                                     |> \x -> if indent > 0 then
-                                             (Element.el [Element.paddingEach {top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0}] (x))
-                                            else
-                                              x
+                                        |> (\x ->
+                                                if indent > 0 then
+                                                    Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
+                                                else
+                                                    x
+                                           )
 
                                 Just f ->
                                     f count acc settings args id exprs
-                                      |> \x -> if indent > 0 then
-                                           (Element.el [Element.paddingEach {top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0}] (x))
-                                          else
-                                            x
+                                        |> (\x ->
+                                                if indent > 0 then
+                                                    Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
+                                                else
+                                                    x
+                                           )
 
         VerbatimBlock _ ->
             case content of

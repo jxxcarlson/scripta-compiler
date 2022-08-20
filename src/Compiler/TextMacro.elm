@@ -4,15 +4,15 @@ module Compiler.TextMacro exposing
     , applyMacroS
     , applyMacroS2
     , buildDictionary
-    , getTextMacroFunctionNames
     , expand
+    , exportTexMacros
     , extract
+    , getTextMacroFunctionNames
     , listSubst
     , macroFromL0String
     , macroFromString
     , parseMicroLaTeX
     , printMacro
-    , exportTexMacros
     , toString
     )
 
@@ -71,6 +71,7 @@ printMacro macro =
         ++ "], expr:  "
         ++ L0.Test.toStringFromList macro.body
 
+
 printLaTeXMacro : Macro -> String
 printLaTeXMacro macro =
     if List.length macro.vars == 0 then
@@ -79,15 +80,17 @@ printLaTeXMacro macro =
             ++ "}{"
             ++ (List.map toLaTeXString macro.body |> String.join "")
             ++ "}"
+
     else
-      "\\newcommand{\\"
-      ++ macro.name
-      ++ "}"
-      ++ "["
-      ++ String.fromInt (List.length macro.vars)
-      ++ "]{"
-      ++ (List.map toLaTeXString macro.body |> String.join "")
-      ++ "}"
+        "\\newcommand{\\"
+            ++ macro.name
+            ++ "}"
+            ++ "["
+            ++ String.fromInt (List.length macro.vars)
+            ++ "]{"
+            ++ (List.map toLaTeXString macro.body |> String.join "")
+            ++ "}"
+
 
 toLaTeXString : Expr -> String
 toLaTeXString expr =
@@ -110,7 +113,7 @@ toLaTeXString expr =
                     else
                         " " ++ body_
             in
-            "\\" ++ name ++ "{" ++  body ++ "}"
+            "\\" ++ name ++ "{" ++ body ++ "}"
 
         Text str _ ->
             str
@@ -222,15 +225,16 @@ buildDictionary lines =
 getTextMacroFunctionNames : String -> List String
 getTextMacroFunctionNames str =
     str
-    |> String.lines
-    |> buildDictionary
-    |> Dict.toList
-    |> List.map Tuple.second
-    |> List.map .body
-    |> List.map functionNames
-    |> List.concat
-    |> List.Extra.unique
-    |> List.sort
+        |> String.lines
+        |> buildDictionary
+        |> Dict.toList
+        |> List.map Tuple.second
+        |> List.map .body
+        |> List.map functionNames
+        |> List.concat
+        |> List.Extra.unique
+        |> List.sort
+
 
 functionNames : List Expr -> List String
 functionNames exprs =
@@ -238,22 +242,28 @@ functionNames exprs =
 
 
 functionNames_ : Expr -> List String
-functionNames_ expr  =
+functionNames_ expr =
     case expr of
-        Fun name body _ -> name :: (List.map functionNames_ body |> List.concat)
-        Text _ _ -> []
-        Verbatim _ _ _ -> []
+        Fun name body _ ->
+            name :: (List.map functionNames_ body |> List.concat)
+
+        Text _ _ ->
+            []
+
+        Verbatim _ _ _ ->
+            []
 
 
-exportTexMacros: String -> String
+exportTexMacros : String -> String
 exportTexMacros str =
     str
-    |> String.lines
-    |> buildDictionary
-    |> Dict.toList
-    |> List.map Tuple.second
-    |> List.map printLaTeXMacro
-    |> String.join "\n"
+        |> String.lines
+        |> buildDictionary
+        |> Dict.toList
+        |> List.map Tuple.second
+        |> List.map printLaTeXMacro
+        |> String.join "\n"
+
 
 {-| Expand the given expression using the given dictionary of lambdas.
 -}

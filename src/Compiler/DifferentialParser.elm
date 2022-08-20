@@ -1,8 +1,10 @@
 module Compiler.DifferentialParser exposing (EditRecord, init, update)
 
+import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
 import Dict exposing (Dict)
+import L0.Parser.Classify
 import L0.Parser.Expression
 import Markup
 import MicroLaTeX.Parser.Expression
@@ -74,29 +76,31 @@ init inclusionData lang str =
 -}
 prependContent : String -> Dict String String -> List (Tree PrimitiveBlock) -> List (Tree PrimitiveBlock)
 prependContent tag dict trees =
-    Tree.singleton (makeBlock tag dict) :: trees
+    List.map Tree.singleton (makeBlocks tag dict) ++ trees
 
 
 {-| Function makeBlock looks up the text corresponding to 'tag' in 'dict'
 and uses it to produce a primitive block of macro definitions.
 -}
-makeBlock : String -> Dict String String -> PrimitiveBlock
-makeBlock tag dict =
+makeBlocks : String -> Dict String String -> List PrimitiveBlock
+makeBlocks tag dict =
     let
         empty =
-            Parser.PrimitiveBlock.empty
+            []
     in
     case Dict.get tag dict of
         Nothing ->
-            empty
+            []
 
         Just content ->
-            { empty
-                | blockType = PBVerbatim
-                , name = Just "mathmacros"
-                , content = String.lines content |> List.drop 1 |> List.filter (\line -> line /= "")
-                , named = True
-            }
+            parseL0 (String.lines content)
+                |> List.filter (\pb -> List.member pb.name [ Just "mathmacros", Just "textmacros" ])
+                |> List.map (\pb -> { pb | content = pb.content |> List.filter (\line_ -> line_ /= "") })
+
+
+parseL0 : List String -> List PrimitiveBlock
+parseL0 lines =
+    Parser.PrimitiveBlock.parse L0Lang L0.Parser.Classify.isVerbatimLine lines
 
 
 update : EditRecord -> String -> EditRecord

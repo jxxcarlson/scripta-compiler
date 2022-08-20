@@ -1,11 +1,13 @@
 module Compiler.ASTTools exposing
     ( banner
+    , blockNameInList
     , blockNames
     , existsBlockWithName
     , exprListToStringList
     , expressionNames
     , extractTextFromSyntaxTreeByKey
     , filterASTOnName
+    , filterBlocks
     , filterBlocksByArgs
     , filterBlocksOnName
     , filterExpressionsOnName
@@ -32,6 +34,7 @@ module Compiler.ASTTools exposing
     , toExprRecord
     )
 
+import Bool.Extra
 import Dict exposing (Dict)
 import Either exposing (Either(..))
 import List.Extra
@@ -122,6 +125,16 @@ isBlank expr =
 filterBlocksOnName : String -> List ExpressionBlock -> List ExpressionBlock
 filterBlocksOnName name blocks =
     List.filter (matchBlockName name) blocks
+
+
+blockNameInList : ExpressionBlock -> List String -> Bool
+blockNameInList block names =
+    Bool.Extra.any (List.map (\name -> matchBlockName name block) names)
+
+
+filterBlocks : (ExpressionBlock -> Bool) -> List ExpressionBlock -> List ExpressionBlock
+filterBlocks predicate blocks =
+    List.filter predicate blocks
 
 
 filterNotBlocksOnName : String -> List ExpressionBlock -> List ExpressionBlock

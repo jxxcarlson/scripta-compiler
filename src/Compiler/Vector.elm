@@ -1,4 +1,4 @@
-module Compiler.Vector exposing (Vector, get, level, increment, init, resetFrom, set, toString)
+module Compiler.Vector exposing (Vector, get, increment, init, level, resetFrom, set, toString)
 
 import List.Extra
 
@@ -51,5 +51,7 @@ increment k v =
         set k (get k v + 1) v
             |> resetFrom (k + 1)
 
+
 level : Vector -> Int
-level v  = List.filter (\i -> i /= 0) v.content |> List.length
+level v =
+    List.filter (\i -> i /= 0) v.content |> List.length
