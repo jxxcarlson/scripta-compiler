@@ -529,7 +529,7 @@ updateWithVerbatimBlock accumulator name_ tag id =
     in
     { accumulator | inList = inList, counter = newCounter }
         -- Update the references dictionary
-        |> updateReference tag id (getCounter (reduceName name) newCounter |> String.fromInt)
+        |> updateReference tag id ((Vector.toString accumulator.headingIndex) ++ "." ++  (getCounter (reduceName name) newCounter |> String.fromInt))
 
 
 updateWithParagraph accumulator name content id =
