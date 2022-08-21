@@ -80,7 +80,7 @@ equation count acc settings ((ExpressionBlock { id, args, properties }) as block
             String.lines (getContent block)
                 |> List.filter (\line -> not (String.left 2 line == "$$") && not (String.left 6 line == "[label") && not (line == "end"))
 
-        adjustedLines1 =
+        adjustedLines =
             -- TODO: we need a better solution than the below for not messing up
             -- TODO internal \\begin-\\end pairs
             List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
@@ -93,10 +93,6 @@ equation count acc settings ((ExpressionBlock { id, args, properties }) as block
                         else
                             line
                     )
-
-        adjustedLines =
-            --"\\begin{equation}" :: "\\nonumber" :: adjustedLines1 ++ [ "\\end{equation}" ]
-            adjustedLines1
 
         content =
             String.join "\n" adjustedLines

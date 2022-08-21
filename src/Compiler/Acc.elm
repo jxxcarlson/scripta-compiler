@@ -137,24 +137,53 @@ transformBlock acc (ExpressionBlock block) =
                 { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
         ( Just "equation", _ ) ->
+            let
+                prefix =
+                    Vector.toString acc.headingIndex
+
+                equationProp =
+                    if prefix == "" then
+                        getCounterAsString "equation" acc.counter
+
+                    else
+                        Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter
+            in
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             ExpressionBlock
-                -- args = (Vector.toString acc.headingIndex ++  "." ++ (getCounterAsString (reduceName name_) acc.counter))::[]
-                -- { block | properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt (Dict.get "block" acc.counter |> Maybe.withDefault 1)) block.properties } |> Debug.log "!!SEC NO (EQU)"
-                { block | properties = Dict.insert "equation" (Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter) block.properties }
+                { block | properties = Dict.insert "equation" equationProp block.properties }
 
         ( Just "aligned", _ ) ->
-            -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+            let
+                prefix =
+                    Vector.toString acc.headingIndex
+
+                equationProp =
+                    if prefix == "" then
+                        getCounterAsString "equation" acc.counter
+
+                    else
+                        Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter
+            in
             ExpressionBlock
-                { block | properties = Dict.insert "equation" (Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter) block.properties }
+                { block | properties = Dict.insert "equation" equationProp block.properties }
 
         ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             if List.member name_ [ "section" ] then
-                -- TODO: bad code! fix this!!
+                let
+                    prefix =
+                        Vector.toString acc.headingIndex
+
+                    equationProp =
+                        if prefix == "" then
+                            getCounterAsString "equation" acc.counter
+
+                        else
+                            Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter
+                in
                 ExpressionBlock
                     { block
-                        | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ getCounterAsString (reduceName name_) acc.counter) block.properties
+                        | properties = Dict.insert "label" equationProp block.properties
                     }
 
             else
@@ -529,7 +558,19 @@ updateWithVerbatimBlock accumulator name_ tag id =
     in
     { accumulator | inList = inList, counter = newCounter }
         -- Update the references dictionary
-        |> updateReference tag id ((Vector.toString accumulator.headingIndex) ++ "." ++  (getCounter (reduceName name) newCounter |> String.fromInt))
+        |> updateReference tag id (verbatimBlockReference accumulator.headingIndex name newCounter)
+
+
+verbatimBlockReference headingIndex name newCounter =
+    let
+        a =
+            Vector.toString headingIndex
+    in
+    if a == "" then
+        getCounter (reduceName name) newCounter |> String.fromInt
+
+    else
+        a ++ "." ++ (getCounter (reduceName name) newCounter |> String.fromInt)
 
 
 updateWithParagraph accumulator name content id =
