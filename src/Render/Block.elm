@@ -241,7 +241,7 @@ subheading count acc settings ((ExpressionBlock { id, args }) as block) =
 
 
 section : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-section count acc settings ((ExpressionBlock { id, args }) as block) =
+section count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     -- level 1 is reserved for titles
     let
         headingLevel =
@@ -257,11 +257,8 @@ section count acc settings ((ExpressionBlock { id, args }) as block) =
                 Just "-" ->
                     Element.none
 
-                Just s ->
-                    Element.el [ Font.size fontSize ] (Element.text (s ++ ". "))
-
-                Nothing ->
-                    Element.none
+                _ ->
+                    Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
 
         fontSize =
             Render.Settings.maxHeadingFontSize / sqrt headingLevel |> round
@@ -431,6 +428,11 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
 blockHeading : Maybe String -> Dict String String -> String
 blockHeading name properties =
     (name |> Maybe.withDefault "(name)") ++ " " ++ (Dict.get "label" properties |> Maybe.withDefault "")
+
+
+blockLabel : Dict String String -> String
+blockLabel properties =
+    Dict.get "label" properties |> Maybe.withDefault "??"
 
 
 indented count acc settings ((ExpressionBlock { id }) as block) =

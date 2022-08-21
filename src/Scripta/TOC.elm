@@ -2,7 +2,7 @@ module Scripta.TOC exposing (view)
 
 import Compiler.ASTTools
 import Compiler.Acc exposing (Accumulator)
-import Dict
+import Dict exposing (Dict)
 import Either exposing (Either(..))
 import Element exposing (Element)
 import Element.Events as Events
@@ -41,7 +41,7 @@ view counter acc _ ast =
 
 
 viewTocItem : Int -> Accumulator -> Render.Settings.Settings -> ExpressionBlock -> Element MarkupMsg
-viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber }) =
+viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber, properties }) =
     case content of
         Left _ ->
             Element.none
@@ -56,11 +56,8 @@ viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber }) =
                         Just "-" ->
                             Element.none
 
-                        Just s ->
-                            Element.el [] (Element.text (s ++ ". "))
-
                         _ ->
-                            Element.none
+                            Element.el [] (Element.text (blockLabel properties ++ ". "))
 
                 label : Element MarkupMsg
                 label =
@@ -68,6 +65,11 @@ viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber }) =
             in
             Element.el [ Events.onClick (SelectId id) ]
                 (Element.link [ Font.color (Element.rgb 0 0 0.8) ] { url = Render.Utility.internalLink id, label = label })
+
+
+blockLabel : Dict String String -> String
+blockLabel properties =
+    Dict.get "label" properties |> Maybe.withDefault "??"
 
 
 tocLevel : Int -> ExpressionBlock -> Bool
