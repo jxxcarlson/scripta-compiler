@@ -40,9 +40,8 @@ fontWidth =
     10
 
 
-
 chart : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-chart count acc settings (ExpressionBlock {id, args} as block)  =
+chart count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         options : Options
         options =
@@ -459,15 +458,18 @@ getRange str =
             Nothing
 
 
-
 getVerbatimContent : ExpressionBlock -> String
-getVerbatimContent (ExpressionBlock {content}) =
+getVerbatimContent (ExpressionBlock { content }) =
     case content of
-        Left  str -> str
-        Right _ -> ""
+        Left str ->
+            str
+
+        Right _ ->
+            ""
+
 
 table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-table count acc settings (ExpressionBlock {id, args} as block) =
+table count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         argString =
             String.join " " args

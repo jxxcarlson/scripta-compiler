@@ -136,16 +136,17 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
-        ( Just "equation", _) ->
-                    -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+        ( Just "equation", _ ) ->
+            -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             ExpressionBlock
-                { block | properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt (Dict.get "block" acc.counter |> Maybe.withDefault 1)) block.properties } |> Debug.log "!!SEC NO (EQU)"
+                -- args = (Vector.toString acc.headingIndex ++  "." ++ (getCounterAsString (reduceName name_) acc.counter))::[]
+                -- { block | properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt (Dict.get "block" acc.counter |> Maybe.withDefault 1)) block.properties } |> Debug.log "!!SEC NO (EQU)"
+                { block | properties = Dict.insert "equation" (Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter) block.properties }
 
-        ( Just "aligned", _) ->
-                        -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
-                ExpressionBlock
-                    { block |properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt acc.blockCounter) block.properties } |> Debug.log "!!SEC NO (ALIGNED)"
-
+        ( Just "aligned", _ ) ->
+            -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+            ExpressionBlock
+                { block | properties = Dict.insert "equation" (Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter) block.properties }
 
         ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
@@ -515,7 +516,8 @@ updateWithVerbatimBlock accumulator name_ tag id =
         name =
             Maybe.withDefault "---" name_
 
-        -- Increment the appropriate counter, e.g., "equation"
+        -- Increment the appropriate counter, e.g., "equation" and "aligned"
+        -- reduceName maps these both to "equation"
         newCounter =
             if List.member name accumulator.numberedBlockNames then
                 -- TODO: is this the right change?

@@ -171,8 +171,8 @@ verbatimDict =
         , ( "svg", Render.Graphics.svg )
         , ( "quiver", Render.Graphics.quiver )
         , ( "tikz", Render.Graphics.tikz )
-        , ( "load-files", renderNothing  )
-         , ( "include", renderNothing  )
+        , ( "load-files", renderNothing )
+        , ( "include", renderNothing )
         ]
 
 
@@ -194,7 +194,6 @@ noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
         [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "| " ++ (args |> String.join " ") ++ " ??(9) " ]
         , Element.paragraph [] (List.map (Render.Elm.render count acc settings) (getExprs block))
         ]
-
 
 
 renderNothing : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -428,7 +427,7 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
 
 blockHeading : Maybe String -> Dict String String -> String
 blockHeading name properties =
-    (name |> Maybe.withDefault "(name)") ++ " " ++ (Dict.get "label" properties |> Maybe.withDefault "")
+    (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase) ++ " " ++ (Dict.get "label" properties |> Maybe.withDefault "")
 
 
 blockLabel : Dict String String -> String
@@ -509,9 +508,8 @@ highlightAttrs id settings =
 -- VERBATIM
 
 
-
 renderCode : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-renderCode count acc settings (ExpressionBlock {id, args} as block) =
+renderCode count acc settings ((ExpressionBlock { id, args }) as block) =
     Element.column
         [ Font.color Render.Settings.codeColor
         , Font.family
@@ -533,10 +531,8 @@ renderCode count acc settings (ExpressionBlock {id, args} as block) =
         )
 
 
-
-
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-renderVerse _ _ _ (ExpressionBlock {id} as block) =
+renderVerse _ _ _ ((ExpressionBlock { id }) as block) =
     Element.column
         [ Events.onClick (SendId id)
         , Render.Utility.elementAttribute "id" id
@@ -599,9 +595,8 @@ elmDict =
         ]
 
 
-
 renderVerbatim : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-renderVerbatim _ _ _ (ExpressionBlock {id, args} as block) =
+renderVerbatim _ _ _ ((ExpressionBlock { id, args }) as block) =
     let
         _ =
             List.head args
@@ -709,10 +704,14 @@ numbered count acc settings ((ExpressionBlock { id, args }) as block) =
 
 
 getVerbatimContent : ExpressionBlock -> String
-getVerbatimContent (ExpressionBlock {content}) =
+getVerbatimContent (ExpressionBlock { content }) =
     case content of
-        Left  str -> str
-        Right _ -> ""
+        Left str ->
+            str
+
+        Right _ ->
+            ""
+
 
 desc : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 desc count acc settings ((ExpressionBlock { id, args }) as block) =

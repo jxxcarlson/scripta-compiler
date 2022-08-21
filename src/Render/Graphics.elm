@@ -48,13 +48,17 @@ image settings body =
 
 
 getVerbatimContent : ExpressionBlock -> String
-getVerbatimContent (ExpressionBlock {content}) =
+getVerbatimContent (ExpressionBlock { content }) =
     case content of
-        Left  str -> str
-        Right _ -> ""
+        Left str ->
+            str
+
+        Right _ ->
+            ""
+
 
 svg : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-svg ount acc settings (ExpressionBlock {id, args} as block) =
+svg ount acc settings ((ExpressionBlock { id, args }) as block) =
     case SvgParser.parse (getVerbatimContent block) of
         Ok html_ ->
             Element.column
@@ -68,11 +72,10 @@ svg ount acc settings (ExpressionBlock {id, args} as block) =
             Element.el [] (Element.text "SVG parse error")
 
 
-
 {-| Create elements from HTML markup. On parsing error, output no elements.
 -}
 tikz : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-tikz count acc settings (ExpressionBlock {id, args} as block) =
+tikz count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         maybePair =
             case String.split "---" (getVerbatimContent block) of
@@ -98,8 +101,8 @@ tikz count acc settings (ExpressionBlock {id, args} as block) =
                 ]
 
 
-quiver :Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-quiver _ _ settings (ExpressionBlock {id, args} as block) =
+quiver : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+quiver _ _ settings ((ExpressionBlock { id, args }) as block) =
     let
         -- arguments: ["width:250","caption:Fig","1"]
         qArgs : { caption : Element msg, description : String, placement : Element.Attribute a, width : Element.Length }
