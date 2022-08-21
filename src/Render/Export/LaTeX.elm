@@ -266,6 +266,7 @@ beginItemizedBlock : ExpressionBlock
 beginItemizedBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "beginBlock" ]
         , content = Right [ Text "itemize" { begin = 0, end = 7, index = 0, id = "" } ]
         , messages = []
@@ -283,6 +284,7 @@ endItemizedBlock : ExpressionBlock
 endItemizedBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "endBlock" ]
         , content = Right [ Text "itemize" { begin = 0, end = 7, index = 0, id = "" } ]
         , messages = []
@@ -300,6 +302,7 @@ beginNumberedBlock : ExpressionBlock
 beginNumberedBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "beginNumberedBlock" ]
         , content = Right [ Text "enumerate" { begin = 0, end = 7, index = 0, id = "begin" } ]
         , messages = []
@@ -317,6 +320,7 @@ endNumberedBlock : ExpressionBlock
 endNumberedBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "endNumberedBlock" ]
         , content = Right [ Text "enumerate" { begin = 0, end = 7, index = 0, id = "end" } ]
         , messages = []
@@ -334,6 +338,7 @@ beginDescriptionBlock : ExpressionBlock
 beginDescriptionBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "beginDescriptionBlock" ]
         , content = Right [ Text "description" { begin = 0, end = 7, index = 0, id = "begin" } ]
         , messages = []
@@ -351,6 +356,7 @@ endDescriptionBlock : ExpressionBlock
 endDescriptionBlock =
     ExpressionBlock
         { args = []
+        , properties = Dict.empty
         , blockType = OrdinaryBlock [ "endDescriptionBlock" ]
         , content = Right [ Text "description" { begin = 0, end = 7, index = 0, id = "end" } ]
         , messages = []

@@ -17,6 +17,7 @@ consumes trees of ExpressionBlocks to produce Html.
 
 -}
 
+import Dict exposing (Dict)
 import Either exposing (Either)
 import Parser.Expr exposing (Expr)
 
@@ -34,6 +35,7 @@ type ExpressionBlock
     = ExpressionBlock
         { name : Maybe String
         , args : List String
+        , properties : Dict String String
         , indent : Int
         , lineNumber : Int
         , numberOfLines : Int

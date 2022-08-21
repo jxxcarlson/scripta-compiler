@@ -5,6 +5,7 @@ module Parser.BlockUtil exposing
     )
 
 import Compiler.Util
+import Dict
 import Either exposing (Either(..))
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
@@ -17,6 +18,7 @@ l0Empty =
     ExpressionBlock
         { name = Nothing
         , args = []
+        , properties = Dict.empty
         , indent = 0
         , lineNumber = 0
         , id = "0"
@@ -54,6 +56,7 @@ toExpressionBlock lang parse { name, args, indent, lineNumber, blockType, conten
     ExpressionBlock
         { name = name
         , args = args
+        , properties = Dict.empty
         , indent = indent
         , lineNumber = lineNumber
         , numberOfLines = List.length content

@@ -122,7 +122,7 @@ transformBlock acc (ExpressionBlock block) =
     case ( block.name, block.args ) of
         ( Just "section", level :: [] ) ->
             ExpressionBlock
-                { block | args = level :: Vector.toString acc.headingIndex :: [] }
+                { block | properties = Dict.insert "label" (Vector.toString acc.headingIndex) block.properties }
 
         ( Just "section", level :: "-" :: [] ) ->
             ExpressionBlock
@@ -134,19 +134,19 @@ transformBlock acc (ExpressionBlock block) =
 
         ( Just "document", id :: level :: _ ) ->
             ExpressionBlock
-                { block | args = [ id, level, Vector.toString acc.documentIndex ] }
+                { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
         ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             if List.member name_ [ "equation", "aligned" ] then
                 ExpressionBlock
-                    { block | args = level :: Vector.toString acc.headingIndex :: [] }
+                    { block | properties = Dict.insert "label" (Vector.toString acc.headingIndex) block.properties }
 
             else if List.member name_ [ "section" ] then
                 -- TODO: bad code! fix this!!
                 ExpressionBlock
                     { block
-                        | args = (vectorPrefix acc.headingIndex ++ getCounterAsString (reduceName name_) acc.counter) :: []
+                        | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ getCounterAsString (reduceName name_) acc.counter) block.properties
                     }
 
             else
@@ -156,11 +156,7 @@ transformBlock acc (ExpressionBlock block) =
                 in
                 ExpressionBlock
                     { block
-                        | args =
-                            prependAsNew
-                                "label:"
-                                ("label:" ++ vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter)
-                                block.args
+                        | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) block.properties
                     }
                     |> expand acc.textMacroDict
 

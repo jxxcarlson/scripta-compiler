@@ -34,7 +34,7 @@ topPaddingForIndentedElements =
 
 
 render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-render count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
+render count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
     case blockType of
         Paragraph ->
             case content of
@@ -68,12 +68,12 @@ render count acc settings (ExpressionBlock { name, indent, args, blockType, cont
                 Right exprs ->
                     case name of
                         Nothing ->
-                            noSuchOrdinaryBlock count acc settings "name" exprs
+                            noSuchOrdinaryBlock count acc settings block
 
                         Just functionName ->
                             case Dict.get functionName blockDict of
                                 Nothing ->
-                                    env (String.Extra.toTitleCase functionName) count acc settings args id exprs
+                                    env count acc settings block
                                         |> (\x ->
                                                 if indent > 0 then
                                                     Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
@@ -83,7 +83,7 @@ render count acc settings (ExpressionBlock { name, indent, args, blockType, cont
                                            )
 
                                 Just f ->
-                                    f count acc settings args id exprs
+                                    f count acc settings block
                                         |> (\x ->
                                                 if indent > 0 then
                                                     Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
@@ -115,14 +115,14 @@ render count acc settings (ExpressionBlock { name, indent, args, blockType, cont
 -- DICT OF BLOCKS
 
 
-blockDict : Dict String (Int -> Accumulator -> Settings -> List String -> String -> List Expr -> Element MarkupMsg)
+blockDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg)
 blockDict =
     Dict.fromList
         [ ( "indent", indented )
         , ( "quotation", quotation )
-        , ( "set-key", \_ _ _ _ _ _ -> Element.none )
+        , ( "set-key", \_ _ _ _ -> Element.none )
         , ( "comment", comment )
-        , ( "set-key", \_ _ _ _ _ _ -> Element.none )
+        , ( "set-key", \_ _ _ _ -> Element.none )
         , ( "q", question ) -- xx
         , ( "a", answer ) -- xx
         , ( "document", document )
@@ -130,24 +130,26 @@ blockDict =
         , ( "bibitem", bibitem )
         , ( "section", section ) -- xx
         , ( "subheading", subheading ) -- xx
-        , ( "runninghead", \_ _ _ _ _ _ -> Element.none )
+
+        --, ( "runninghead", \_ _ _ _ -> Element.none )
         , ( "runninghead_", runninghead ) -- ??
-        , ( "banner", \_ _ _ _ _ _ -> Element.none )
-        , ( "banner_", banner ) -- ??
-        , ( "title", \_ _ _ _ _ _ -> Element.none )
-        , ( "subtitle", \_ _ _ _ _ _ -> Element.none )
-        , ( "author", \_ _ _ _ _ _ -> Element.none )
-        , ( "date", \_ _ _ _ _ _ -> Element.none )
-        , ( "contents", \_ _ _ _ _ _ -> Element.none )
-        , ( "tags", \_ _ _ _ _ _ -> Element.none )
-        , ( "type", \_ _ _ _ _ _ -> Element.none )
+        , ( "banner", \_ _ _ _ -> Element.none )
+
+        --, ( "banner_", banner ) -- ??
+        , ( "title", \_ _ _ _ -> Element.none )
+        , ( "subtitle", \_ _ _ _ -> Element.none )
+        , ( "author", \_ _ _ _ -> Element.none )
+        , ( "date", \_ _ _ _ -> Element.none )
+        , ( "contents", \_ _ _ _ -> Element.none )
+        , ( "tags", \_ _ _ _ -> Element.none )
+        , ( "type", \_ _ _ _ -> Element.none )
         , ( "env", env_ )
         , ( "item", item )
         , ( "desc", desc )
         , ( "numbered", numbered )
         , ( "index", index )
         , ( "endnotes", endnotes )
-        , ( "setcounter", \_ _ _ _ _ _ -> Element.none )
+        , ( "setcounter", \_ _ _ _ -> Element.none )
         ]
 
 
@@ -186,11 +188,11 @@ noSuchVerbatimBlock functionName content =
         ]
 
 
-noSuchOrdinaryBlock : Int -> Accumulator -> Settings -> String -> List Expr -> Element MarkupMsg
-noSuchOrdinaryBlock count acc settings functionName exprs =
+noSuchOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
     Element.column [ Element.spacing 4 ]
-        [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "| " ++ functionName ++ " ??(9) " ]
-        , Element.paragraph [] (List.map (Render.Elm.render count acc settings) exprs)
+        [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "| " ++ (args |> String.join " ") ++ " ??(9) " ]
+        , Element.paragraph [] (List.map (Render.Elm.render count acc settings) (getExprs block))
         ]
 
 
@@ -221,21 +223,25 @@ renderWithDefault2 _ count acc settings exprs =
 -- HEADINGS
 
 
-subheading count acc settings _ id exprs =
+subheading : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+subheading count acc settings ((ExpressionBlock { id, args }) as block) =
     Element.link
         ([ Font.size 16
          , Font.bold
-         , Render.Utility.makeId exprs
+         , Render.Utility.makeId (getExprs block)
          , Render.Utility.elementAttribute "id" id
          , Events.onClick (SendId "title")
          , Element.paddingEach { top = 10, bottom = 0, left = 0, right = 0 }
          ]
             ++ highlightAttrs id settings
         )
-        { url = Render.Utility.internalLink (settings.titlePrefix ++ "title"), label = Element.paragraph [] (renderWithDefault "| subheading" count acc settings exprs) }
+        { url = Render.Utility.internalLink (settings.titlePrefix ++ "title")
+        , label = Element.paragraph [] (renderWithDefault "| subheading" count acc settings (getExprs block))
+        }
 
 
-section count acc settings args id exprs =
+section : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+section count acc settings ((ExpressionBlock { id, args }) as block) =
     -- level 1 is reserved for titles
     let
         headingLevel =
@@ -259,6 +265,9 @@ section count acc settings args id exprs =
 
         fontSize =
             Render.Settings.maxHeadingFontSize / sqrt headingLevel |> round
+
+        exprs =
+            getExprs block
     in
     Element.link
         ([ Font.size fontSize
@@ -276,9 +285,10 @@ section count acc settings args id exprs =
 -- SCRIPTA
 
 
-runninghead count acc settings _ id exprs =
+runninghead : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+runninghead count acc settings ((ExpressionBlock { id, args }) as block) =
     Element.paragraph ([ Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "| runninghead" count acc settings exprs)
+        (renderWithDefault "| runninghead" count acc settings (getExprs block))
 
 
 banner count acc settings _ id exprs =
@@ -286,11 +296,11 @@ banner count acc settings _ id exprs =
         (renderWithDefault "| banner" count acc settings exprs)
 
 
-collection _ _ _ _ _ _ =
+collection _ _ _ _ =
     Element.none
 
 
-document _ _ settings args selectedId exprs =
+document _ _ settings ((ExpressionBlock { id, args }) as block) =
     let
         docId =
             List.Extra.getAt 0 args |> Maybe.withDefault "--"
@@ -299,7 +309,7 @@ document _ _ settings args selectedId exprs =
             List.Extra.getAt 1 args |> Maybe.withDefault "1" |> String.toInt |> Maybe.withDefault 1
 
         title =
-            List.map ASTTools.getText exprs |> Maybe.Extra.values |> String.join " " |> truncateString 35
+            List.map ASTTools.getText (getExprs block) |> Maybe.Extra.values |> String.join " " |> truncateString 35
 
         sectionNumber =
             case List.Extra.getAt 2 args of
@@ -314,7 +324,7 @@ document _ _ settings args selectedId exprs =
     in
     Element.row
         [ Element.alignTop
-        , Render.Utility.elementAttribute "id" selectedId
+        , Render.Utility.elementAttribute "id" settings.selectedId
         , vspace 0 Render.Settings.topMarginForChildren
         , Element.moveRight (15 * (level - 1) |> toFloat)
         , fontColor settings.selectedId settings.selectedSlug docId
@@ -350,7 +360,7 @@ ilink docTitle selectedId selecteSlug docId =
 -- QUESTIONS AND ANSWERS (FOR TEACHING)
 
 
-question count acc settings args id exprs =
+question count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         title =
             String.join " " (List.drop 1 args)
@@ -361,11 +371,11 @@ question count acc settings args id exprs =
     Element.column [ Element.spacing 12 ]
         [ Element.el [ Font.bold ] (Element.text (title ++ " " ++ label))
         , Element.paragraph ([ Font.italic, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-            (renderWithDefault "..." count acc settings exprs)
+            (renderWithDefault "..." count acc settings (getExprs block))
         ]
 
 
-answer count acc settings args id exprs =
+answer count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         title =
             String.join " " (List.drop 1 args)
@@ -382,7 +392,7 @@ answer count acc settings args id exprs =
         , if settings.selectedId == id then
             Element.el [ Events.onClick (ProposeSolution Render.Msg.Unsolved) ]
                 (Element.paragraph ([ Font.italic, Render.Utility.elementAttribute "id" id, Element.paddingXY 8 8 ] ++ highlightAttrs id settings)
-                    (renderWithDefault "..." count acc settings exprs)
+                    (renderWithDefault "..." count acc settings (getExprs block))
                 )
 
           else
@@ -394,35 +404,51 @@ answer count acc settings args id exprs =
 -- LATEXY STUFF
 
 
-env_ : Int -> Accumulator -> Settings -> List String -> String -> List Expr -> Element MarkupMsg
-env_ count acc settings args id exprs =
+env_ : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id, properties }) as block) =
     case List.head args of
         Nothing ->
             Element.paragraph [ Render.Utility.elementAttribute "id" id, Font.color Render.Settings.redColor, Events.onClick (SendId id) ] [ Element.text "| env (missing name!)" ]
 
-        Just name ->
-            env name count acc settings (List.drop 1 args) id exprs
+        Just _ ->
+            env count acc settings block
 
 
-env : String -> Int -> Accumulator -> Settings -> List String -> String -> List Expr -> Element MarkupMsg
-env name count acc settings args id exprs =
-    let
-        envHeading =
-            name ++ " " ++ labeledArgs args
-    in
-    Element.column ([ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text envHeading)
-        , Element.paragraph [ Font.italic, Events.onClick (SendId id) ]
-            (renderWithDefault2 ("| " ++ name) count acc settings exprs)
-        ]
+env : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+env count acc settings (ExpressionBlock { name, indent, args, blockType, content, id, properties }) =
+    case content of
+        Left str ->
+            Element.none
+
+        Right exprs ->
+            Element.column ([ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+                [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (blockHeading name properties))
+                , Element.paragraph [ Font.italic, Events.onClick (SendId id) ]
+                    (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
+                ]
 
 
-indented count acc settings _ id exprs =
+blockHeading : Maybe String -> Dict String String -> String
+blockHeading name properties =
+    (name |> Maybe.withDefault "(name)") ++ " " ++ (Dict.get "label" properties |> Maybe.withDefault "")
+
+
+indented count acc settings ((ExpressionBlock { id }) as block) =
     Element.paragraph ([ Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "| indent" count acc settings exprs)
+        (renderWithDefault "| indent" count acc settings (getExprs block))
 
 
-comment count acc settings args id exprs =
+getExprs : ExpressionBlock -> List Expr
+getExprs (ExpressionBlock { content }) =
+    case content of
+        Left _ ->
+            []
+
+        Right stuff ->
+            stuff
+
+
+comment count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         author_ =
             String.join " " args
@@ -437,31 +463,20 @@ comment count acc settings args id exprs =
     Element.column [ Element.spacing 6 ]
         [ Element.el [ Font.bold, Font.color Color.blue ] (Element.text author)
         , Element.paragraph ([ Font.italic, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-            (renderWithDefault "| indent" count acc settings exprs)
+            (renderWithDefault "| indent" count acc settings (getExprs block))
         ]
 
 
-quotation count acc settings args id exprs =
-    let
-        attribution_ =
-            argString args
-
-        attribution =
-            if attribution_ == "" then
-                ""
-
-            else
-                "—" ++ attribution_
-    in
+quotation count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     Element.column [ Element.spacing 12 ]
         [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-            (renderWithDefault "| indent" count acc settings exprs)
-        , Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text attribution)
+            (renderWithDefault "| indent" count acc settings (getExprs block))
+        , Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
         ]
 
 
-bibitem : Int -> Accumulator -> Settings -> List String -> String -> List Expr -> Element MarkupMsg
-bibitem count acc settings args id exprs =
+bibitem : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+bibitem count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         label =
             List.Extra.getAt 0 args |> Maybe.withDefault "(12)" |> (\s -> "[" ++ s ++ "]")
@@ -475,7 +490,7 @@ bibitem count acc settings args id exprs =
             ]
             (Element.text label)
         , Element.paragraph ([ Element.paddingEach { left = 25, right = 0, top = 0, bottom = 0 }, Events.onClick (SendId id) ] ++ highlightAttrs id settings)
-            (renderWithDefault "bibitem" count acc settings exprs)
+            (renderWithDefault "bibitem" count acc settings (getExprs block))
         ]
 
 
@@ -611,7 +626,8 @@ renderVerbatim _ _ _ args id str =
 -- LISTS
 
 
-item count acc settings _ id exprs =
+item : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+item count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         level =
             Dict.get id acc.numberedItemDict |> Maybe.map .level |> Maybe.withDefault 0
@@ -637,11 +653,12 @@ item count acc settings _ id exprs =
             ]
             (Element.text label)
         , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
-            (renderWithDefault "| item" count acc settings exprs)
+            (renderWithDefault "| item" count acc settings (getExprs block))
         ]
 
 
-numbered count acc settings _ id exprs =
+numbered : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+numbered count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         alphabet =
             [ "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ]
@@ -684,11 +701,12 @@ numbered count acc settings _ id exprs =
             ]
             (Element.text (label ++ ". "))
         , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
-            (renderWithDefault "| numbered" count acc settings exprs)
+            (renderWithDefault "| numbered" count acc settings (getExprs block))
         ]
 
 
-desc count acc settings args id exprs =
+desc : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+desc count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         label =
             argString args
@@ -696,7 +714,7 @@ desc count acc settings args id exprs =
     Element.row ([ Element.alignTop, Render.Utility.elementAttribute "id" id, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs id settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
         , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
-            (renderWithDefault "| desc" count acc settings exprs)
+            (renderWithDefault "| desc" count acc settings (getExprs block))
         ]
 
 
@@ -705,9 +723,9 @@ argString args =
     List.filter (\arg -> not <| String.contains "label:" arg) args |> String.join " "
 
 
-getLabel : List String -> String
-getLabel args =
-    List.filter (\arg -> String.contains "label:" arg) args |> String.join " "
+getLabel : Dict String String -> String
+getLabel dict =
+    Dict.get "label" dict |> Maybe.withDefault ""
 
 
 labeledArgs : List String -> String
@@ -723,7 +741,8 @@ indentationScale =
 -- INDEX
 
 
-index _ acc _ _ _ _ =
+index : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+index _ acc _ (ExpressionBlock { id, args }) =
     let
         groupItemList : List GroupItem
         groupItemList =
@@ -762,11 +781,10 @@ indexItem_ ( name, loc ) =
 
 
 -- ENDNOTES
---type alias Item =
---    ( String, { begin : Int, end : Int, id : String } )
 
 
-endnotes _ acc _ _ _ _ =
+endnotes : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+endnotes _ acc _ (ExpressionBlock { id, args }) =
     let
         endnoteList =
             acc.footnotes
