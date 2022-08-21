@@ -407,17 +407,8 @@ env_ count acc settings args id exprs =
 env : String -> Int -> Accumulator -> Settings -> List String -> String -> List Expr -> Element MarkupMsg
 env name count acc settings args id exprs =
     let
-        label =
-            args
-                |> List.filter (\s -> String.contains "index::" s)
-                |> String.join ""
-                |> String.replace "index::" ""
-
-        headingString =
-            String.join " " (List.filter (\s -> not (String.contains "::" s)) args)
-
         envHeading =
-            name ++ " " ++ label ++ headingString
+            name ++ " " ++ labeledArgs args
     in
     Element.column ([ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
         [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text envHeading)
@@ -453,7 +444,7 @@ comment count acc settings args id exprs =
 quotation count acc settings args id exprs =
     let
         attribution_ =
-            String.join " " args
+           argString args
 
         attribution =
             if attribution_ == "" then
@@ -699,9 +690,8 @@ numbered count acc settings _ id exprs =
 
 desc count acc settings args id exprs =
     let
-        label : String
-        label =
-            String.join " " args
+
+        label = argString args
     in
     Element.row ([ Element.alignTop, Render.Utility.elementAttribute "id" id, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs id settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
@@ -709,6 +699,17 @@ desc count acc settings args id exprs =
             (renderWithDefault "| desc" count acc settings exprs)
         ]
 
+
+argString : List String -> String
+argString args =
+    List.filter (\arg -> not <| String.contains "label:" arg) args |> String.join " "
+
+getLabel : List String -> String
+getLabel args =
+    List.filter (\arg -> String.contains "label:" arg) args |> String.join " "
+
+labeledArgs : List String -> String
+labeledArgs args = List.map (\s -> String.replace "label:" "" s) args |> String.join " "
 
 indentationScale =
     15

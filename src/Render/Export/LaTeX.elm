@@ -238,8 +238,9 @@ rawExport1 settings ast =
 
 type Status
     = InsideItemizedList
-    | OutsideList
     | InsideNumberedList
+    | InsideDescriptionList
+    | OutsideList
 
 
 encloseLists : Forest ExpressionBlock -> Forest ExpressionBlock
@@ -328,6 +329,39 @@ endNumberedBlock =
         , sourceText = "| endBlock\nitemize"
         }
 
+beginDescriptionBlock : ExpressionBlock
+beginDescriptionBlock =
+    ExpressionBlock
+        { args = []
+        , blockType = OrdinaryBlock [ "beginDescriptionBlock" ]
+        , content = Right [ Text "description" { begin = 0, end = 7, index = 0, id = "begin" } ]
+        , messages = []
+        , id = "0"
+        , tag = ""
+        , indent = 1
+        , lineNumber = 0
+        , name = Just "beginDescriptionBlock"
+        , numberOfLines = 2
+        , sourceText = "| beginBlock\ndescription"
+        }
+
+
+endDescriptionBlock : ExpressionBlock
+endDescriptionBlock =
+    ExpressionBlock
+        { args = []
+        , blockType = OrdinaryBlock [ "endDescriptionBlock" ]
+        , content = Right [ Text "description" { begin = 0, end = 7, index = 0, id = "end" } ]
+        , messages = []
+        , id = "0"
+        , tag = ""
+        , indent = 1
+        , lineNumber = 0
+        , name = Just "endDescriptionBlock"
+        , numberOfLines = 2
+        , sourceText = "| endBlock\ndescription"
+        }
+
 
 nextState : Tree ExpressionBlock -> State -> State
 nextState tree state =
@@ -357,6 +391,17 @@ nextState tree state =
 
         ( InsideNumberedList, _ ) ->
             { state | status = OutsideList, itemNumber = 0, output = tree :: Tree.singleton endNumberedBlock :: state.output, input = List.drop 1 state.input }
+
+
+        -- DESCRIPTION LIST
+        ( OutsideList, Just "desc" ) ->
+            { state | status = InsideDescriptionList, itemNumber = 1, output = tree :: Tree.singleton beginDescriptionBlock :: state.output, input = List.drop 1 state.input }
+
+        ( InsideDescriptionList, Just "desc" ) ->
+            { state | output = tree :: state.output, itemNumber = state.itemNumber + 1, input = List.drop 1 state.input }
+
+        ( InsideDescriptionList, _ ) ->
+            { state | status = OutsideList, itemNumber = 0, output = tree :: Tree.singleton endDescriptionBlock :: state.output, input = List.drop 1 state.input }
 
         --- OUTSIDE
         ( OutsideList, _ ) ->
@@ -542,16 +587,24 @@ blockDict =
         , ( "docinfo", \_ _ _ -> "" )
         , ( "banner", \_ _ _ -> "" )
         , ( "set-key", \_ _ _ -> "" )
+        , ( "endnotes", \_ _ _ -> "" )
+        , ( "index", \_ _ _ -> "Index: not implemented" )
+
 
         --
         , ( "section", \settings_ args body -> section settings_ args body )
         , ( "subheading", \settings_ args body -> subheading settings_ args body )
         , ( "item", \_ _ body -> macro1 "item" body )
+        , ( "descriptionItem", \_ args body -> descriptionItem args body )
         , ( "numbered", \_ _ body -> macro1 "item" body )
+        , ( "desc", \_ args body -> descriptionItem args body )
         , ( "beginBlock", \_ _ _ -> "\\begin{itemize}" )
         , ( "endBlock", \_ _ _ -> "\\end{itemize}" )
         , ( "beginNumberedBlock", \_ _ _ -> "\\begin{enumerate}" )
         , ( "endNumberedBlock", \_ _ _ -> "\\end{enumerate}" )
+        , ( "beginDescriptionBlock", \_ _ _ -> "\\begin{description}" )
+
+        , ( "endDescriptionBlock", \_ _ _ -> "\\end{description}" )
         , ( "mathmacros", \_ _ body -> body ++ "\nHa ha ha!" )
         , ( "setcounter", \_ _ _ -> "" )
         ]
@@ -657,6 +710,21 @@ setcounter args =
 subheading : Settings -> List String -> String -> String
 subheading settings args body =
     "\\subheading{" ++ body ++ "}"
+
+descriptionItem : List String -> String -> String
+descriptionItem args body =
+    let
+        arg = argString args
+    in
+    case args of
+        [] -> "\\item{" ++  body ++ "}"
+        _ ->
+         "\\item[" ++ arg ++ "]{" ++ body ++ "}"
+
+
+argString : List String -> String
+argString args =
+    List.filter (\arg -> not <| String.contains "label:" arg) args |> String.join " "
 
 
 section : Settings -> List String -> String -> String

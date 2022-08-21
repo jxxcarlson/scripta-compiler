@@ -141,12 +141,25 @@ transformBlock acc (ExpressionBlock block) =
             else
                 ExpressionBlock
                     { block
-                        | args = (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) :: []
+                        | args = prependAsNew
+                                    "label:"
+                                    ("label:" ++ vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter)
+                                    block.args
                     }
                     |> expand acc.textMacroDict
 
         _ ->
             expand acc.textMacroDict (ExpressionBlock block)
+
+{-|
+    Remove any items from 'list' if they contain the ssring
+    'alreadyThere', then prepend 'item' to the result
+
+-}
+prependAsNew : String -> String -> List String -> List String
+prependAsNew alreadyThere str list =
+    str :: List.filter (\item -> not <| String.contains alreadyThere item) list
+
 
 
 vectorPrefix : Vector -> String
