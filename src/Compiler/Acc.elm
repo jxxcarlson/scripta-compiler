@@ -66,8 +66,14 @@ transformST lang ast =
     ast |> transformAccumulate lang |> Tuple.second
 
 
+{-| Note that function transformAccumulate operates on initialized accumulator.
+-}
 transformAccumulate : Language -> Forest ExpressionBlock -> ( Accumulator, Forest ExpressionBlock )
 transformAccumulate lang ast =
+    let
+        _ =
+            "1"
+    in
     List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init 4, [] ) ast
         |> (\( acc_, ast_ ) -> ( acc_, List.reverse ast_ ))
 
@@ -130,28 +136,40 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | args = [ id, level, Vector.toString acc.documentIndex ] }
 
-        ( Just name_, _ ) ->
+        ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             if List.member name_ [ "equation", "aligned" ] then
+                ExpressionBlock
+                    { block | args = level :: Vector.toString acc.headingIndex :: [] }
+
+            else if List.member name_ [ "section" ] then
+                -- TODO: bad code! fix this!!
                 ExpressionBlock
                     { block
                         | args = (vectorPrefix acc.headingIndex ++ getCounterAsString (reduceName name_) acc.counter) :: []
                     }
 
             else
+                let
+                    _ =
+                        block.args
+                in
                 ExpressionBlock
                     { block
-                        | args = prependAsNew
-                                    "label:"
-                                    ("label:" ++ vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter)
-                                    block.args
+                        | args =
+                            prependAsNew
+                                "label:"
+                                ("label:" ++ vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter)
+                                block.args
                     }
                     |> expand acc.textMacroDict
 
         _ ->
             expand acc.textMacroDict (ExpressionBlock block)
 
+
 {-|
+
     Remove any items from 'list' if they contain the ssring
     'alreadyThere', then prepend 'item' to the result
 
@@ -159,7 +177,6 @@ transformBlock acc (ExpressionBlock block) =
 prependAsNew : String -> String -> List String -> List String
 prependAsNew alreadyThere str list =
     str :: List.filter (\item -> not <| String.contains alreadyThere item) list
-
 
 
 vectorPrefix : Vector -> String

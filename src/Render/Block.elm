@@ -444,7 +444,7 @@ comment count acc settings args id exprs =
 quotation count acc settings args id exprs =
     let
         attribution_ =
-           argString args
+            argString args
 
         attribution =
             if attribution_ == "" then
@@ -690,8 +690,8 @@ numbered count acc settings _ id exprs =
 
 desc count acc settings args id exprs =
     let
-
-        label = argString args
+        label =
+            argString args
     in
     Element.row ([ Element.alignTop, Render.Utility.elementAttribute "id" id, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs id settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
@@ -704,12 +704,16 @@ argString : List String -> String
 argString args =
     List.filter (\arg -> not <| String.contains "label:" arg) args |> String.join " "
 
+
 getLabel : List String -> String
 getLabel args =
     List.filter (\arg -> String.contains "label:" arg) args |> String.join " "
 
+
 labeledArgs : List String -> String
-labeledArgs args = List.map (\s -> String.replace "label:" "" s) args |> String.join " "
+labeledArgs args =
+    List.map (\s -> String.replace "label:" "" s) args |> String.join " "
+
 
 indentationScale =
     15

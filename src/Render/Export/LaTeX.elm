@@ -329,6 +329,7 @@ endNumberedBlock =
         , sourceText = "| endBlock\nitemize"
         }
 
+
 beginDescriptionBlock : ExpressionBlock
 beginDescriptionBlock =
     ExpressionBlock
@@ -391,7 +392,6 @@ nextState tree state =
 
         ( InsideNumberedList, _ ) ->
             { state | status = OutsideList, itemNumber = 0, output = tree :: Tree.singleton endNumberedBlock :: state.output, input = List.drop 1 state.input }
-
 
         -- DESCRIPTION LIST
         ( OutsideList, Just "desc" ) ->
@@ -590,7 +590,6 @@ blockDict =
         , ( "endnotes", \_ _ _ -> "" )
         , ( "index", \_ _ _ -> "Index: not implemented" )
 
-
         --
         , ( "section", \settings_ args body -> section settings_ args body )
         , ( "subheading", \settings_ args body -> subheading settings_ args body )
@@ -603,7 +602,6 @@ blockDict =
         , ( "beginNumberedBlock", \_ _ _ -> "\\begin{enumerate}" )
         , ( "endNumberedBlock", \_ _ _ -> "\\end{enumerate}" )
         , ( "beginDescriptionBlock", \_ _ _ -> "\\begin{description}" )
-
         , ( "endDescriptionBlock", \_ _ _ -> "\\end{description}" )
         , ( "mathmacros", \_ _ body -> body ++ "\nHa ha ha!" )
         , ( "setcounter", \_ _ _ -> "" )
@@ -711,15 +709,19 @@ subheading : Settings -> List String -> String -> String
 subheading settings args body =
     "\\subheading{" ++ body ++ "}"
 
+
 descriptionItem : List String -> String -> String
 descriptionItem args body =
     let
-        arg = argString args
+        arg =
+            argString args
     in
     case args of
-        [] -> "\\item{" ++  body ++ "}"
+        [] ->
+            "\\item{" ++ body ++ "}"
+
         _ ->
-         "\\item[" ++ arg ++ "]{" ++ body ++ "}"
+            "\\item[" ++ arg ++ "]{" ++ body ++ "}"
 
 
 argString : List String -> String
