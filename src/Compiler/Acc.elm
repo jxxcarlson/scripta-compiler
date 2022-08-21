@@ -136,13 +136,20 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
+        ( Just "equation", _) ->
+                    -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+            ExpressionBlock
+                { block | properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt (Dict.get "block" acc.counter |> Maybe.withDefault 1)) block.properties } |> Debug.log "!!SEC NO (EQU)"
+
+        ( Just "aligned", _) ->
+                        -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
+                ExpressionBlock
+                    { block |properties = Dict.insert "label" ((Vector.toString acc.headingIndex) ++ "." ++ String.fromInt acc.blockCounter) block.properties } |> Debug.log "!!SEC NO (ALIGNED)"
+
+
         ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
-            if List.member name_ [ "equation", "aligned" ] then
-                ExpressionBlock
-                    { block | properties = Dict.insert "label" (Vector.toString acc.headingIndex) block.properties }
-
-            else if List.member name_ [ "section" ] then
+            if List.member name_ [ "section" ] then
                 -- TODO: bad code! fix this!!
                 ExpressionBlock
                     { block

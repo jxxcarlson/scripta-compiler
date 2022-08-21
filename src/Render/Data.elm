@@ -5,10 +5,12 @@ import Chart.Attributes as CA
 import Chart.Svg exposing (Axis)
 import Compiler.Acc exposing (Accumulator)
 import Dict
+import Either exposing (Either(..))
 import Element exposing (Element)
 import Element.Font as Font
 import List.Extra
 import Maybe.Extra
+import Parser.Block exposing (ExpressionBlock(..))
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Utility
@@ -38,8 +40,9 @@ fontWidth =
     10
 
 
-chart : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-chart count acc settings args id str =
+
+chart : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+chart count acc settings (ExpressionBlock {id, args} as block)  =
     let
         options : Options
         options =
@@ -55,7 +58,7 @@ chart count acc settings args id str =
 
         data : Maybe ChartData
         data =
-            csvToChartData options str
+            csvToChartData options (getVerbatimContent block)
     in
     Element.column [ Element.width (Element.px settings.width), Element.paddingEach { left = 48, right = 0, top = 36, bottom = 72 }, Element.spacing 24 ]
         [ Element.el [ Element.width (Element.px settings.width) ]
@@ -456,8 +459,15 @@ getRange str =
             Nothing
 
 
-table : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-table _ _ _ args _ str =
+
+getVerbatimContent : ExpressionBlock -> String
+getVerbatimContent (ExpressionBlock {content}) =
+    case content of
+        Left  str -> str
+        Right _ -> ""
+
+table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+table count acc settings (ExpressionBlock {id, args} as block) =
     let
         argString =
             String.join " " args
@@ -486,7 +496,7 @@ table _ _ _ args _ str =
                 |> List.map (\n -> n - 1)
 
         lines =
-            String.split "\n" str
+            String.split "\n" (getVerbatimContent block)
 
         rawCells : List (List String)
         rawCells =

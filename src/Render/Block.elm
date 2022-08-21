@@ -108,7 +108,7 @@ render count acc settings ((ExpressionBlock { name, indent, args, blockType, con
                                     noSuchVerbatimBlock functionName str
 
                                 Just f ->
-                                    f count acc settings args id str
+                                    f count acc settings block
 
 
 
@@ -153,7 +153,7 @@ blockDict =
         ]
 
 
-verbatimDict : Dict String (Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg)
+verbatimDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg)
 verbatimDict =
     Dict.fromList
         [ ( "math", Render.Math.displayedMath )
@@ -171,8 +171,8 @@ verbatimDict =
         , ( "svg", Render.Graphics.svg )
         , ( "quiver", Render.Graphics.quiver )
         , ( "tikz", Render.Graphics.tikz )
-        , ( "load-files", \_ _ _ _ _ _ -> Element.none )
-        , ( "include", \_ _ _ _ _ _ -> Element.none )
+        , ( "load-files", renderNothing  )
+         , ( "include", renderNothing  )
         ]
 
 
@@ -196,8 +196,9 @@ noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
         ]
 
 
-renderNothing : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderNothing _ _ _ _ _ _ =
+
+renderNothing : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderNothing _ _ _ _ =
     Element.none
 
 
@@ -508,12 +509,9 @@ highlightAttrs id settings =
 -- VERBATIM
 
 
-renderCode : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderCode _ _ _ args id str =
-    let
-        _ =
-            List.head args
-    in
+
+renderCode : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderCode count acc settings (ExpressionBlock {id, args} as block) =
     Element.column
         [ Font.color Render.Settings.codeColor
         , Font.family
@@ -528,20 +526,22 @@ renderCode _ _ _ args id str =
         ]
         (case List.head args of
             Just arg ->
-                List.map (renderVerbatimLine arg) (String.lines (String.trim str))
+                List.map (renderVerbatimLine arg) (String.lines (String.trim (getVerbatimContent block)))
 
             Nothing ->
-                List.map (renderVerbatimLine "plain") (String.lines (String.trim str))
+                List.map (renderVerbatimLine "plain") (String.lines (String.trim (getVerbatimContent block)))
         )
 
 
-renderVerse : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderVerse _ _ _ _ id str =
+
+
+renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderVerse _ _ _ (ExpressionBlock {id} as block) =
     Element.column
         [ Events.onClick (SendId id)
         , Render.Utility.elementAttribute "id" id
         ]
-        (List.map (renderVerbatimLine "plain") (String.lines (String.trim str)))
+        (List.map (renderVerbatimLine "plain") (String.lines (String.trim (getVerbatimContent block))))
 
 
 renderVerbatimLine : String -> String -> Element msg
@@ -599,8 +599,9 @@ elmDict =
         ]
 
 
-renderVerbatim : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-renderVerbatim _ _ _ args id str =
+
+renderVerbatim : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderVerbatim _ _ _ (ExpressionBlock {id, args} as block) =
     let
         _ =
             List.head args
@@ -617,10 +618,10 @@ renderVerbatim _ _ _ args id str =
         ]
         (case List.head args of
             Just lang ->
-                List.map (renderVerbatimLine lang) (String.lines (String.trim str))
+                List.map (renderVerbatimLine lang) (String.lines (String.trim (getVerbatimContent block)))
 
             _ ->
-                List.map (renderVerbatimLine "none") (String.lines (String.trim str))
+                List.map (renderVerbatimLine "none") (String.lines (String.trim (getVerbatimContent block)))
         )
 
 
@@ -706,6 +707,12 @@ numbered count acc settings ((ExpressionBlock { id, args }) as block) =
             (renderWithDefault "| numbered" count acc settings (getExprs block))
         ]
 
+
+getVerbatimContent : ExpressionBlock -> String
+getVerbatimContent (ExpressionBlock {content}) =
+    case content of
+        Left  str -> str
+        Right _ -> ""
 
 desc : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 desc count acc settings ((ExpressionBlock { id, args }) as block) =

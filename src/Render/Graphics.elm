@@ -3,8 +3,10 @@ module Render.Graphics exposing (image, quiver, svg, tikz)
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
 import Dict
+import Either exposing (Either(..))
 import Element exposing (Element, alignLeft, alignRight, centerX, column, el, px, rgb255, spacing)
 import Element.Font as Font
+import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Render.Msg exposing (MarkupMsg)
 import Render.Settings exposing (Settings)
@@ -45,9 +47,15 @@ image settings body =
         }
 
 
-svg : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-svg _ _ settings _ _ str =
-    case SvgParser.parse str of
+getVerbatimContent : ExpressionBlock -> String
+getVerbatimContent (ExpressionBlock {content}) =
+    case content of
+        Left  str -> str
+        Right _ -> ""
+
+svg : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+svg ount acc settings (ExpressionBlock {id, args} as block) =
+    case SvgParser.parse (getVerbatimContent block) of
         Ok html_ ->
             Element.column
                 [ Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 }
@@ -60,13 +68,14 @@ svg _ _ settings _ _ str =
             Element.el [] (Element.text "SVG parse error")
 
 
+
 {-| Create elements from HTML markup. On parsing error, output no elements.
 -}
-tikz : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-tikz _ _ settings _ _ str =
+tikz : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+tikz count acc settings (ExpressionBlock {id, args} as block) =
     let
         maybePair =
-            case String.split "---" str of
+            case String.split "---" (getVerbatimContent block) of
                 a :: b :: [] ->
                     Just ( a, b )
 
@@ -89,16 +98,16 @@ tikz _ _ settings _ _ str =
                 ]
 
 
-quiver : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-quiver _ _ settings arguments _ str =
+quiver :Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+quiver _ _ settings (ExpressionBlock {id, args} as block) =
     let
         -- arguments: ["width:250","caption:Fig","1"]
-        args : { caption : Element msg, description : String, placement : Element.Attribute a, width : Element.Length }
-        args =
-            parameters settings arguments
+        qArgs : { caption : Element msg, description : String, placement : Element.Attribute a, width : Element.Length }
+        qArgs =
+            parameters settings args
 
         maybePair =
-            case String.split "---" str of
+            case String.split "---" (getVerbatimContent block) of
                 a :: b :: [] ->
                     Just ( a, b )
 
@@ -115,9 +124,9 @@ quiver _ _ settings arguments _ str =
                     String.words imageData |> imageParameters settings
             in
             Element.column [ Element.spacing 8, Element.width (Element.px settings.width), params.placement, Element.paddingXY 0 18 ]
-                [ Element.image [ Element.width args.width, params.placement ]
+                [ Element.image [ Element.width qArgs.width, params.placement ]
                     { src = params.url, description = params.description }
-                , Element.el [ params.placement ] args.caption
+                , Element.el [ params.placement ] qArgs.caption
                 ]
 
 

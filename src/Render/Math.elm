@@ -11,10 +11,13 @@ import Element exposing (Element)
 import Element.Background as Background
 import Element.Events as Events
 import Element.Font as Font
+import Either exposing(Either(..))
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Keyed
+import Dict exposing(Dict)
 import Json.Encode
+import Parser.Block exposing (ExpressionBlock(..))
 import Parser.MathMacro
 import Parser.TextMacro
 import Render.Msg exposing (MarkupMsg(..))
@@ -31,15 +34,17 @@ type DisplayMode
 -- MATH
 
 
-displayedMath : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-displayedMath count acc settings _ id str =
+displayedMath : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+displayedMath count acc settings (ExpressionBlock {id} as block) =
     let
         w =
             String.fromInt settings.width ++ "px"
 
+
+
         filteredLines =
             -- lines of math text to be rendered: filter stuff out
-            String.lines str
+            String.lines (getContent block)
                 |> List.filter (\line -> not (String.left 2 (String.trim line) == "$$"))
                 |> List.filter (\line -> not (String.left 6 line == "[label"))
                 |> List.filter (\line -> line /= "")
@@ -56,15 +61,24 @@ displayedMath count acc settings _ id str =
         [ mathText count w id DisplayMathMode (adjustedLines |> String.join "\n") ]
 
 
-equation : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-equation count acc settings args id str =
+getContent : ExpressionBlock -> String
+getContent (ExpressionBlock {content}) =
+    case content of
+        Left  str -> str
+        Right _ -> ""
+
+
+
+
+equation : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+equation count acc settings (ExpressionBlock {id, args, properties} as block)  =
     let
         w =
             String.fromInt settings.width ++ "px"
 
         filteredLines =
             -- lines of math text to be rendered: filter stuff out
-            String.lines str
+            String.lines (getContent block)
                 |> List.filter (\line -> not (String.left 2 line == "$$") && not (String.left 6 line == "[label") && not (line == "end"))
 
         adjustedLines1 =
@@ -107,19 +121,22 @@ equation count acc settings args id str =
     in
     Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
         [ Element.el attrs2 (mathText count w id DisplayMathMode content)
-        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ Render.Utility.getArg "(??)" 0 args ++ ")")
+        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel properties ++ ")")
         ]
 
+getLabel : Dict String String -> String
+getLabel dict =
+    Dict.get "label" dict |> Maybe.withDefault ""
 
-aligned : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
-aligned count acc settings args id str =
+
+aligned :  Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+aligned count acc settings (ExpressionBlock {id, args, properties} as block) =
     Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
-        [ Element.el [ Element.centerX ] (aligned_ count acc settings args id str)
-        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ Render.Utility.getArg "??(11)" 0 args ++ ")")
+        [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
+        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel properties ++ ")")
         ]
 
 
-aligned_ : Int -> Accumulator -> Settings -> List String -> String -> String -> Element MarkupMsg
 aligned_ count acc settings _ id str =
     let
         w =
