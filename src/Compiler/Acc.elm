@@ -504,7 +504,7 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
                 |> updateReference tag id (String.fromInt (Vector.get level itemVector))
 
         Just name_ ->
-            if List.member name_ [ "title", "contents", "banner" ] then
+            if List.member name_ [ "title", "contents", "banner", "a" ] then
                 accumulator
 
             else

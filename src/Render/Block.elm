@@ -357,16 +357,16 @@ ilink docTitle selectedId selecteSlug docId =
 -- QUESTIONS AND ANSWERS (FOR TEACHING)
 
 
-question count acc settings ((ExpressionBlock { id, args }) as block) =
+question count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         title =
-            String.join " " (List.drop 1 args)
+            String.join " "  args
 
         label =
-            List.take 1 args |> String.join ""
+             " " ++ getLabel properties
     in
     Element.column [ Element.spacing 12 ]
-        [ Element.el [ Font.bold ] (Element.text (title ++ " " ++ label))
+        [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (title ++ " " ++ label))
         , Element.paragraph ([ Font.italic, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "..." count acc settings (getExprs block))
         ]
@@ -374,6 +374,7 @@ question count acc settings ((ExpressionBlock { id, args }) as block) =
 
 answer count acc settings ((ExpressionBlock { id, args }) as block) =
     let
+        _ = Debug.log "!! ANSWER ID, ARGS" (id, args)
         title =
             String.join " " (List.drop 1 args)
 
@@ -393,7 +394,9 @@ answer count acc settings ((ExpressionBlock { id, args }) as block) =
                 )
 
           else
-            Element.none
+             (Element.paragraph ([ Font.italic, Font.color (Element.rgb 0.5 0.5 0.5), Render.Utility.elementAttribute "id" id, Element.paddingXY 8 8 ] ++ highlightAttrs id settings)
+                (renderWithDefault "..." count acc settings (getExprs block)))
+
         ]
 
 
