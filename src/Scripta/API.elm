@@ -83,6 +83,7 @@ import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Regex
+import Render.Block
 import Render.Export.LaTeX
 import Render.Markup
 import Render.Msg exposing (MarkupMsg)
@@ -185,12 +186,20 @@ render displaySettings editRecord =
         settings =
             renderSettings displaySettings
     in
-    Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.parsed :: renderBody displaySettings.counter settings editRecord
+    banner displaySettings editRecord :: Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.parsed :: renderBody displaySettings.counter settings editRecord
 
 
 renderBody : Int -> Render.Settings.Settings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
 renderBody count settings editRecord =
     Render.Markup.renderFromAST count editRecord.accumulator settings (body editRecord)
+
+
+banner : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> Element MarkupMsg
+banner displaySettings editRecord =
+    ASTTools.banner editRecord.parsed
+        |> Maybe.map (Parser.Block.setName "banner_")
+        |> Maybe.map (Render.Block.render displaySettings.counter editRecord.accumulator (renderSettings displaySettings))
+        |> Maybe.withDefault Element.none
 
 
 

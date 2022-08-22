@@ -97,13 +97,6 @@ prepareTOC maximumLevel count acc settings ast =
         headings =
             getHeadings ast
 
-        banner : Element MarkupMsg
-        banner =
-            Compiler.ASTTools.banner ast
-                |> Maybe.map (Parser.Block.setName "banner_")
-                |> Maybe.map (Render.Block.render count acc settings)
-                |> Maybe.withDefault Element.none
-
         titleSize =
             Font.size (round Render.Settings.maxHeadingFontSize)
 
@@ -125,10 +118,10 @@ prepareTOC maximumLevel count acc settings ast =
             Element.el [ Element.paddingEach { bottom = k, top = 0, left = 0, right = 0 } ] (Element.text " ")
     in
     if List.length rawToc < 2 then
-        banner :: title :: subtitle :: []
+        title :: subtitle :: []
 
     else
-        banner :: title :: subtitle :: spaceBelow 8 :: toc
+        title :: subtitle :: spaceBelow 8 :: toc
 
 
 prepareFrontMatter : Int -> Accumulator -> Render.Settings.Settings -> Forest ExpressionBlock -> List (Element MarkupMsg)

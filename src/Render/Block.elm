@@ -400,7 +400,6 @@ answer count acc settings ((ExpressionBlock { id, args }) as block) =
 
           else
             Element.none
-
         ]
 
 
