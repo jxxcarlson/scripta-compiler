@@ -470,6 +470,12 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                         Just "code" ->
                             str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
 
+                        Just "verbatim" ->
+                            str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
+
+                        Just "verse" ->
+                            str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
+
                         Just "mathmacros" ->
                             str
 
@@ -526,9 +532,6 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                             in
                             [ "\\[\n", data, "\n\\]" ]
                                 |> String.join ""
-
-                        Just "hide" ->
-                            ""
 
                         Just "docinfo" ->
                             ""

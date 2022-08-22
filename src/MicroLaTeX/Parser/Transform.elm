@@ -84,28 +84,6 @@ handlePseudoBlockWithContent block macroName macroExpr =
                     }
 
 
-
---Just (Macro macroName args) ->
---    let
---        _ =
---            Debug.log "!!! macroName" macroName
---
---        realArgs =
---            List.map Parser.MathMacro.getArgs args |> List.concat |> Debug.log "!!! realArgs"
---
---        mainContent =
---            List.map Parser.MathMacro.getArgs args |> List.concat |> Debug.log "!!! mainContent"
---    in
---    case Dict.get macroName sectionDict of
---        Nothing ->
---            { block | content = ("| " ++ macroName) :: mainContent, name = Just name, args = realArgs, blockType = PBOrdinary }
---
---        Just val ->
---            { block | content = ("| section " ++ val) :: mainContent, args = val :: [], name = Just "section", blockType = PBOrdinary }
---_ ->
---    block
-
-
 normalize : List String -> List String
 normalize list =
     case list of
