@@ -135,7 +135,7 @@ blockDict =
         , ( "runninghead_", runninghead ) -- ??
         , ( "banner", \_ _ _ _ -> Element.none )
 
-        --, ( "banner_", banner ) -- ??
+        --, ( "banner_", \_ _ _ _ -> Element.none ) -- ??
         , ( "title", \_ _ _ _ -> Element.none )
         , ( "subtitle", \_ _ _ _ -> Element.none )
         , ( "author", \_ _ _ _ -> Element.none )
@@ -427,11 +427,15 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
 
 blockHeading : Maybe String -> List String -> Dict String String -> String
 blockHeading name args properties =
-    (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase)
-      ++ " "
-      ++ (Dict.get "label" properties |> Maybe.withDefault "?")
-      ++ " "
-      ++ String.join " " args
+    if List.member name [ Just "banner_", Just "banner" ] then
+        ""
+
+    else
+        (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase)
+            ++ " "
+            ++ (Dict.get "label" properties |> Maybe.withDefault "?")
+            ++ " "
+            ++ String.join " " args
 
 
 blockLabel : Dict String String -> String
