@@ -167,7 +167,8 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "equation" equationProp block.properties }
 
-        ( Just name_, level :: [] ) ->
+        ( Just name_, _ ) ->
+        -- ( Just name_, level :: [] ) ->
             -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             if List.member name_ [ "section" ] then
                 let
@@ -187,10 +188,6 @@ transformBlock acc (ExpressionBlock block) =
                     }
 
             else
-                let
-                    _ =
-                        block.args
-                in
                 ExpressionBlock
                     { block
                         | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) block.properties
@@ -291,7 +288,7 @@ e.g, "2" or "2.3"
 updateReference : String -> String -> String -> Accumulator -> Accumulator
 updateReference tag_ id_ numRef_ acc =
     if tag_ /= "" then
-        { acc | reference = Dict.insert tag_ { id = id_, numRef = numRef_ } acc.reference |> Debug.log "!! UREF"}
+        { acc | reference = Dict.insert tag_ { id = id_, numRef = numRef_ } acc.reference}
 
     else
         acc
@@ -507,11 +504,12 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
                 |> updateReference tag id (String.fromInt (Vector.get level itemVector))
 
         Just name_ ->
-            if name_ == "title" then
+            if List.member name_ ["title", "contents"] then
                 accumulator
 
             else
-                { accumulator | blockCounter = accumulator.blockCounter + 1 } |> updateReference tag id tag
+                { accumulator | blockCounter = accumulator.blockCounter + 1 }
+                   |> updateReference tag id tag
 
         _ ->
             accumulator
