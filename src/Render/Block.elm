@@ -360,21 +360,26 @@ ilink docTitle selectedId selecteSlug docId =
 question count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         title =
-            String.join " "  args
+            String.join " " args
 
         label =
-             " " ++ getLabel properties
+            " " ++ getLabel properties
+
+        qId =
+            Dict.get id acc.qAndADict |> Maybe.withDefault id
     in
     Element.column [ Element.spacing 12 ]
-        [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (title ++ " " ++ label))
-        , Element.paragraph ([ Font.italic, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+        [ Element.el [ Font.bold, Events.onClick (HighlightId qId) ] (Element.text (title ++ " " ++ label))
+        , Element.paragraph ([ Font.italic, Events.onClick (HighlightId qId), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "..." count acc settings (getExprs block))
         ]
 
 
 answer count acc settings ((ExpressionBlock { id, args }) as block) =
     let
-        _ = Debug.log "!! ANSWER ID, ARGS" (id, args)
+        _ =
+            ( id, args )
+
         title =
             String.join " " (List.drop 1 args)
 
@@ -394,8 +399,7 @@ answer count acc settings ((ExpressionBlock { id, args }) as block) =
                 )
 
           else
-             (Element.paragraph ([ Font.italic, Font.color (Element.rgb 0.5 0.5 0.5), Render.Utility.elementAttribute "id" id, Element.paddingXY 8 8 ] ++ highlightAttrs id settings)
-                (renderWithDefault "..." count acc settings (getExprs block)))
+            Element.none
 
         ]
 

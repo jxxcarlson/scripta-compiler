@@ -43,6 +43,8 @@ type alias Accumulator =
     , mathMacroDict : Parser.MathMacro.MathMacroDict
     , textMacroDict : Dict String Macro
     , keyValueDict : Dict String String
+    , qAndAList : List ( String, String )
+    , qAndADict : Dict String String
     }
 
 
@@ -95,6 +97,8 @@ init k =
     , mathMacroDict = Dict.empty
     , textMacroDict = Dict.empty
     , keyValueDict = Dict.empty
+    , qAndAList = []
+    , qAndADict = Dict.empty
     }
 
 
@@ -299,6 +303,24 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
     -- Update the accumulator for expression blocks with selected name
     case ( name, blockType ) of
         -- provide numbering for sections
+        ( Just "q", _ ) ->
+            { accumulator
+                | qAndAList = ( id, "??" ) :: accumulator.qAndAList
+                , blockCounter = accumulator.blockCounter + 1
+            }
+                |> updateReference tag id tag
+
+        ( Just "a", _ ) ->
+            case List.Extra.uncons accumulator.qAndAList of
+                Just ( ( q, _ ), rest ) ->
+                    { accumulator
+                        | qAndAList = ( q, id ) :: rest
+                        , qAndADict = Dict.fromList (( q, id ) :: rest)
+                    }
+
+                _ ->
+                    accumulator
+
         ( Just "set-key", OrdinaryBlock _ ) ->
             case args of
                 key :: value :: rest ->
