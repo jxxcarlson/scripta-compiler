@@ -478,10 +478,32 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
 
                         Just "quiver" ->
                             let
-                                data =
+                                lines =
                                     String.split "---" str
                                         |> List.drop 1
-                                        |> String.join ""
+                                        |> String.join "\n"
+                                        |> String.lines
+                                        |> List.filter (\line -> line /= "")
+
+                                line1 =
+                                    List.head lines |> Maybe.withDefault "%%" |> String.trim
+
+                                line1b =
+                                    if String.contains "\\hide{" line1 then
+                                        -- preserve comment with quiver url
+                                        line1 |> String.replace "\\hide{" "" |> String.dropRight 1 |> (\x -> "%% " ++ x)
+
+                                    else
+                                        line1
+
+                                data =
+                                    lines
+                                        |> List.drop 1
+                                        -- now normalize the data
+                                        |> List.filter (\line -> not <| String.contains "\\[\\begin{tikzcd}" line)
+                                        |> List.filter (\line -> not <| String.contains "\\end{tikzcd}\\]" line)
+                                        |> (\x -> line1b :: "\\[\\begin{tikzcd}" :: x ++ [ "\\end{tikzcd}\\]" ])
+                                        |> String.join "\n"
                             in
                             data
 
