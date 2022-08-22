@@ -9,7 +9,6 @@ numberedBlockNames =
     , "lemma"
     , "proposition"
     , "corollary"
-    , "definition"
     , "note"
     , "remark"
     , "question"

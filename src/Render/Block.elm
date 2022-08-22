@@ -414,20 +414,24 @@ env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, conte
 env : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 env count acc settings (ExpressionBlock { name, indent, args, blockType, content, id, properties }) =
     case content of
-        Left str ->
+        Left _ ->
             Element.none
 
         Right exprs ->
             Element.column ([ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-                [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (blockHeading name properties))
+                [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (blockHeading name args properties))
                 , Element.paragraph [ Font.italic, Events.onClick (SendId id) ]
                     (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
                 ]
 
 
-blockHeading : Maybe String -> Dict String String -> String
-blockHeading name properties =
-    (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase) ++ " " ++ (Dict.get "label" properties |> Maybe.withDefault "")
+blockHeading : Maybe String -> List String -> Dict String String -> String
+blockHeading name args properties =
+    (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase)
+      ++ " "
+      ++ (Dict.get "label" properties |> Maybe.withDefault "?")
+      ++ " "
+      ++ String.join " " args
 
 
 blockLabel : Dict String String -> String

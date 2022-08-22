@@ -291,7 +291,7 @@ e.g, "2" or "2.3"
 updateReference : String -> String -> String -> Accumulator -> Accumulator
 updateReference tag_ id_ numRef_ acc =
     if tag_ /= "" then
-        { acc | reference = Dict.insert tag_ { id = id_, numRef = numRef_ } acc.reference }
+        { acc | reference = Dict.insert tag_ { id = id_, numRef = numRef_ } acc.reference |> Debug.log "!! UREF"}
 
     else
         acc
@@ -336,7 +336,7 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
 
         ( Just name_, OrdinaryBlock _ ) ->
             -- TODO: tighten up
-            updateWitOrdinaryBlock accumulator (Just name_) content tag id indent
+            updateWithOrdinaryBlock accumulator (Just name_) content tag id indent
 
         -- provide for numbering of equations
         ( Just "mathmacros", VerbatimBlock [] ) ->
@@ -355,7 +355,7 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
             updateWithVerbatimBlock accumulator name tag id
 
         ( Nothing, Paragraph ) ->
-            updateWithParagraph accumulator Nothing content id
+            updateWithParagraph accumulator Nothing content tag id
 
         _ ->
             -- TODO: take care of numberedItemIndex
@@ -438,8 +438,8 @@ updateBibItemBlock accumulator args id =
             { accumulator | reference = Dict.insert label { id = id, numRef = "_irrelevant_" } accumulator.reference }
 
 
-updateWitOrdinaryBlock : Accumulator -> Maybe String -> Either b (List Expr) -> String -> String -> Int -> Accumulator
-updateWitOrdinaryBlock accumulator name content tag id indent =
+updateWithOrdinaryBlock : Accumulator -> Maybe String -> Either b (List Expr) -> String -> String -> Int -> Accumulator
+updateWithOrdinaryBlock accumulator name content tag id indent =
     let
         ( inList, initialNumberedVector ) =
             listData accumulator name
@@ -573,7 +573,7 @@ verbatimBlockReference headingIndex name newCounter =
         a ++ "." ++ (getCounter (reduceName name) newCounter |> String.fromInt)
 
 
-updateWithParagraph accumulator name content id =
+updateWithParagraph accumulator name content tag id =
     let
         ( inList, _ ) =
             listData accumulator name
@@ -586,7 +586,7 @@ updateWithParagraph accumulator name content id =
         , terms = addTermsFromContent id content accumulator.terms
         , footnotes = footnotes
         , footnoteNumbers = footnoteNumbers
-    }
+    } |> updateReference tag id tag
 
 
 type alias TermLoc =
