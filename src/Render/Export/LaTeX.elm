@@ -515,20 +515,17 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
 
                         Just "tikz" ->
                             let
+                                renderedAsLaTeX =
+                                    String.contains "\\hide{" str
+
                                 data =
                                     String.split "---" str
                                         |> List.drop 1
                                         |> String.join ""
                                         |> String.lines
-                                        |> List.map
-                                            (\line ->
-                                                if line == "" then
-                                                    "%"
-
-                                                else
-                                                    line
-                                            )
+                                        |> List.map (hideToPercentComment >> commentBlankLine)
                                         |> String.join "\n"
+                                        |> addTikzPictureClosing renderedAsLaTeX
                             in
                             [ "\\[\n", data, "\n\\]" ]
                                 |> String.join ""
@@ -541,6 +538,32 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
 
                 Right _ ->
                     "???(13)"
+
+
+addTikzPictureClosing flagUp str =
+    if flagUp then
+        str ++ "\n\\end{tikzpicture}"
+
+    else
+        str
+
+
+commentBlankLine : String -> String
+commentBlankLine line =
+    if line == "" then
+        "%"
+
+    else
+        line
+
+
+hideToPercentComment : String -> String
+hideToPercentComment str =
+    if String.left 6 str == "\\hide{" then
+        str |> String.dropLeft 6 |> String.dropRight 1 |> (\s -> "%% " ++ s)
+
+    else
+        str
 
 
 fixChars str =

@@ -127,7 +127,7 @@ nextState2 line (MyMacro name args) state =
         -- HANDLE ``` BLOCK, INTERIOR
         { state | output = line :: state.output } |> fakeDebugLog state.i "(3.1)"
 
-    else if name == "begin" && List.member firstArg [ "code", "equation", "aligned", "verse", "verbatim", "hide" ] then
+    else if name == "begin" && List.member firstArg [ "code", "equation", "aligned", "verse", "verbatim", "hide", "tikz" ] then
         -- HANDLE VERBATIM BLOCKS (CODE, EQUATION, ALIGNED), BEGIN
         -- ADDED 6/21/2022: Parser.Cond.getLeadingBlanks line ++
         { state | output = (Parser.Utility.getLeadingBlanks line ++ "|| " ++ firstArg) :: state.output, status = InVerbatimBlock firstArg, stack = InVerbatimBlock firstArg :: state.stack } |> fakeDebugLog state.i "(1)"
