@@ -119,7 +119,7 @@ markupDict =
         , ( "image", \_ _ s exprList -> Render.Graphics.image s exprList )
         , ( "tags", \_ _ _ _ -> Element.none )
         , ( "vspace", vspace )
-        , ( "syspar", syspar )
+        , ( "par", par )
 
         -- MiniLaTeX stuff
         , ( "term", \g acc s exprList -> term g acc s exprList )
@@ -369,8 +369,8 @@ vspace _ _ _ exprList =
     Element.column [ Element.height (Element.px h) ] [ Element.text "" ]
 
 
-syspar _ _ _ _ =
-    Element.column [ Element.height (Element.px 10) ] [ Element.text "" ]
+par _ _ _ _ =
+    Element.column [ Element.height (Element.px 15) ] [ Element.text "" ]
 
 
 strong g acc s exprList =
