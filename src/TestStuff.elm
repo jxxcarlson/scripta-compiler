@@ -1,4 +1,14 @@
-module TestStuff exposing (quiver)
+module TestStuff exposing (quiver, xx)
+
+
+xx =
+    """
+\\begin{theorem}
+abc def
+
+  ghi jkl
+\\end{theorem}
+"""
 
 
 quiver =

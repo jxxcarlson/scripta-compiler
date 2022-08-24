@@ -170,10 +170,10 @@ exportTree settings tree =
                 Nothing ->
                     ""
 
-                Just ( lastLine, precedingLines ) ->
+                Just ( lastLine, firstLines ) ->
                     let
                         _ =
-                            precedingLines
+                            firstLines
 
                         _ =
                             renderedChildren
@@ -181,8 +181,7 @@ exportTree settings tree =
                         _ =
                             lastLine
                     in
-                    -- precedingLines ++ renderedChildren ++ [ lastLine ] |> String.join "\n"
-                    lastLine :: "\\begin{indent}" :: renderedChildren ++ [ "\\end{indent}" ] |> String.join "\n"
+                    firstLines ++ renderedChildren ++ [ lastLine ] |> String.join "\n"
 
 
 rawExport : Settings -> List (Tree ExpressionBlock) -> String
@@ -218,7 +217,6 @@ rawExport1 settings ast =
 
 
 
---
 --unravel : Tree (Element MarkupMsg) -> Element MarkupMsg
 --unravel tree =
 --    let
