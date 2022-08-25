@@ -1,4 +1,4 @@
-module Render.Graphics exposing (image, quiver, svg, tikz)
+module Render.Graphics exposing (image, image2, quiver, svg, tikz)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
@@ -43,6 +43,41 @@ image settings body =
     in
     Element.newTabLink []
         { url = params.url
+        , label = inner
+        }
+
+
+image2 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
+    let
+        label =
+            case params.caption of
+                "" ->
+                    "Figure " ++ getFigureLabel properties
+
+                _ ->
+                    "Figure " ++ getFigureLabel properties ++ ". " ++ params.caption
+
+        url =
+            case content of
+                Left str ->
+                    str
+
+                Right _ ->
+                    "bad block"
+
+        params =
+            parameters settings args
+
+        inner =
+            column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 18 ]
+                [ Element.image [ Element.width params.width, params.placement ]
+                    { src = url, description = params.description }
+                , el [ params.placement ] (Element.text label)
+                ]
+    in
+    Element.newTabLink []
+        { url = url
         , label = inner
         }
 
@@ -107,7 +142,7 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
         -- arguments: ["width:250","caption:Fig","1"]
         qArgs : { caption : String, description : String, placement : Element.Attribute a, width : Element.Length }
         qArgs =
-            parameters2 settings args
+            parameters settings args
 
         maybePair =
             case String.split "---" (getVerbatimContent block) of
@@ -225,83 +260,7 @@ imageParameters settings arguments =
     { caption = caption, description = description, placement = placement, width = width, url = url }
 
 
-
--- parameters : Render.Settings.Settings -> List String -> ImageParameters msg
-
-
 parameters settings arguments =
-    let
-        keyValueStrings_ =
-            List.filter (\s -> String.contains ":" s) arguments
-
-        keyValueStrings : List String
-        keyValueStrings =
-            List.filter (\s -> not (String.contains "caption" s)) keyValueStrings_
-
-        captionLeadString =
-            List.filter (\s -> String.contains "caption" s) keyValueStrings_
-                |> String.join ""
-                |> String.replace "caption:" ""
-
-        captionPhrase =
-            (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) arguments) |> String.join " "
-
-        dict =
-            Render.Utility.keyValueDict keyValueStrings
-
-        description : String
-        description =
-            Dict.get "caption" dict |> Maybe.withDefault ""
-
-        caption : Element msg
-        caption =
-            if captionPhrase == "" then
-                Element.none
-
-            else
-                Element.row [ placement, Element.width Element.fill ] [ el [ Element.width Element.fill ] (Element.text captionPhrase) ]
-
-        displayWidth =
-            settings.width
-
-        width : Element.Length
-        width =
-            case Dict.get "width" dict of
-                Nothing ->
-                    px displayWidth
-
-                Just "fill" ->
-                    Element.fill
-
-                Just w_ ->
-                    case String.toInt w_ of
-                        Nothing ->
-                            px displayWidth
-
-                        Just w ->
-                            px w
-
-        placement =
-            case Dict.get "placement" dict of
-                Nothing ->
-                    centerX
-
-                Just "left" ->
-                    alignLeft
-
-                Just "right" ->
-                    alignRight
-
-                Just "center" ->
-                    centerX
-
-                _ ->
-                    centerX
-    in
-    { caption = caption, description = description, placement = placement, width = width }
-
-
-parameters2 settings arguments =
     let
         keyValueStrings_ =
             List.filter (\s -> String.contains ":" s) arguments

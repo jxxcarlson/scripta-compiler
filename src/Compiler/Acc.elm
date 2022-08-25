@@ -132,6 +132,10 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (Vector.toString acc.headingIndex ++ getCounterAsString "figure" acc.counter) block.properties }
 
+        ( Just "image", _ ) ->
+            ExpressionBlock
+                { block | properties = Dict.insert "figure" (Vector.toString acc.headingIndex ++ getCounterAsString "figure" acc.counter) block.properties }
+
         ( Just "section", level :: "-" :: [] ) ->
             ExpressionBlock
                 { block | args = level :: "-" :: [] }

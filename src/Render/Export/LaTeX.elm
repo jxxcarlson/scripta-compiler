@@ -483,6 +483,10 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                         Just "textmacros" ->
                             Compiler.TextMacro.exportTexMacros str
 
+                        Just "image" ->
+                            -- todo: ???
+                            str
+
                         Just "quiver" ->
                             let
                                 lines =

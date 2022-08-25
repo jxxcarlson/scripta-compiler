@@ -170,6 +170,7 @@ verbatimDict =
         , ( "chart", Render.Data.chart )
         , ( "svg", Render.Graphics.svg )
         , ( "quiver", Render.Graphics.quiver )
+        , ( "image", Render.Graphics.image2 )
         , ( "tikz", Render.Graphics.tikz )
         , ( "load-files", renderNothing )
         , ( "include", renderNothing )
