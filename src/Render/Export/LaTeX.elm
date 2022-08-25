@@ -413,7 +413,7 @@ nextState tree state =
 
 
 exportBlock : Settings -> ExpressionBlock -> String
-exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
+exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as block) =
     case blockType of
         Paragraph ->
             case content of
@@ -484,8 +484,7 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                             Compiler.TextMacro.exportTexMacros str
 
                         Just "image" ->
-                            -- todo: ???
-                            str
+                            Render.Export.Image.exportBlock settings block
 
                         Just "quiver" ->
                             let

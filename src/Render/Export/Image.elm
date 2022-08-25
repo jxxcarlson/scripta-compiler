@@ -1,15 +1,25 @@
-module Render.Export.Image exposing (export)
+module Render.Export.Image exposing (export, exportBlock)
 
 import Compiler.ASTTools
 import Dict
+import Either exposing (Either(..))
+import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Render.Export.Util
 import Render.Settings exposing (Settings)
 import Render.Utility
 
 
+exportBlock : Settings -> ExpressionBlock -> String
+exportBlock settings ((ExpressionBlock { content, args }) as block) =
+    let
+        params =
+            imageParameters2 settings block
 
--- width=4truein,keepaspectratio]
+        options =
+            [ params.fractionalWidth, ",keepaspectratio" ] |> String.join ""
+    in
+    exportCenteredFigure params.url options params.caption
 
 
 export : Settings -> List Expr -> String
@@ -99,18 +109,18 @@ imageParameters settings body =
         width =
             case Dict.get "width" dict of
                 Nothing ->
-                    rescale displayWidth
+                    rescale displayWidth displayWidth
 
                 Just "fill" ->
-                    rescale displayWidth
+                    rescale displayWidth displayWidth
 
                 Just w_ ->
                     case String.toInt w_ of
                         Nothing ->
-                            rescale displayWidth
+                            rescale displayWidth displayWidth
 
                         Just w ->
-                            rescale w
+                            rescale displayWidth w
 
         fractionalWidth : String
         fractionalWidth =
@@ -149,15 +159,114 @@ imageParameters settings body =
     { caption = caption, description = description, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
 
 
-rescale : Int -> String
-rescale k =
-    (toFloat k * (8.0 / 800.0) |> String.fromFloat) ++ "truein"
+imageParameters2 : Render.Settings.Settings -> ExpressionBlock -> ImageParameters
+imageParameters2 settings (ExpressionBlock { content, args }) =
+    let
+        arguments : List String
+        arguments =
+            args
+
+        url =
+            case content of
+                Left str ->
+                    String.replace "https://" "" str
+
+                Right _ ->
+                    "bad block"
+
+        _ =
+            url
+
+        remainingArguments =
+            List.drop 1 arguments
+
+        keyValueStrings_ =
+            List.filter (\s -> String.contains ":" s) remainingArguments
+
+        keyValueStrings : List String
+        keyValueStrings =
+            List.filter (\s -> not (String.contains "caption" s)) keyValueStrings_
+
+        captionLeadString =
+            List.filter (\s -> String.contains "caption" s) keyValueStrings_
+                |> String.join ""
+                |> String.replace "caption:" ""
+
+        caption =
+            (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) remainingArguments) |> String.join " "
+
+        dict =
+            Render.Utility.keyValueDict keyValueStrings
+
+        description =
+            Dict.get "caption" dict |> Maybe.withDefault ""
+
+        displayWidth =
+            settings.width
+
+        width : String
+        width =
+            case Dict.get "width" dict of
+                Nothing ->
+                    rescale displayWidth displayWidth
+
+                Just "fill" ->
+                    rescale displayWidth displayWidth
+
+                Just w_ ->
+                    case String.toInt w_ of
+                        Nothing ->
+                            rescale displayWidth displayWidth
+
+                        Just w ->
+                            rescale displayWidth w
+
+        fractionalWidth : String
+        fractionalWidth =
+            case Dict.get "width" dict of
+                Nothing ->
+                    "0.51\\textwidth"
+
+                Just "fill" ->
+                    fractionaRescale displayWidth
+
+                Just w_ ->
+                    case String.toInt w_ of
+                        Nothing ->
+                            fractionaRescale displayWidth
+
+                        Just w ->
+                            fractionaRescale w
+
+        placement =
+            case Dict.get "placement" dict of
+                Nothing ->
+                    "C"
+
+                Just "left" ->
+                    "L"
+
+                Just "right" ->
+                    "R"
+
+                Just "center" ->
+                    "C"
+
+                _ ->
+                    "C"
+    in
+    { caption = caption, description = description, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
+
+
+rescale : Int -> Int -> String
+rescale displayWidth k =
+    (toFloat k * (8.0 / toFloat displayWidth) |> String.fromFloat) ++ "truein"
 
 
 fractionaRescale : Int -> String
 fractionaRescale k =
     let
         f =
-            (toFloat k / 800.0) |> String.fromFloat
+            (toFloat k / 600.0) |> String.fromFloat
     in
     [ f, "\\textwidth" ] |> String.join ""

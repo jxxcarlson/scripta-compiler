@@ -260,6 +260,7 @@ imageParameters settings arguments =
     { caption = caption, description = description, placement = placement, width = width, url = url }
 
 
+parameters : Settings -> List String -> { caption : String, description : String, placement : Element.Attribute msg, width : Element.Length }
 parameters settings arguments =
     let
         keyValueStrings_ =
