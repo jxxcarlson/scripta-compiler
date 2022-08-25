@@ -474,6 +474,9 @@ exportBlock settings (ExpressionBlock { blockType, name, args, content }) =
                         Just "verse" ->
                             str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
 
+                        Just "load-files" ->
+                            ""
+
                         Just "mathmacros" ->
                             str
 

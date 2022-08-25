@@ -128,6 +128,10 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "label" (Vector.toString acc.headingIndex) block.properties }
 
+        ( Just "quiver", _ ) ->
+            ExpressionBlock
+                { block | properties = Dict.insert "figure" (Vector.toString acc.headingIndex ++ getCounterAsString "figure" acc.counter) block.properties }
+
         ( Just "section", level :: "-" :: [] ) ->
             ExpressionBlock
                 { block | args = level :: "-" :: [] }
@@ -230,6 +234,9 @@ reduceName : String -> String
 reduceName str =
     if List.member str [ "equation", "aligned" ] then
         "equation"
+
+    else if List.member str [ "quiver", "image" ] then
+        "figure"
 
     else
         str

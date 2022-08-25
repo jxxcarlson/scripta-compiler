@@ -2,7 +2,7 @@ module Render.Graphics exposing (image, quiver, svg, tikz)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
-import Dict
+import Dict exposing (Dict)
 import Either exposing (Either(..))
 import Element exposing (Element, alignLeft, alignRight, centerX, column, el, px, rgb255, spacing)
 import Element.Font as Font
@@ -102,12 +102,12 @@ tikz count acc settings ((ExpressionBlock { id, args }) as block) =
 
 
 quiver : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-quiver _ _ settings ((ExpressionBlock { id, args }) as block) =
+quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         -- arguments: ["width:250","caption:Fig","1"]
-        qArgs : { caption : Element msg, description : String, placement : Element.Attribute a, width : Element.Length }
+        qArgs : { caption : String, description : String, placement : Element.Attribute a, width : Element.Length }
         qArgs =
-            parameters settings args
+            parameters2 settings args
 
         maybePair =
             case String.split "---" (getVerbatimContent block) of
@@ -125,11 +125,19 @@ quiver _ _ settings ((ExpressionBlock { id, args }) as block) =
             let
                 params =
                     String.words imageData |> imageParameters settings
+
+                desc =
+                    case qArgs.caption of
+                        "" ->
+                            "Figure " ++ getFigureLabel properties
+
+                        _ ->
+                            "Figure " ++ getFigureLabel properties ++ ". " ++ qArgs.caption
             in
             Element.column [ Element.spacing 8, Element.width (Element.px settings.width), params.placement, Element.paddingXY 0 18 ]
                 [ Element.image [ Element.width qArgs.width, params.placement ]
-                    { src = params.url, description = params.description }
-                , Element.el [ params.placement ] qArgs.caption
+                    { src = params.url, description = desc }
+                , Element.el [ params.placement ] (Element.text desc)
                 ]
 
 
@@ -291,3 +299,72 @@ parameters settings arguments =
                     centerX
     in
     { caption = caption, description = description, placement = placement, width = width }
+
+
+parameters2 settings arguments =
+    let
+        keyValueStrings_ =
+            List.filter (\s -> String.contains ":" s) arguments
+
+        keyValueStrings : List String
+        keyValueStrings =
+            List.filter (\s -> not (String.contains "caption" s)) keyValueStrings_
+
+        captionLeadString =
+            List.filter (\s -> String.contains "caption" s) keyValueStrings_
+                |> String.join ""
+                |> String.replace "caption:" ""
+
+        captionPhrase =
+            (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) arguments) |> String.join " "
+
+        dict =
+            Render.Utility.keyValueDict keyValueStrings
+
+        description : String
+        description =
+            Dict.get "caption" dict |> Maybe.withDefault ""
+
+        displayWidth =
+            settings.width
+
+        width : Element.Length
+        width =
+            case Dict.get "width" dict of
+                Nothing ->
+                    px displayWidth
+
+                Just "fill" ->
+                    Element.fill
+
+                Just w_ ->
+                    case String.toInt w_ of
+                        Nothing ->
+                            px displayWidth
+
+                        Just w ->
+                            px w
+
+        placement =
+            case Dict.get "placement" dict of
+                Nothing ->
+                    centerX
+
+                Just "left" ->
+                    alignLeft
+
+                Just "right" ->
+                    alignRight
+
+                Just "center" ->
+                    centerX
+
+                _ ->
+                    centerX
+    in
+    { caption = captionPhrase, description = description, placement = placement, width = width }
+
+
+getFigureLabel : Dict String String -> String
+getFigureLabel dict =
+    Dict.get "figure" dict |> Maybe.withDefault ""

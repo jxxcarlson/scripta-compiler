@@ -16,6 +16,8 @@ numberedBlockNames =
     , "example"
     , "equation"
     , "aligned"
+    , "quiver"
+    , "image"
     ]
 
 
