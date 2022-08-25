@@ -129,26 +129,10 @@ transformBlock acc (ExpressionBlock block) =
                 { block | properties = Dict.insert "label" (Vector.toString acc.headingIndex) block.properties }
 
         ( Just "quiver", _ ) ->
-            --let
-            --    figureProp =
-            --        if Vector.toString acc.headingIndex == "" then
-            --            getCounterAsString "figure" acc.counter
-            --
-            --        else
-            --            Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "figure" acc.counter
-            --in
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
 
         ( Just "image", _ ) ->
-            --let
-            --    figureProp =
-            --        if Vector.toString acc.headingIndex == "" then
-            --            getCounterAsString "figure" acc.counter
-            --
-            --        else
-            --            Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "figure" acc.counter
-            --in
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
 
