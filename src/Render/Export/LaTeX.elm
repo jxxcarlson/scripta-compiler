@@ -930,7 +930,9 @@ renderVerbatim name body =
             name ++ "(" ++ body ++ ") — unimplemented "
 
         Just f ->
-            -- body |> fixChars |> (\x -> "\\code{" ++ x  ++ "}")
+          if List.member name ["equation", "aligned", "math"] then
+            body |> f
+         else
             body |> fixChars |> f
 
 
