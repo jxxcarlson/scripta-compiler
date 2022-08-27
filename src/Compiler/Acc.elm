@@ -19,6 +19,7 @@ import Parser.Forest exposing (Forest)
 import Parser.MathMacro
 import Parser.Meta exposing (Meta)
 import Parser.Settings
+import Render.Utility
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 
@@ -382,7 +383,7 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
 
         ( Just _, VerbatimBlock _ ) ->
             -- TODO: tighten up
-            updateWithVerbatimBlock accumulator name tag id
+            updateWithVerbatimBlock accumulator name args tag id
 
         ( Nothing, Paragraph ) ->
             updateWithParagraph accumulator Nothing content tag id
@@ -568,36 +569,53 @@ updateWithMathMacros accumulator content =
     { accumulator | mathMacroDict = mathMacroDict }
 
 
-updateWithVerbatimBlock accumulator name_ tag id =
+updateWithVerbatimBlock accumulator name_ args tag_ id =
     let
+        _ =
+            ( name_, tag, id )
+
         ( inList, _ ) =
             listData accumulator name_
 
         name =
             Maybe.withDefault "---" name_
 
+        dict =
+            Render.Utility.keyValueDict args
+
+        tag =
+            Dict.get "label" dict |> Maybe.withDefault tag_
+
+        isSimple =
+            List.member name [ "quiver", "image" ]
+
         -- Increment the appropriate counter, e.g., "equation" and "aligned"
         -- reduceName maps these both to "equation"
         newCounter =
             if List.member name accumulator.numberedBlockNames then
-                -- TODO: is this the right change?
-                -- incrementCounter (reduceName name) accumulator.counter
                 incrementCounter (reduceName name) accumulator.counter
 
             else
                 accumulator.counter
+
+        _ =
+            if isSimple then
+                id
+
+            else
+                " "
     in
     { accumulator | inList = inList, counter = newCounter }
-        -- Update the references dictionary
-        |> updateReference tag id (verbatimBlockReference accumulator.headingIndex name newCounter)
+        |> updateReference tag id (verbatimBlockReference isSimple accumulator.headingIndex name newCounter)
 
 
-verbatimBlockReference headingIndex name newCounter =
+verbatimBlockReference : Bool -> Vector -> String -> Dict String Int -> String
+verbatimBlockReference isSimple headingIndex name newCounter =
     let
         a =
             Vector.toString headingIndex
     in
-    if a == "" then
+    if a == "" || isSimple then
         getCounter (reduceName name) newCounter |> String.fromInt
 
     else

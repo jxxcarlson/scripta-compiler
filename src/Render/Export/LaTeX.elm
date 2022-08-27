@@ -452,6 +452,7 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                                         |> String.lines
                                         |> List.filter (\line -> String.left 2 line /= "$$")
                                         |> String.join "\n"
+                                        |> Compiler.Util.transformLabel
                             in
                             -- TODO: This should be fixed upstream
                             [ "$$", fix_ str, "$$" ] |> String.join "\n"
@@ -459,11 +460,11 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                         Just "equation" ->
                             -- TODO: there should be a trailing "$$"
                             -- TODO: equation numbers and label
-                            [ "\\begin{equation}", str, "\\end{equation}" ] |> String.join "\n"
+                            [ "\\begin{equation}", str |> Compiler.Util.transformLabel, "\\end{equation}" ] |> String.join "\n"
 
                         Just "aligned" ->
                             -- TODO: equation numbers and label
-                            [ "\\begin{align}", str, "\\end{align}" ] |> String.join "\n"
+                            [ "\\begin{align}", str |> Compiler.Util.transformLabel, "\\end{align}" ] |> String.join "\n"
 
                         Just "code" ->
                             str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
@@ -931,9 +932,9 @@ renderVerbatim name body =
 
         Just f ->
           if List.member name ["equation", "aligned", "math"] then
-            body |> f
+            body |> Compiler.Util.transformLabel |> f
          else
-            body |> fixChars |> f
+            body |> fixChars |> Compiler.Util.transformLabel |> f
 
 
 

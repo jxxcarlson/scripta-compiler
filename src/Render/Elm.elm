@@ -516,7 +516,6 @@ ref acc exprList =
         id =
             ref_ |> Maybe.map .id |> Maybe.withDefault ""
     in
-    -- Element.el [ Font.color (Element.rgb 0 0 0.7) ] (Element.text val)
     Element.link
         [ Font.color (Element.rgb 0 0 0.7)
         , Font.bold
@@ -570,7 +569,11 @@ eqref : Accumulator -> List Expr -> Element MarkupMsg
 eqref acc exprList =
     let
         key =
-            List.map ASTTools.getText exprList |> Maybe.Extra.values |> String.join "" |> String.trim
+            List.map ASTTools.getText exprList
+                |> Maybe.Extra.values
+                |> String.join ""
+                |> String.trim
+                |> String.replace "label:" ""
 
         ref_ =
             Dict.get key acc.reference
@@ -580,6 +583,9 @@ eqref acc exprList =
 
         id =
             ref_ |> Maybe.map .id |> Maybe.withDefault ""
+
+        _ =
+            Debug.log "!!(KEY, ID)"
     in
     Element.link
         [ Font.color (Element.rgb 0 0 0.7)

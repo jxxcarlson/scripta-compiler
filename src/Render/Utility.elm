@@ -53,6 +53,8 @@ makeSlug str =
     str |> String.toLower |> String.replace " " ""
 
 
+
+
 keyValueDict : List String -> Dict String String
 keyValueDict strings_ =
     List.map (String.split ":") strings_

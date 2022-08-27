@@ -69,9 +69,10 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         params =
             parameters settings args
 
+
         inner =
             column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 18 ]
-                [ Element.image [ Element.width params.width, params.placement ]
+                [ Element.image [ Element.width params.width, params.placement, Render.Utility.elementAttribute "id" id ]
                     { src = url, description = params.description }
                 , el [ params.placement ] (Element.text label)
                 ]
@@ -169,7 +170,7 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
                         _ ->
                             "Figure " ++ getFigureLabel properties ++ ". " ++ qArgs.caption
             in
-            Element.column [ Element.spacing 8, Element.width (Element.px settings.width), params.placement, Element.paddingXY 0 18 ]
+            Element.column [ Element.spacing 8, Element.width (Element.px settings.width), params.placement, Element.paddingXY 0 18, Render.Utility.elementAttribute "id" id ]
                 [ Element.image [ Element.width qArgs.width, params.placement ]
                     { src = params.url, description = desc }
                 , Element.el [ params.placement ] (Element.text desc)

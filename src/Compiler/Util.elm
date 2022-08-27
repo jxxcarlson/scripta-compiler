@@ -14,6 +14,7 @@ module Compiler.Util exposing
     , normalizedWord
     , removeNonAlphaNum
     , size
+    , transformLabel
     )
 
 import Parser exposing ((|.), (|=), Parser, Step(..), loop, map, oneOf, spaces, succeed)
@@ -58,9 +59,16 @@ userReplace userRegex replacer string =
             Regex.replace regex replacer string
 
 
+transformLabel : String -> String
+transformLabel str =
+   let
+       normalize m  = m |> List.map (Maybe.withDefault "") |> String.join "" |> String.trim
+   in
+   userReplace "\\[label(.*)\\]" (\m -> ("\\label{" ++ (m.submatches |> normalize)  ++ "}")) str
+
 compressWhitespace : String -> String
 compressWhitespace string =
-    userReplace "\\s\\s+" (\_ -> " ") string
+    userReplace "\\s\\s+" (\m -> " ") string
 
 
 removeNonAlphaNum : String -> String
