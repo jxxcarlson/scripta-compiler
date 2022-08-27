@@ -1,7 +1,7 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, prepareContentForExport, getImageUrls, Settings
+    , fileNameForExport, prepareContentForExport, getImageUrls, getBlockNames, Settings
     , Msg, SyntaxTree
     )
 
@@ -76,8 +76,9 @@ import Compiler.AbstractDifferentialParser
 import Compiler.Acc
 import Compiler.DifferentialParser
 import Dict exposing (Dict)
-import Either
+import Either exposing (Either(..))
 import Element exposing (..)
+import List.Extra
 import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
@@ -247,6 +248,10 @@ prepareContentForExport currentTime settings syntaxTree =
 {-| -}
 getImageUrls : Forest ExpressionBlock -> List String
 getImageUrls syntaxTree =
+    getImageUrls1 syntaxTree ++ getImageUrls2 syntaxTree |> List.sort |> List.Extra.unique
+
+getImageUrls1 : Forest ExpressionBlock -> List String
+getImageUrls1 syntaxTree =
     syntaxTree
         |> List.map Tree.flatten
         |> List.concat
@@ -258,6 +263,28 @@ getImageUrls syntaxTree =
         |> List.map (Maybe.andThen extractUrl)
         |> Maybe.Extra.values
 
+getImageUrls2 : Forest ExpressionBlock -> List String
+getImageUrls2 syntaxTree =
+    syntaxTree
+        |> List.map Tree.flatten
+        |> List.concat
+        |> ASTTools.filterBlocksOnName "image"
+        |> List.map verbatimContent
+        |> Maybe.Extra.values
+
+verbatimContent : ExpressionBlock -> Maybe String
+verbatimContent (ExpressionBlock { content }) =
+     case content of
+         Left str -> Just str
+         Right _ -> Nothing
+
+getBlockNames  : Forest ExpressionBlock -> List String
+getBlockNames syntaxTree =
+    syntaxTree
+        |> List.map Tree.flatten
+        |> List.concat
+        |> List.map  Parser.Block.getName
+        |> Maybe.Extra.values
 
 extractUrl : String -> Maybe String
 extractUrl str =
