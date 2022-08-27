@@ -8,7 +8,7 @@ import Element exposing (Element, alignLeft, alignRight, centerX, column, el, px
 import Element.Font as Font
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
-import Render.Msg exposing (MarkupMsg)
+import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Utility
 import SvgParser
@@ -70,10 +70,18 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
             parameters settings args
 
         inner =
-            column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 18 ]
-                [ Element.image [ Element.width params.width, params.placement, Render.Utility.elementAttribute "id" id ]
+            column
+                ([ spacing 8
+                 , Element.width (px settings.width)
+                 , params.placement
+                 , Element.paddingXY 0 18
+
+                 ]
+                    ++ Render.Utility.highlightElement id settings.selectedId
+                )
+                [ Element.image [ Element.width params.width, params.placement ]
                     { src = url, description = params.description }
-                , el [ params.placement ] (Element.text label)
+                , el [ params.placement,  Render.Utility.elementAttribute "id" id ] (Element.text label)
                 ]
     in
     Element.newTabLink []
@@ -169,10 +177,16 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
                         _ ->
                             "Figure " ++ getFigureLabel properties ++ ". " ++ qArgs.caption
             in
-            Element.column [ Element.spacing 8, Element.width (Element.px settings.width), params.placement, Element.paddingXY 0 18, Render.Utility.elementAttribute "id" id ]
+            Element.column
+                ([ Element.spacing 8
+                 , Element.width (Element.px settings.width)
+
+                 ]
+                    ++ Render.Utility.highlightElement id settings.selectedId
+                )
                 [ Element.image [ Element.width qArgs.width, params.placement ]
                     { src = params.url, description = desc }
-                , Element.el [ params.placement ] (Element.text desc)
+                , Element.el [ params.placement, params.placement, Element.paddingXY 0 18 , Render.Utility.elementAttribute "id" id ] (Element.text desc)
                 ]
 
 

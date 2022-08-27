@@ -557,7 +557,8 @@ reflink acc exprList =
     in
     Element.link
         [ Font.color (Element.rgb 0 0 0.7)
-        , Events.onClick (SendId id)
+
+        -- , Events.onClick (SendId id)
         , Events.onClick (SelectId id)
         ]
         { url = Utility.internalLink id

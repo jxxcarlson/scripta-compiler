@@ -1,6 +1,7 @@
 module Render.Utility exposing
     ( elementAttribute
     , getArg
+    , highlightElement
     , hspace
     , internalLink
     , keyValueDict
@@ -11,10 +12,13 @@ module Render.Utility exposing
 import Compiler.ASTTools
 import Dict exposing (Dict)
 import Element exposing (paddingEach)
+import Element.Background as Background
+import Element.Events as Events
 import Html.Attributes
 import List.Extra
 import Maybe.Extra
 import Parser.Expr
+import Render.Msg exposing (MarkupMsg(..))
 
 
 getArg : String -> Int -> List String -> String
@@ -75,3 +79,15 @@ pairFromList strings =
 elementAttribute : String -> String -> Element.Attribute msg
 elementAttribute key value =
     Element.htmlAttribute (Html.Attributes.attribute key value)
+
+
+highlightElement id selectedId =
+    if id == selectedId then
+        [ Events.onClick (SendId id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+
+    else
+        [ Events.onClick (SendId id), leftPadding ]
+
+
+leftPadding =
+    Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
