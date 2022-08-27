@@ -931,10 +931,11 @@ renderVerbatim name body =
             name ++ "(" ++ body ++ ") — unimplemented "
 
         Just f ->
-          if List.member name ["equation", "aligned", "math"] then
-            body |> Compiler.Util.transformLabel |> f
-         else
-            body |> fixChars |> Compiler.Util.transformLabel |> f
+            if List.member name [ "equation", "aligned", "math" ] then
+                body |> Compiler.Util.transformLabel |> f
+
+            else
+                body |> fixChars |> Compiler.Util.transformLabel |> f
 
 
 

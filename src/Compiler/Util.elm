@@ -61,10 +61,12 @@ userReplace userRegex replacer string =
 
 transformLabel : String -> String
 transformLabel str =
-   let
-       normalize m  = m |> List.map (Maybe.withDefault "") |> String.join "" |> String.trim
-   in
-   userReplace "\\[label(.*)\\]" (\m -> ("\\label{" ++ (m.submatches |> normalize)  ++ "}")) str
+    let
+        normalize m =
+            m |> List.map (Maybe.withDefault "") |> String.join "" |> String.trim
+    in
+    userReplace "\\[label(.*)\\]" (\m -> "\\label{" ++ (m.submatches |> normalize) ++ "}") str
+
 
 compressWhitespace : String -> String
 compressWhitespace string =

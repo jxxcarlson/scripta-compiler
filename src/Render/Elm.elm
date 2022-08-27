@@ -583,9 +583,6 @@ eqref acc exprList =
 
         id =
             ref_ |> Maybe.map .id |> Maybe.withDefault ""
-
-        _ =
-            Debug.log "!!(KEY, ID)"
     in
     Element.link
         [ Font.color (Element.rgb 0 0 0.7)

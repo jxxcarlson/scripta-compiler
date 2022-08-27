@@ -1,8 +1,9 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, prepareContentForExport, getImageUrls, getBlockNames, Settings
+    , fileNameForExport, prepareContentForExport, getImageUrls, Settings
     , Msg, SyntaxTree
+    , getBlockNames
     )
 
 {-| Scripta.API provides the functions you will need for an application
@@ -250,6 +251,7 @@ getImageUrls : Forest ExpressionBlock -> List String
 getImageUrls syntaxTree =
     getImageUrls1 syntaxTree ++ getImageUrls2 syntaxTree |> List.sort |> List.Extra.unique
 
+
 getImageUrls1 : Forest ExpressionBlock -> List String
 getImageUrls1 syntaxTree =
     syntaxTree
@@ -263,6 +265,7 @@ getImageUrls1 syntaxTree =
         |> List.map (Maybe.andThen extractUrl)
         |> Maybe.Extra.values
 
+
 getImageUrls2 : Forest ExpressionBlock -> List String
 getImageUrls2 syntaxTree =
     syntaxTree
@@ -272,19 +275,25 @@ getImageUrls2 syntaxTree =
         |> List.map verbatimContent
         |> Maybe.Extra.values
 
+
 verbatimContent : ExpressionBlock -> Maybe String
 verbatimContent (ExpressionBlock { content }) =
-     case content of
-         Left str -> Just str
-         Right _ -> Nothing
+    case content of
+        Left str ->
+            Just str
 
-getBlockNames  : Forest ExpressionBlock -> List String
+        Right _ ->
+            Nothing
+
+
+getBlockNames : Forest ExpressionBlock -> List String
 getBlockNames syntaxTree =
     syntaxTree
         |> List.map Tree.flatten
         |> List.concat
-        |> List.map  Parser.Block.getName
+        |> List.map Parser.Block.getName
         |> Maybe.Extra.values
+
 
 extractUrl : String -> Maybe String
 extractUrl str =

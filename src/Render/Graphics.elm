@@ -69,7 +69,6 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         params =
             parameters settings args
 
-
         inner =
             column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 18 ]
                 [ Element.image [ Element.width params.width, params.placement, Render.Utility.elementAttribute "id" id ]
