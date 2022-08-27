@@ -71,17 +71,18 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
 
         inner =
             column
-                ([ spacing 8
-                 , Element.width (px settings.width)
-                 , params.placement
-                 , Element.paddingXY 0 18
-
-                 ]
-                    ++ Render.Utility.highlightElement id settings.selectedId
-                )
+                [ spacing 8
+                , Element.width (px settings.width)
+                , params.placement
+                , Element.paddingXY 0 18
+                ]
                 [ Element.image [ Element.width params.width, params.placement ]
                     { src = url, description = params.description }
-                , el [ params.placement,  Render.Utility.elementAttribute "id" id ] (Element.text label)
+                , el
+                    ([ params.placement, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
+                        ++ Render.Utility.highlightElement id settings.selectedId
+                    )
+                    (Element.text label)
                 ]
     in
     Element.newTabLink []
@@ -178,15 +179,16 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
                             "Figure " ++ getFigureLabel properties ++ ". " ++ qArgs.caption
             in
             Element.column
-                ([ Element.spacing 8
-                 , Element.width (Element.px settings.width)
-
-                 ]
-                    ++ Render.Utility.highlightElement id settings.selectedId
-                )
+                [ Element.spacing 8
+                , Element.width (Element.px settings.width)
+                ]
                 [ Element.image [ Element.width qArgs.width, params.placement ]
                     { src = params.url, description = desc }
-                , Element.el [ params.placement, params.placement, Element.paddingXY 0 18 , Render.Utility.elementAttribute "id" id ] (Element.text desc)
+                , Element.el
+                    ([ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
+                        ++ Render.Utility.highlightElement id settings.selectedId
+                    )
+                    (Element.text desc)
                 ]
 
 
