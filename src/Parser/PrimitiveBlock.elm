@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , parse_
+    , parse_, eq
     )
 
 {-| The main function is
@@ -16,6 +16,8 @@ import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..), isEmpty, isNonEmptyBlank)
 import Scripta.Language exposing (Language(..))
 
+eq : PrimitiveBlock -> PrimitiveBlock -> Bool
+eq b1 b2 = b1.content == b2.content
 
 {-| -}
 type alias PrimitiveBlock =
