@@ -1,41 +1,57 @@
-module Compiler.AbstractDifferentialParser exposing (EditRecord, differentialParser, init, update)
+module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions, differentialParser, init, update)
 
-import Compiler.Differ as Differ
+import Compiler.DifferEq
+import Compiler.Differ
 import Scripta.Language exposing (Language)
+import Tree exposing (Tree)
 
 
 type alias EditRecord chunk parsedChunk accumulator =
     { chunks : List chunk
     , parsed : List parsedChunk
+    , tree : List (Tree parsedChunk)
     , accumulator : accumulator
     , lang : Language
     , messages : List String
     , includedFiles : List String
     }
 
+type alias UpdateFunctions chunk parsedChunk acc =
+    {  chunker : String -> List chunk
+     , chunkEq : chunk -> chunk -> Bool
+     , chunkParser : chunk -> parsedChunk
+     , forestFromBlocks : List parsedChunk -> List (Tree parsedChunk)
+     , getMessages : List (Tree parsedChunk) -> List String
+     , accMaker : Scripta.Language.Language -> List (Tree parsedChunk) -> (acc, List (Tree parsedChunk))
+    }
 
 init :
     Language
-    -> (String -> List chunk)
-    -> (Language -> List chunk -> ( acc, List parsedChunk ))
-    -> (List parsedChunk -> List String)
+    -> UpdateFunctions chunk parsedChunk acc
     -> String
     -> EditRecord chunk parsedChunk acc
-init lang chunker accMaker getMessages text =
+init lang f text =
     let
         chunks =
-            chunker text
+            f.chunker text
 
-        ( newAccumulator, parsed ) =
-            accMaker lang chunks
+        parsed_ = List.map f.chunkParser chunks
+
+        tree_ = f.forestFromBlocks parsed_
+
+        ( newAccumulator, tree ) =
+            f.accMaker lang tree_
     in
     { lang = lang
     , chunks = chunks
-    , parsed = parsed
+    , parsed = parsed_
+    , tree = tree
     , accumulator = newAccumulator
-    , messages = getMessages parsed
+    , messages = f.getMessages tree
     , includedFiles = []
     }
+
+
 
 
 {-| The update function takes an EditRecord and a string, the "text",
@@ -47,41 +63,40 @@ accomplishes this using the transformer. The seed is used to produces
 a differential idList. This last step is perhaps unnecessary. To investigate.
 (This was part of an optimization scheme.)
 -}
-update :
-    (String -> List chunk)
-    -> (chunk -> parsedChunk)
-    -> (List parsedChunk -> List String)
-    -> (Language -> List parsedChunk -> ( acc, List parsedChunk ))
-    -> EditRecord chunk parsedChunk acc
-    -> String
-    -> EditRecord chunk parsedChunk acc
-update chunker parser getMessages accMaker editRecord text =
+update : UpdateFunctions chunk parsedChunk acc
+         -> EditRecord chunk parsedChunk accumulator
+         -> String
+         -> EditRecord chunk parsedChunk acc
+update f editRecord sourceText =
     let
         newChunks =
-            chunker text
+            f.chunker sourceText
 
         diffRecord =
-            Differ.diff editRecord.chunks newChunks
+            Compiler.DifferEq.diff f.chunkEq editRecord.chunks newChunks
 
         parsed_ =
-            differentialParser parser diffRecord editRecord
+            differentialParser f.chunkParser diffRecord editRecord
 
-        ( newAccumulator, parsed ) =
-            accMaker editRecord.lang parsed_
+        tree_ = f.forestFromBlocks parsed_
+
+        ( newAccumulator, tree ) =
+                    f.accMaker editRecord.lang tree_
     in
     -- TODO: real update of accumulator
     { lang = editRecord.lang
     , chunks = newChunks
-    , parsed = parsed
+    , parsed = parsed_
+    , tree = tree
     , accumulator = newAccumulator
-    , messages = getMessages parsed
+    , messages = f.getMessages tree
     , includedFiles = []
     }
 
 
 differentialParser :
     (chunk -> parsedChunk)
-    -> Differ.DiffRecord chunk
+    -> Compiler.Differ.DiffRecord chunk
     -> EditRecord chunk parsedChunk acc
     -> List parsedChunk
 differentialParser parser diffRecord editRecord =

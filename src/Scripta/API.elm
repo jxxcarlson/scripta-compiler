@@ -146,7 +146,7 @@ init importedFileDict language sourceText =
 
 
 {-| -}
-update : EditRecord -> String -> EditRecord
+update : Compiler.DifferentialParser.EditRecord -> String -> Compiler.DifferentialParser.EditRecord
 update =
     Compiler.DifferentialParser.update
 
@@ -188,7 +188,7 @@ render displaySettings editRecord =
         settings =
             renderSettings displaySettings
     in
-    banner displaySettings editRecord :: Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.parsed :: renderBody displaySettings.counter settings editRecord
+    banner displaySettings editRecord :: Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.tree :: renderBody displaySettings.counter settings editRecord
 
 
 renderBody : Int -> Render.Settings.Settings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)
@@ -198,7 +198,7 @@ renderBody count settings editRecord =
 
 banner : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> Element MarkupMsg
 banner displaySettings editRecord =
-    ASTTools.banner editRecord.parsed
+    ASTTools.banner editRecord.tree
         |> Maybe.map (Parser.Block.setName "banner_")
         |> Maybe.map (Render.Block.render displaySettings.counter editRecord.accumulator (renderSettings displaySettings))
         |> Maybe.withDefault Element.none
@@ -330,6 +330,6 @@ defaultSettings =
 -- PARSER INTERFACE
 
 
-body : { a | parsed : Forest ExpressionBlock } -> Forest ExpressionBlock
+body : { a | tree : Forest ExpressionBlock } -> Forest ExpressionBlock
 body editRecord =
-    editRecord.parsed
+    editRecord.tree

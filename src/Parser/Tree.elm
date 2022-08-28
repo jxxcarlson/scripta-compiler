@@ -1,4 +1,4 @@
-module Parser.Tree exposing (fromBlocks, forestFromBlocks, Error(..))
+module Parser.Tree exposing (fromBlocks, Block, forestFromBlocks, Error(..))
 
 {-| This module provides tools for building
 a tree from a string or a list of blocks. As noted
@@ -65,6 +65,7 @@ type alias State data =
 
 type alias Block data =
     { data | indent : Int }
+
 
 
 init : data -> (Block data -> data) -> List (Block data) -> Result Error (State data)
