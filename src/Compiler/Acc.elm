@@ -81,7 +81,6 @@ transformAccumulate lang ast =
         |> (\( acc_, ast_ ) -> ( acc_, List.reverse ast_ ))
 
 
-
 init : Int -> Accumulator
 init k =
     { headingIndex = Vector.init k
@@ -107,14 +106,16 @@ init k =
 mapper ast_ ( acc_, tree_ ) =
     ( acc_, tree_ :: ast_ )
 
+
 transformAccumulateBlock : Accumulator -> ExpressionBlock -> ( Accumulator, ExpressionBlock )
 transformAccumulateBlock =
-            \acc_ block_ ->
-                let
-                    newAcc =
-                        updateAccumulator block_ acc_
-                in
-                ( newAcc, transformBlock newAcc block_ )
+    \acc_ block_ ->
+        let
+            newAcc =
+                updateAccumulator block_ acc_
+        in
+        ( newAcc, transformBlock newAcc block_ )
+
 
 transformAccumulateTree : Tree ExpressionBlock -> Accumulator -> ( Accumulator, Tree ExpressionBlock )
 transformAccumulateTree tree acc =

@@ -22,23 +22,27 @@ import XMarkdown.Expression
 
 
 type alias EditRecord =
-    Compiler.AbstractDifferentialParser.EditRecord (PrimitiveBlock) (ExpressionBlock) Compiler.Acc.Accumulator
+    Compiler.AbstractDifferentialParser.EditRecord PrimitiveBlock ExpressionBlock Compiler.Acc.Accumulator
 
-type alias ExpBlockData = { name : Maybe String, args : List String, properties : Dict String String, indent : Int, lineNumber : Int, numberOfLines : Int, id : String, tag : String, blockType : Parser.Block.BlockType, content : Either String (List Parser.Expr.Expr), messages : List String, sourceText : String }
+
+type alias ExpBlockData =
+    { name : Maybe String, args : List String, properties : Dict String String, indent : Int, lineNumber : Int, numberOfLines : Int, id : String, tag : String, blockType : Parser.Block.BlockType, content : Either String (List Parser.Expr.Expr), messages : List String, sourceText : String }
+
 
 indentation : ExpressionBlock -> Int
-indentation (ExpressionBlock data) = data.indent
+indentation (ExpressionBlock data) =
+    data.indent
 
 
 forestFromBlocks : List ExpressionBlock -> List (Tree ExpressionBlock)
 forestFromBlocks blocks =
-   Parser.Tree.forestFromBlocks Parser.Block.empty indentation blocks |> Result.withDefault []
+    Parser.Tree.forestFromBlocks Parser.Block.empty indentation blocks |> Result.withDefault []
 
 
 init : Dict String String -> Language -> String -> EditRecord
 init inclusionData lang str =
     let
-        chunks : List (PrimitiveBlock)
+        chunks : List PrimitiveBlock
         chunks =
             chunker lang str
 
@@ -74,28 +78,31 @@ init inclusionData lang str =
                 Just fileName ->
                     prependContent fileName inclusionData chunks
 
-        parsed_ = List.map (Markup.primitiveBlockToExpressionBlock lang) chunks
-        tree = forestFromBlocks parsed_
+        parsed_ =
+            List.map (Markup.primitiveBlockToExpressionBlock lang) updatedChunks
+
+        tree_ =
+            forestFromBlocks parsed_
 
         -- Tree { content } ->
-        ( newAccumulator, parsed ) =
-            (Compiler.Acc.transformAccumulate lang) tree
+        ( newAccumulator, tree ) =
+            Compiler.Acc.transformAccumulate lang tree_
     in
     { lang = lang
     , chunks = chunks
     , parsed = parsed_
     , tree = tree
     , accumulator = newAccumulator
-    , messages = Markup.messagesFromForest parsed
+    , messages = Markup.messagesFromForest tree
     , includedFiles = includedFiles
     }
 
 
 {-| Prepend a block of tex macros corresponding to the text retrieved from 'dict' with key 'tag'
 -}
-prependContent : String -> Dict String String -> List (PrimitiveBlock) -> List ( PrimitiveBlock)
+prependContent : String -> Dict String String -> List PrimitiveBlock -> List PrimitiveBlock
 prependContent tag dict blocks =
-    (makeBlocks tag dict) ++ blocks
+    makeBlocks tag dict ++ blocks
 
 
 {-| Function makeBlock looks up the text corresponding to 'tag' in 'dict'
@@ -121,15 +128,17 @@ parseL0 : List String -> List PrimitiveBlock
 parseL0 lines =
     Parser.PrimitiveBlock.parse L0Lang L0.Parser.Classify.isVerbatimLine lines
 
+
 updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunctions PrimitiveBlock ExpressionBlock Compiler.Acc.Accumulator
 updateFunctions lang =
-    {  chunker = chunker lang -- String -> List chunk
-     , chunkEq = chunkEq -- chunk -> chunk -> Bool
-     , chunkParser = parser lang -- : chunk -> parsedChunk
-     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
-     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
-     , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> List parsedChunk -> (acc, List parsedChunk)
+    { chunker = chunker lang -- String -> List chunk
+    , chunkEq = chunkEq -- chunk -> chunk -> Bool
+    , chunkParser = parser lang -- : chunk -> parsedChunk
+    , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
+    , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
+    , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> List parsedChunk -> (acc, List parsedChunk)
     }
+
 
 getMessages_ : List ExpressionBlock -> List String
 getMessages_ blocks =
@@ -137,15 +146,20 @@ getMessages_ blocks =
 
 
 chunkEq : PrimitiveBlock -> PrimitiveBlock -> Bool
-chunkEq b1 b2 = b1.sourceText == b2.sourceText
+chunkEq b1 b2 =
+    b1.sourceText == b2.sourceText
+
+
 
 -- update : EditRecord -> String -> EditRecord
+
+
 update : EditRecord -> String -> EditRecord
 update editRecord text =
     Compiler.AbstractDifferentialParser.update (updateFunctions editRecord.lang) editRecord text
 
 
-chunker : Language -> String -> List ( PrimitiveBlock)
+chunker : Language -> String -> List PrimitiveBlock
 chunker lang str =
     str |> Markup.toPrimitiveBlocks lang |> List.map (Compiler.Transform.transform lang)
 
@@ -154,16 +168,16 @@ parser : Language -> PrimitiveBlock -> ExpressionBlock
 parser lang =
     case lang of
         MicroLaTeXLang ->
-             (Parser.BlockUtil.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse)
+            Parser.BlockUtil.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse
 
         L0Lang ->
-           (Parser.BlockUtil.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages)
+            Parser.BlockUtil.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages
 
         PlainTextLang ->
-             (Parser.BlockUtil.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] )))
+            Parser.BlockUtil.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] ))
 
         XMarkdownLang ->
-           (Parser.BlockUtil.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] )))
+            Parser.BlockUtil.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] ))
 
 
 parserOLD : Language -> Tree PrimitiveBlock -> Tree ExpressionBlock

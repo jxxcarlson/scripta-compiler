@@ -1,6 +1,6 @@
 module Parser.Block exposing
-    ( BlockType(..), ExpressionBlock(..), empty, empty_, ExpressionBlockData
-    , RawBlock, condenseUrls, getContent, getName, setName
+    ( BlockType(..), ExpressionBlock(..)
+    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getContent, getName, setName
     )
 
 {-| Source text is parsed into a tree of IntermediateBlocks, where the tree
@@ -32,18 +32,20 @@ type alias RawBlock =
 
 type alias ExpressionBlockData =
     { name : Maybe String
-            , args : List String
-            , properties : Dict String String
-            , indent : Int
-            , lineNumber : Int
-            , numberOfLines : Int
-            , id : String
-            , tag : String
-            , blockType : BlockType
-            , content : Either String (List Expr)
-            , messages : List String
-            , sourceText : String
-            }
+    , args : List String
+    , properties : Dict String String
+    , indent : Int
+    , lineNumber : Int
+    , numberOfLines : Int
+    , id : String
+    , tag : String
+    , blockType : BlockType
+    , content : Either String (List Expr)
+    , messages : List String
+    , sourceText : String
+    }
+
+
 {-| -}
 type ExpressionBlock
     = ExpressionBlock
@@ -61,21 +63,26 @@ type ExpressionBlock
         , sourceText : String
         }
 
-empty  = ExpressionBlock empty_
 
-empty_ =  { name = Nothing
-             , args = []
-             , properties  = Dict.empty
-             , indent = 0
-             , lineNumber = 0
-             , numberOfLines = 0
-             , id = "-"
-             , tag = "-"
-             , blockType = VerbatimBlock []
-             , content  = Either.Left "-"
-             , messages = []
-             , sourceText = "-"
-             }
+empty =
+    ExpressionBlock empty_
+
+
+empty_ =
+    { name = Nothing
+    , args = []
+    , properties = Dict.empty
+    , indent = 0
+    , lineNumber = 0
+    , numberOfLines = 0
+    , id = "-"
+    , tag = "-"
+    , blockType = VerbatimBlock []
+    , content = Either.Left "-"
+    , messages = []
+    , sourceText = "-"
+    }
+
 
 setName : String -> ExpressionBlock -> ExpressionBlock
 setName name (ExpressionBlock data) =

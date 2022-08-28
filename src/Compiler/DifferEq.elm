@@ -1,8 +1,6 @@
 module Compiler.DifferEq exposing (diff)
 
-
-import Compiler.Differ exposing(DiffRecord)
-
+import Compiler.Differ exposing (DiffRecord)
 
 
 {-| Let u and v be two lists of strings. Write them as
@@ -36,7 +34,9 @@ diff eq u v =
 
             else
                 b_
-        _ = Debug.log "!! DIFF2" ((List.map List.length) [a, b, x, y])
+
+        _ =
+            List.map List.length [ a, b, x, y ]
     in
     DiffRecord a b x y
 
@@ -50,12 +50,16 @@ commonInitialSegment eq x y =
         []
 
     else
-      case (List.head x, List.head y) of
-          (Just a, Just b) ->
+        case ( List.head x, List.head y ) of
+            ( Just a, Just b ) ->
                 if eq a b then
-                    a :: (commonInitialSegment eq (List.drop 1 x) (List.drop 1 y))
-                else []
-          _ -> []
+                    a :: commonInitialSegment eq (List.drop 1 x) (List.drop 1 y)
+
+                else
+                    []
+
+            _ ->
+                []
 
 
 commonTerminalSegmentAux : (q -> q -> Bool) -> List q -> List q -> List q -> List q

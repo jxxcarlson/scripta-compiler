@@ -1,8 +1,6 @@
 module Markup exposing
     ( parse
-    , isVerbatimLine,
-     primitiveBlockToExpressionBlock,
-     messagesFromForest, parsePlainText, toPrimitiveBlockForest, toPrimitiveBlocks
+    , isVerbatimLine, messagesFromForest, parsePlainText, primitiveBlockToExpressionBlock, toPrimitiveBlockForest, toPrimitiveBlocks
     )
 
 {-| A Parser for the experimental Markup module. See the app folder to see how it is used.
@@ -52,6 +50,7 @@ parse lang sourceText =
         |> toPrimitiveBlockForest lang
         |> Parser.Forest.map (Parser.BlockUtil.toExpressionBlock lang parser)
 
+
 primitiveBlockToExpressionBlock : Language -> PrimitiveBlock -> ExpressionBlock
 primitiveBlockToExpressionBlock lang block =
     let
@@ -69,7 +68,7 @@ primitiveBlockToExpressionBlock lang block =
                 XMarkdownLang ->
                     \i s -> ( XMarkdown.Expression.parse i s, [] )
     in
-     Parser.BlockUtil.toExpressionBlock lang parser block
+    Parser.BlockUtil.toExpressionBlock lang parser block
 
 
 messagesFromTree : Tree.Tree ExpressionBlock -> List String
@@ -103,10 +102,8 @@ toPrimitiveBlockForest lang str =
         |> String.lines
         |> Parser.PrimitiveBlock.parse lang isVerbatimLine
         |> List.map (Compiler.Transform.transform lang)
-        |> Parser.Tree.forestFromBlocks { emptyBlock | indent = -2 }  .indent
+        |> Parser.Tree.forestFromBlocks { emptyBlock | indent = -2 } .indent
         |> Result.withDefault []
-
-
 
 
 isVerbatimLine : String -> Bool

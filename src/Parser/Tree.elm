@@ -63,8 +63,6 @@ type alias State block =
     }
 
 
-
-
 init : block -> (block -> Int) -> List block -> Result Error (State block)
 init defaultNode indentation blocks =
     case List.head blocks of
@@ -100,7 +98,7 @@ fromBlocks defaultNode indentation blocks =
       Ok (Tree "1" [Tree "2" [],Tree "3" []])
 
 -}
-forestFromBlocks : block -> (block -> Int) -> List (block) -> Result Error (Forest block)
+forestFromBlocks : block -> (block -> Int) -> List block -> Result Error (Forest block)
 forestFromBlocks defaultNode indentation blocks =
     fromBlocks defaultNode indentation (defaultNode :: blocks)
         |> Result.map Tree.children
@@ -118,7 +116,8 @@ nextStep state =
 
         Just block ->
             let
-                blockIndentaton = state.indentation block
+                blockIndentaton =
+                    state.indentation block
             in
             case compare blockIndentaton state.indent of
                 GT ->
@@ -150,7 +149,7 @@ loop s f =
 -- HANDLERS
 
 
-handleEQ : Int ->  block -> State block -> State block
+handleEQ : Int -> block -> State block -> State block
 handleEQ indent block state =
     let
         newTree =

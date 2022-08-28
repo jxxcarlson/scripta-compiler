@@ -1,7 +1,8 @@
-module TestStuff exposing (textA, textB, textA1, textB1)
+module TestStuff exposing (textA, textA1, textB, textB1)
 
 
-textA1 = """
+textA1 =
+    """
 abc
 
 def
@@ -11,7 +12,9 @@ ghi
 jkl
 """
 
-textB1 = """
+
+textB1 =
+    """
 abc
 
 def!
@@ -21,7 +24,9 @@ ghi
 jkl
 """
 
-textA = """
+
+textA =
+    """
 || load-files
 jxxcarlson:category-theory-macros
 
@@ -67,12 +72,12 @@ https://i.ibb.co/0j2Dt8B/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwxLCJhIl0sWzIsMSwiYiJdLFs0LDAsImMiXSxbNCwyLCJkIl0sWzAsMV0sWzEsMl0sWzEsM11d
 \\[\\begin{tikzcd}
-	&&&& c \\
-	a && b \\
-	&&&& d
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow[from=2-3, to=3-5]
+\t&&&& c \\
+\ta && b \\
+\t&&&& d
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow[from=2-3, to=3-5]
 \\end{tikzcd}\\]
 
 In this case, $G$ is the functor with 
@@ -101,13 +106,13 @@ https://i.ibb.co/NLtvMbg/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwwLCJHKEUpIl0sWzIsMCwiRycoRSkiXSxbMiwyLCJHJyhWKSJdLFswLDIsIkcoVikiXSxbMCwzLCJHKHMpIiwyXSxbMSwyLCJHJyhzKSJdLFswLDEsIlxcZXRhX0UiXSxbMywyLCJcXGV0YV9WIiwyXV0=
 \\[\\begin{tikzcd}
-	{G(E)} && {G'(E)} \\
-	\\
-	{G(V)} && {G'(V)}
-	\\arrow["{G(s)}"', from=1-1, to=3-1]
-	\\arrow["{G'(s)}", from=1-3, to=3-3]
-	\\arrow["{\\eta_E}", from=1-1, to=1-3]
-	\\arrow["{\\eta_V}"', from=3-1, to=3-3]
+\t{G(E)} && {G'(E)} \\
+\t\\
+\t{G(V)} && {G'(V)}
+\t\\arrow["{G(s)}"', from=1-1, to=3-1]
+\t\\arrow["{G'(s)}", from=1-3, to=3-3]
+\t\\arrow["{\\eta_E}", from=1-1, to=1-3]
+\t\\arrow["{\\eta_V}"', from=3-1, to=3-3]
 \\end{tikzcd}\\]
 
 Test: [eqref functoriality]
@@ -130,20 +135,20 @@ https://i.ibb.co/hWnDsym/image.png
 ---
 % https://q.uiver.app/?q=WzAsNyxbMCwxLCJhIl0sWzIsMSwiYiJdLFswLDQsIjEiXSxbMiw0LCIyIl0sWzQsNCwiMyJdLFs0LDAsImMiXSxbNCwyLCJkIl0sWzAsMV0sWzIsM10sWzMsNF0sWzAsMiwiXFxldGFfYSIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRhc2hlZCJ9fX1dLFsxLDMsIlxcZXRhX2IiLDEseyJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifX19XSxbMSw1XSxbNSw0LCJcXGV0YV9jIiwxLHsiY3VydmUiOi01LCJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifX19XSxbMSw2XSxbNiw0LCJcXGV0YV9kIiwxLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV1d
 \\[\\begin{tikzcd}
-	&&&& c \\
-	a && b \\
-	&&&& d \\
-	\\
-	1 && 2 && 3
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=5-1, to=5-3]
-	\\arrow[from=5-3, to=5-5]
-	\\arrow["{\\eta_a}"{description}, dashed, from=2-1, to=5-1]
-	\\arrow["{\\eta_b}"{description}, dashed, from=2-3, to=5-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow["{\\eta_c}"{description}, curve={height=-30pt}, dashed, from=1-5, to=5-5]
-	\\arrow[from=2-3, to=3-5]
-	\\arrow["{\\eta_d}"{description}, dashed, from=3-5, to=5-5]
+\t&&&& c \\
+\ta && b \\
+\t&&&& d \\
+\t\\
+\t1 && 2 && 3
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=5-1, to=5-3]
+\t\\arrow[from=5-3, to=5-5]
+\t\\arrow["{\\eta_a}"{description}, dashed, from=2-1, to=5-1]
+\t\\arrow["{\\eta_b}"{description}, dashed, from=2-3, to=5-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow["{\\eta_c}"{description}, curve={height=-30pt}, dashed, from=1-5, to=5-5]
+\t\\arrow[from=2-3, to=3-5]
+\t\\arrow["{\\eta_d}"{description}, dashed, from=3-5, to=5-5]
 \\end{tikzcd}\\]
 
 
@@ -169,12 +174,12 @@ https://i.ibb.co/r5ZskWg/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwxLCJhLCBSIl0sWzIsMSwiYiwgRyJdLFs0LDAsImMsIFIiXSxbNCwyLCJkLCBSIl0sWzAsMV0sWzEsMl0sWzEsM11d
 \\[\\begin{tikzcd}
-	&&&& {c, R} \\
-	{a, R} && {b, G} \\
-	&&&& {d, R}
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow[from=2-3, to=3-5]
+\t&&&& {c, R} \\
+\t{a, R} && {b, G} \\
+\t&&&& {d, R}
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow[from=2-3, to=3-5]
 \\end{tikzcd}\\]
 
 Let $C_n : \\op{Graph} \\to \\Set$ be the functor which assigns to a graph the corresponding set of $n$-colorings.
@@ -199,15 +204,15 @@ https://i.ibb.co/MNF2dqJ/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwwLCJBIl0sWzIsMCwiRCJdLFswLDIsIkIiXSxbMiwyLCJDIl0sWzAsMl0sWzIsM10sWzMsMV0sWzEsMF0sWzAsM10sWzEsMl1d
 \\[\\begin{tikzcd}
-	A && D \\
-	\\
-	B && C
-	\\arrow[from=1-1, to=3-1]
-	\\arrow[from=3-1, to=3-3]
-	\\arrow[from=3-3, to=1-3]
-	\\arrow[from=1-3, to=1-1]
-	\\arrow[from=1-1, to=3-3]
-	\\arrow[from=1-3, to=3-1]
+\tA && D \\
+\t\\
+\tB && C
+\t\\arrow[from=1-1, to=3-1]
+\t\\arrow[from=3-1, to=3-3]
+\t\\arrow[from=3-3, to=1-3]
+\t\\arrow[from=1-3, to=1-1]
+\t\\arrow[from=1-1, to=3-3]
+\t\\arrow[from=1-3, to=3-1]
 \\end{tikzcd}\\]
 
 
@@ -221,8 +226,8 @@ C_n(G) \\to \\Hom(G, K_n)
 """
 
 
-
-textB = """
+textB =
+    """
 || load-files
 jxxcarlson:category-theory-macros
 
@@ -268,12 +273,12 @@ https://i.ibb.co/0j2Dt8B/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwxLCJhIl0sWzIsMSwiYiJdLFs0LDAsImMiXSxbNCwyLCJkIl0sWzAsMV0sWzEsMl0sWzEsM11d
 \\[\\begin{tikzcd}
-	&&&& c \\
-	a && b \\
-	&&&& d
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow[from=2-3, to=3-5]
+\t&&&& c \\
+\ta && b \\
+\t&&&& d
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow[from=2-3, to=3-5]
 \\end{tikzcd}\\]
 
 In this case, $G$ is the functor wieth
@@ -302,13 +307,13 @@ https://i.ibb.co/NLtvMbg/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwwLCJHKEUpIl0sWzIsMCwiRycoRSkiXSxbMiwyLCJHJyhWKSJdLFswLDIsIkcoVikiXSxbMCwzLCJHKHMpIiwyXSxbMSwyLCJHJyhzKSJdLFswLDEsIlxcZXRhX0UiXSxbMywyLCJcXGV0YV9WIiwyXV0=
 \\[\\begin{tikzcd}
-	{G(E)} && {G'(E)} \\
-	\\
-	{G(V)} && {G'(V)}
-	\\arrow["{G(s)}"', from=1-1, to=3-1]
-	\\arrow["{G'(s)}", from=1-3, to=3-3]
-	\\arrow["{\\eta_E}", from=1-1, to=1-3]
-	\\arrow["{\\eta_V}"', from=3-1, to=3-3]
+\t{G(E)} && {G'(E)} \\
+\t\\
+\t{G(V)} && {G'(V)}
+\t\\arrow["{G(s)}"', from=1-1, to=3-1]
+\t\\arrow["{G'(s)}", from=1-3, to=3-3]
+\t\\arrow["{\\eta_E}", from=1-1, to=1-3]
+\t\\arrow["{\\eta_V}"', from=3-1, to=3-3]
 \\end{tikzcd}\\]
 
 Test: [eqref functoriality]
@@ -331,20 +336,20 @@ https://i.ibb.co/hWnDsym/image.png
 ---
 % https://q.uiver.app/?q=WzAsNyxbMCwxLCJhIl0sWzIsMSwiYiJdLFswLDQsIjEiXSxbMiw0LCIyIl0sWzQsNCwiMyJdLFs0LDAsImMiXSxbNCwyLCJkIl0sWzAsMV0sWzIsM10sWzMsNF0sWzAsMiwiXFxldGFfYSIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRhc2hlZCJ9fX1dLFsxLDMsIlxcZXRhX2IiLDEseyJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifX19XSxbMSw1XSxbNSw0LCJcXGV0YV9jIiwxLHsiY3VydmUiOi01LCJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifX19XSxbMSw2XSxbNiw0LCJcXGV0YV9kIiwxLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV1d
 \\[\\begin{tikzcd}
-	&&&& c \\
-	a && b \\
-	&&&& d \\
-	\\
-	1 && 2 && 3
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=5-1, to=5-3]
-	\\arrow[from=5-3, to=5-5]
-	\\arrow["{\\eta_a}"{description}, dashed, from=2-1, to=5-1]
-	\\arrow["{\\eta_b}"{description}, dashed, from=2-3, to=5-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow["{\\eta_c}"{description}, curve={height=-30pt}, dashed, from=1-5, to=5-5]
-	\\arrow[from=2-3, to=3-5]
-	\\arrow["{\\eta_d}"{description}, dashed, from=3-5, to=5-5]
+\t&&&& c \\
+\ta && b \\
+\t&&&& d \\
+\t\\
+\t1 && 2 && 3
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=5-1, to=5-3]
+\t\\arrow[from=5-3, to=5-5]
+\t\\arrow["{\\eta_a}"{description}, dashed, from=2-1, to=5-1]
+\t\\arrow["{\\eta_b}"{description}, dashed, from=2-3, to=5-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow["{\\eta_c}"{description}, curve={height=-30pt}, dashed, from=1-5, to=5-5]
+\t\\arrow[from=2-3, to=3-5]
+\t\\arrow["{\\eta_d}"{description}, dashed, from=3-5, to=5-5]
 \\end{tikzcd}\\]
 
 
@@ -370,12 +375,12 @@ https://i.ibb.co/r5ZskWg/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwxLCJhLCBSIl0sWzIsMSwiYiwgRyJdLFs0LDAsImMsIFIiXSxbNCwyLCJkLCBSIl0sWzAsMV0sWzEsMl0sWzEsM11d
 \\[\\begin{tikzcd}
-	&&&& {c, R} \\
-	{a, R} && {b, G} \\
-	&&&& {d, R}
-	\\arrow[from=2-1, to=2-3]
-	\\arrow[from=2-3, to=1-5]
-	\\arrow[from=2-3, to=3-5]
+\t&&&& {c, R} \\
+\t{a, R} && {b, G} \\
+\t&&&& {d, R}
+\t\\arrow[from=2-1, to=2-3]
+\t\\arrow[from=2-3, to=1-5]
+\t\\arrow[from=2-3, to=3-5]
 \\end{tikzcd}\\]
 
 Let $C_n : \\op{Graph} \\to \\Set$ be the functor which assigns to a graph the corresponding set of $n$-colorings.
@@ -400,15 +405,15 @@ https://i.ibb.co/MNF2dqJ/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwwLCJBIl0sWzIsMCwiRCJdLFswLDIsIkIiXSxbMiwyLCJDIl0sWzAsMl0sWzIsM10sWzMsMV0sWzEsMF0sWzAsM10sWzEsMl1d
 \\[\\begin{tikzcd}
-	A && D \\
-	\\
-	B && C
-	\\arrow[from=1-1, to=3-1]
-	\\arrow[from=3-1, to=3-3]
-	\\arrow[from=3-3, to=1-3]
-	\\arrow[from=1-3, to=1-1]
-	\\arrow[from=1-1, to=3-3]
-	\\arrow[from=1-3, to=3-1]
+\tA && D \\
+\t\\
+\tB && C
+\t\\arrow[from=1-1, to=3-1]
+\t\\arrow[from=3-1, to=3-3]
+\t\\arrow[from=3-3, to=1-3]
+\t\\arrow[from=1-3, to=1-1]
+\t\\arrow[from=1-1, to=3-3]
+\t\\arrow[from=1-3, to=3-1]
 \\end{tikzcd}\\]
 
 

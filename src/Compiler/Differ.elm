@@ -61,7 +61,9 @@ diff u v =
 
             else
                 b_
-        _ = Debug.log "!! DIFF" ((List.map List.length) [a, b, x, y])
+
+        _ =
+            List.map List.length [ a, b, x, y ]
     in
     DiffRecord a b x y
 
