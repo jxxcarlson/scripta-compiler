@@ -1,22 +1,22 @@
-module Parser.Tree exposing (fromBlocks, Block, forestFromBlocks, Error(..))
+module Parser.Tree exposing (fromBlocks, forestFromBlocks, Error(..))
 
 {-| This module provides tools for building
 a tree from a string or a list of blocks. As noted
 in the README.md, a tree
 is represented in text as an outline:
 
-     > data = "1\n 2\n 3\n 4\n5\n 6\n 7"
+     > block = "1\n 2\n 3\n 4\n5\n 6\n 7"
 
 To build a tree from it, we apply the function fromString:
 
     fromString :
         node
-        -> (Block -> data)
+        -> (Block -> block)
         -> String
-        -> Result Error (Tree data)
+        -> Result Error (Tree block)
 
 
-    > fromString "?" .content data
+    > fromString "?" .content block
       Tree "0" [
             Tree "1" [Tree "2" [],Tree "3" [], Tree "4" []]
           , Tree "5" [Tree "6" [],Tree "7" []]
@@ -52,24 +52,21 @@ type Error
     = EmptyBlocks
 
 
-type alias State data =
-    { blocks : List (Block data)
-    , zipper : Zipper data
+type alias State block =
+    { blocks : List block
+    , zipper : Zipper block
     , indent : Int
     , indentationChanges : List Int
     , level : Int
-    , make : Block data -> data
-    , default : Zipper data
+    , indentation : block -> Int
+    , default : Zipper block
     }
 
 
-type alias Block data =
-    { data | indent : Int }
 
 
-
-init : data -> (Block data -> data) -> List (Block data) -> Result Error (State data)
-init defaultNode makeNode blocks =
+init : block -> (block -> Int) -> List block -> Result Error (State block)
+init defaultNode indentation blocks =
     case List.head blocks of
         Nothing ->
             Err EmptyBlocks
@@ -77,19 +74,19 @@ init defaultNode makeNode blocks =
         Just rootBlock ->
             Ok
                 { blocks = List.drop 1 blocks
-                , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
+                , zipper = Zipper.fromTree <| Tree.tree defaultNode []
                 , indent = 0
                 , level = 0
+                , indentation = indentation
                 , indentationChanges = []
-                , make = makeNode
                 , default = Zipper.fromTree (Tree.tree defaultNode [])
                 }
 
 
 {-| -}
-fromBlocks : data -> (Block data -> data) -> List (Block data) -> Result Error (Tree data)
-fromBlocks defaultNode makeNode blocks =
-    case init defaultNode makeNode blocks of
+fromBlocks : block -> (block -> Int) -> List block -> Result Error (Tree block)
+fromBlocks defaultNode indentation blocks =
+    case init defaultNode indentation blocks of
         Err error ->
             Err error
 
@@ -103,14 +100,9 @@ fromBlocks defaultNode makeNode blocks =
       Ok (Tree "1" [Tree "2" [],Tree "3" []])
 
 -}
-forestFromBlocks : data -> (Block data -> data) -> (data -> Block data) -> List (Block data) -> Result Error (Forest data)
-forestFromBlocks defaultNode makeNode renderNode blocks =
-    let
-        blocks2 : List (Block data)
-        blocks2 =
-            renderNode defaultNode :: blocks
-    in
-    fromBlocks defaultNode makeNode blocks2
+forestFromBlocks : block -> (block -> Int) -> List (block) -> Result Error (Forest block)
+forestFromBlocks defaultNode indentation blocks =
+    fromBlocks defaultNode indentation (defaultNode :: blocks)
         |> Result.map Tree.children
 
 
@@ -118,30 +110,33 @@ forestFromBlocks defaultNode makeNode renderNode blocks =
 -- FUNCTIONAL LOOP
 
 
-nextStep : State data -> Step (State data) (Tree data)
+nextStep : State block -> Step (State block) (Tree block)
 nextStep state =
     case List.head state.blocks of
         Nothing ->
             Done (Zipper.toTree state.zipper)
 
         Just block ->
-            case compare block.indent state.indent of
+            let
+                blockIndentaton = state.indentation block
+            in
+            case compare blockIndentaton state.indent of
                 GT ->
-                    Loop <| handleGT block.indent block state
+                    Loop <| handleGT blockIndentaton block state
 
                 EQ ->
-                    Loop <| handleEQ block.indent block state
+                    Loop <| handleEQ blockIndentaton block state
 
                 LT ->
-                    Loop <| handleLT block.indent block state
+                    Loop <| handleLT blockIndentaton block state
 
 
-type Step state data
+type Step state block
     = Loop state
-    | Done data
+    | Done block
 
 
-loop : state -> (state -> Step state data) -> data
+loop : state -> (state -> Step state block) -> block
 loop s f =
     case f s of
         Loop s_ ->
@@ -155,11 +150,12 @@ loop s f =
 -- HANDLERS
 
 
-handleEQ : Int -> Block data -> State data -> State data
+handleEQ : Int ->  block -> State block -> State block
 handleEQ indent block state =
     let
         newTree =
-            Tree.tree (state.make block) []
+            -- Tree.tree (state.make block) []
+            Tree.singleton block
     in
     { state
         | blocks = List.drop 1 state.blocks
@@ -168,20 +164,21 @@ handleEQ indent block state =
     }
 
 
-handleGT : Int -> Block data -> State data -> State data
+handleGT : Int -> block -> State block -> State block
 handleGT indent block state =
     let
         newTree =
-            Tree.tree (state.make block) []
+            -- Tree.tree (state.make block) []
+            Tree.singleton block
     in
     case Zipper.lastChild state.zipper of
         Nothing ->
-            -- This is the case for the first data of the tree after the root
+            -- This is the case for the first block of the tree after the root
             { state
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
-                , indentationChanges = pushIndentationChange block.indent state.indentationChanges
+                , indentationChanges = pushIndentationChange (state.indentation block) state.indentationChanges
                 , zipper = attachAtFocus newTree state.zipper
             }
 
@@ -190,7 +187,7 @@ handleGT indent block state =
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
-                , indentationChanges = pushIndentationChange block.indent state.indentationChanges
+                , indentationChanges = pushIndentationChange (state.indentation block) state.indentationChanges
                 , zipper = attachAtFocus newTree newZipper
             }
 
@@ -200,11 +197,12 @@ pushIndentationChange k ks =
     (k - List.sum ks) :: ks
 
 
-handleLT : Int -> Block data -> State data -> State data
+handleLT : Int -> block -> State block -> State block
 handleLT indent block state =
     let
         newTree =
-            Tree.tree (state.make block) []
+            -- Tree.tree (state.make block) []
+            Tree.singleton block
 
         deltaInfo =
             popUntil (state.indent - indent) state.indentationChanges
@@ -254,12 +252,12 @@ popUntilAux goal { sum, popped, remaining } =
 -- HELPERS I
 
 
-attachAtFocus : Tree.Tree data -> Zipper data -> Zipper data
+attachAtFocus : Tree.Tree block -> Zipper block -> Zipper block
 attachAtFocus t z =
     Zipper.replaceTree (appendChild t z) z
 
 
-appendChild : Tree data -> Zipper data -> Tree data
+appendChild : Tree block -> Zipper block -> Tree block
 appendChild t z =
     Tree.appendChild t (Zipper.tree z)
 
@@ -273,7 +271,7 @@ appendChild t z =
     Apply f to x n times
 
 -}
-repeatM : Int -> (data -> Maybe data) -> Maybe data -> Maybe data
+repeatM : Int -> (block -> Maybe block) -> Maybe block -> Maybe block
 repeatM n f x =
     if n == 0 then
         x

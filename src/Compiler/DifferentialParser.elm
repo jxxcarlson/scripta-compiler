@@ -26,28 +26,14 @@ type alias EditRecord =
 
 type alias ExpBlockData = { name : Maybe String, args : List String, properties : Dict String String, indent : Int, lineNumber : Int, numberOfLines : Int, id : String, tag : String, blockType : Parser.Block.BlockType, content : Either String (List Parser.Expr.Expr), messages : List String, sourceText : String }
 
-unpack : ExpressionBlock -> ExpBlockData
-unpack (ExpressionBlock data) = data
+indentation : ExpressionBlock -> Int
+indentation (ExpressionBlock data) = data.indent
 
-pack : ExpBlockData -> ExpressionBlock
-pack data = ExpressionBlock data
-
---foo : ExpressionBlock -> Parser.Tree.Block ExpressionBlockData
-foo (ExpressionBlock data) = Parser.Tree.Block data
 
 forestFromBlocks : List ExpressionBlock -> List (Tree ExpressionBlock)
 forestFromBlocks blocks =
--- forestFromBlocks : data -> (Block data -> data) -> (data -> Block data) -> List (Block data) -> Result Error (Forest data)
-   Parser.Tree.forestFromBlocks Parser.Block.empty unpack pack (List.map unpack blocks) |> Result.withDefault []
-  -- Debug.todo "forestFromBlocks"
+   Parser.Tree.forestFromBlocks Parser.Block.empty indentation blocks |> Result.withDefault []
 
-type alias Blockkk data =
-    { data | indent : Int }
-
-
-forestFromBlocks1 : List ExpBlockData -> List (Tree ExpBlockData)
-forestFromBlocks1 blocks =
-    Parser.Tree.forestFromBlocks Parser.Block.empty_ identity identity blocks |> Result.withDefault []
 
 init : Dict String String -> Language -> String -> EditRecord
 init inclusionData lang str =

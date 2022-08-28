@@ -103,8 +103,10 @@ toPrimitiveBlockForest lang str =
         |> String.lines
         |> Parser.PrimitiveBlock.parse lang isVerbatimLine
         |> List.map (Compiler.Transform.transform lang)
-        |> Parser.Tree.forestFromBlocks { emptyBlock | indent = -2 } identity identity
+        |> Parser.Tree.forestFromBlocks { emptyBlock | indent = -2 }  .indent
         |> Result.withDefault []
+
+
 
 
 isVerbatimLine : String -> Bool
