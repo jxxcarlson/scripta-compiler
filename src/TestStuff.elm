@@ -1,14 +1,18 @@
 module TestStuff exposing (..)
 
-
+import Compiler.DifferEq
 import Markup
 import Parser.PrimitiveBlock
-import Scripta.Language exposing(Language(..))
-import Compiler.DifferEq
+import Scripta.Language exposing (Language(..))
 
-toPrimitiveBlocks = Markup.toPrimitiveBlocks L0Lang
 
-diffc a b = Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq .indent (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+toPrimitiveBlocks =
+    Markup.toPrimitiveBlocks L0Lang
+
+
+diffc a b =
+    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq .indent (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+
 
 textA1 =
     """abc
@@ -31,7 +35,10 @@ textB1 =
 jkl
 """
 
-textB = String.replace "In this case, $G$ is the functor with" "In this case, $G$ is the functor wieth" textA
+
+textB =
+    String.replace "In this case, $G$ is the functor with" "In this case, $G$ is the functor wieth" textA
+
 
 textA =
     """
