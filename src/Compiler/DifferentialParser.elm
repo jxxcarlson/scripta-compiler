@@ -133,6 +133,7 @@ updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunction
 updateFunctions lang =
     { chunker = chunker lang -- String -> List chunk
     , chunkEq = chunkEq -- chunk -> chunk -> Bool
+    , chunkIndent = .indent
     , chunkParser = parser lang -- : chunk -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String

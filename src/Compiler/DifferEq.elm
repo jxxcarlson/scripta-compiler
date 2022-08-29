@@ -1,4 +1,4 @@
-module Compiler.DifferEq exposing (diff, diffc, backwardClosure)
+module Compiler.DifferEq exposing (diff, diffc, backwardClosure, forwardClosure)
 
 import Compiler.Differ exposing (DiffRecord)
 import List.Extra
@@ -8,8 +8,8 @@ import List.Extra
 u = axb, v = ayb, where a is the greatest common prefix
 and b is the greatest common suffix. Return DiffRecord a b x y
 -}
-diff : (q -> q -> Bool) -> List q -> List q -> DiffRecord q
-diff eq u v =
+diff : (q -> q -> Bool) -> (q -> Int) -> List q -> List q -> DiffRecord q
+diff eq indentation u v =
     let
         a =
             commonInitialSegment eq u v
@@ -39,10 +39,10 @@ diff eq u v =
         _ =
             List.map List.length [ a, b, x, y ] |> Debug.log "!! DIFF"
     in
-    DiffRecord a b x y
+    DiffRecord a b x y |> backwardClosure indentation v -- |> forwardClosure indentation v
 
 backwardClosure : (q -> Int) -> List q -> DiffRecord q -> DiffRecord q
-backwardClosure level t diffRecord =
+backwardClosure level changedItems diffRecord =
     let
         n = List.length diffRecord.commonInitialSegment
     in
@@ -53,22 +53,49 @@ backwardClosure level t diffRecord =
               case List.Extra.unconsLast diffRecord.commonInitialSegment of
                   Nothing -> diffRecord
                   Just (last, remaining) ->
-                      backwardClosure level t
-                        ({diffRecord | commonInitialSegment = remaining
-                                      , middleSegmentInSource = last :: diffRecord.middleSegmentInSource
-                                      , middleSegmentInTarget = case List.Extra.getAt (n - 1) t of
-                                                Nothing -> diffRecord.middleSegmentInTarget
-                                                Just item_ -> item_ :: diffRecord.middleSegmentInTarget
-                          })
+                      backwardClosure level changedItems (retreat last remaining changedItems diffRecord )
             else
             diffRecord
 
-
-
-diffc : (q -> q -> Bool) -> List q -> List q -> List Int
-diffc eq u v =
+retreat : q -> List q -> List q -> DiffRecord q -> DiffRecord q
+retreat last remaining changedItems diffRecord =
     let
-        r = diff eq u v
+        n = List.length diffRecord.commonInitialSegment
+    in
+    ({diffRecord | commonInitialSegment = remaining
+          , middleSegmentInSource = last :: diffRecord.middleSegmentInSource
+          , middleSegmentInTarget = case List.Extra.getAt (n - 1) changedItems of
+                    Nothing -> diffRecord.middleSegmentInTarget
+                    Just item_ -> item_ :: diffRecord.middleSegmentInTarget
+     })
+
+
+forwardClosure : (q -> Int) -> List q -> DiffRecord q -> DiffRecord q
+forwardClosure level changedItems diffRecord =
+    case List.Extra.uncons diffRecord.commonTerminalSegment of
+        Nothing -> diffRecord
+        Just (first, remaining) ->
+            if level first == 0 then
+              diffRecord
+            else
+              forwardClosure level changedItems (advance first remaining changedItems diffRecord )
+
+advance : q -> List q -> List q -> DiffRecord q -> DiffRecord q
+advance first remaining changedItems diffRecord =
+   let
+       n = List.length diffRecord.commonTerminalSegment + List.length diffRecord.middleSegmentInTarget
+   in
+   {diffRecord | commonTerminalSegment = remaining
+          , middleSegmentInSource = first :: diffRecord.middleSegmentInSource
+          , middleSegmentInTarget = case List.Extra.getAt (n - 1) changedItems of
+                    Nothing -> diffRecord.middleSegmentInTarget
+                    Just item_ -> item_ :: diffRecord.middleSegmentInTarget
+   }
+
+diffc : (q -> q -> Bool) -> (q -> Int) -> List q -> List q -> List Int
+diffc eq ind u v =
+    let
+        r = diff eq ind u v
     in
        List.map List.length [r.commonInitialSegment, r.commonTerminalSegment, r.middleSegmentInSource, r.middleSegmentInTarget]
 

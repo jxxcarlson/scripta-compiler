@@ -8,28 +8,14 @@ import Compiler.DifferEq
 
 toPrimitiveBlocks = Markup.toPrimitiveBlocks L0Lang
 
-diffc a b = Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq (toPrimitiveBlocks a) (toPrimitiveBlocks b)
-
-diff2 a b =
-   let
-     oldBlocks = toPrimitiveBlocks a
-     newBlocks = toPrimitiveBlocks b
-     dr1 = Compiler.DifferEq.diff Parser.PrimitiveBlock.eq oldBlocks newBlocks
-   in
-     Compiler.DifferEq.backwardClosure .indent newBlocks dr1
-
-diff2c a b =
-   let
-       r = diff2 a b
-   in
-   List.map List.length [r.commonInitialSegment, r.commonTerminalSegment, r.middleSegmentInSource, r.middleSegmentInTarget]
+diffc a b = Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq .indent (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 textA1 =
     """abc
 
-def
+  def
 
-ghi
+  ghi
 
 jkl
 """
@@ -38,9 +24,9 @@ jkl
 textB1 =
     """abc
 
-def
+  def!
 
-ghi!
+  ghi
 
 jkl
 """
