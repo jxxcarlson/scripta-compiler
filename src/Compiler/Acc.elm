@@ -2,7 +2,9 @@ module Compiler.Acc exposing
     ( Accumulator
     , init
     , transformAccumulate
+    , InitialAccumulatorData
     , transformST
+    , initialData
     )
 
 import Compiler.ASTTools
@@ -27,6 +29,13 @@ import Tree exposing (Tree)
 indentationQuantum =
     2
 
+initialData : Scripta.Language.Language -> InitialAccumulatorData
+initialData lang =
+           {  language  = lang
+             , mathMacros = ""
+             , textMacros  = ""
+             , vectorSize = 4
+             }
 
 type alias Accumulator =
     { headingIndex : Vector

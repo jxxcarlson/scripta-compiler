@@ -1,5 +1,6 @@
 module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions, differentialParser, init, update)
 
+import Compiler.Acc
 import Compiler.Differ
 import Compiler.DifferEq
 import Dict exposing (Dict)
@@ -14,7 +15,7 @@ type alias EditRecord chunk parsedChunk accumulator =
     , accumulator : accumulator
     , lang : Language
     , messages : List String
-    , includedFiles : List String
+    , initialData : InitialData
     }
 
 
@@ -25,23 +26,31 @@ type alias UpdateFunctions chunk parsedChunk acc =
     , chunkParser : chunk -> parsedChunk
     , forestFromBlocks : List parsedChunk -> List (Tree parsedChunk)
     , getMessages : List (Tree parsedChunk) -> List String
-    , accMaker : Scripta.Language.Language -> List (Tree parsedChunk) -> ( acc, List (Tree parsedChunk) )
+    , accMaker : Compiler.Acc.InitialAccumulatorData -> List (Tree parsedChunk) -> ( acc, List (Tree parsedChunk) )
     }
 
-type alias InitialData parsedChunk =
+type alias InitialData1 parsedChunk =
     {  language : Language
      , content : String
      , macroData : List parsedChunk
      }
 
+type alias InitialData  =
+   {  language : Language
+     , mathMacros : String
+     , textMacros : String
+     , vectorSize : Int
+     }
 
 init : UpdateFunctions chunk parsedChunk acc
-    -> InitialData parsedChunk
+    -> InitialData
+    -> String
     -> EditRecord chunk parsedChunk acc
-init f data =
+init f initialData content =
     let
+
         chunks =
-            f.chunker data.content
+            f.chunker content
 
         parsed_ =
             List.map f.chunkParser chunks
@@ -50,15 +59,15 @@ init f data =
             f.forestFromBlocks parsed_
 
         ( newAccumulator, tree ) =
-            f.accMaker data.language tree_
+            f.accMaker initialData tree_
     in
-    { lang = data.language
+    { lang = initialData.language
     , chunks = chunks
     , parsed = parsed_
     , tree = tree
     , accumulator = newAccumulator
     , messages = f.getMessages tree
-    , includedFiles = []
+    , initialData = initialData
     }
 
 
@@ -91,7 +100,7 @@ update f editRecord sourceText =
             f.forestFromBlocks parsed_
 
         ( newAccumulator, tree ) =
-            f.accMaker editRecord.lang tree_
+            f.accMaker editRecord.initialData tree_
     in
     -- TODO: real update of accumulator
     { lang = editRecord.lang
@@ -100,7 +109,7 @@ update f editRecord sourceText =
     , tree = tree
     , accumulator = newAccumulator
     , messages = f.getMessages tree
-    , includedFiles = []
+    , initialData = editRecord.initialData
     }
 
 

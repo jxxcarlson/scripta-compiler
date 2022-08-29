@@ -41,75 +41,93 @@ forestFromBlocks blocks =
 
 init : Dict String String -> Language -> String -> EditRecord
 init inclusionData lang str =
-    let
-        chunks : List PrimitiveBlock
-        chunks =
-            chunker lang str
+  let
+      initialData =
+           {  language  = lang
+             , mathMacros = ""
+             , textMacros  = ""
+             , vectorSize = 4
+             }
+  in
+  Compiler.AbstractDifferentialParser.init (updateFunctions lang) initialData str
 
-        -- Get the names of the files to include in the main document
-        includedFiles : List String
-        includedFiles =
-            case List.head chunks of
+--
+--init2 : Dict String String -> Language -> String -> EditRecord
+--init2 inclusionData lang str =
+--    let
+--        chunks : List PrimitiveBlock
+--        chunks =
+--            chunker lang str
+--
+--
+--
+--        includedFiles = getIncludedFiles chunks
+--
+--        macroData = getMacroData includedFiles inclusionData lang
+--
+--        parsed_ =
+--            List.map (Markup.primitiveBlockToExpressionBlock lang) chunks
+--
+--        tree_ =
+--            forestFromBlocks parsed_
+--
+--        -- Tree { content } ->
+--        ( newAccumulator, tree ) =
+--            Compiler.Acc.transformAccumulate lang tree_
+--    in
+--    { lang = lang
+--    , chunks = chunks
+--    , parsed = parsed_
+--    , tree = tree
+--    , accumulator = newAccumulator
+--    , messages = Markup.messagesFromForest tree
+--    , includedFiles = includedFiles
+--    }
+
+getMacroData includedFiles inclusionData lang =
+    case List.head includedFiles of
+            Nothing -> []
+            Just macroFileName ->
+                makeBlocks macroFileName inclusionData lang
+
+-- A document with files to be loaded has the form
+-- || load-files
+-- file1
+-- file2
+-- ..
+-- | title
+-- Chem 101
+-- ...
+-- So the below is how we extract those file names from the document
+-- Note that the dictionary 'inclusionData : Dict String String'
+-- has keys which are file (document) names and whose values
+-- are document contents
+getIncludedFiles : List PrimitiveBlock -> List String
+getIncludedFiles chunks =
+    case List.head chunks of
+        Nothing ->
+            []
+
+        Just chunk ->
+            let
+                lines =
+                    chunk.content
+            in
+            case List.head lines of
                 Nothing ->
                     []
 
-                Just chunk ->
-                    let
-                        lines =
-                            chunk.content
-                    in
-                    case List.head lines of
-                        Nothing ->
-                            []
+                Just "|| load-files" ->
+                    List.drop 1 lines
 
-                        Just "|| load-files" ->
-                            List.drop 1 lines
-
-                        _ ->
-                            []
-
-        -- Prepend macro definitions if any.
-        updatedChunks : List PrimitiveBlock
-        updatedChunks =
-            case List.head includedFiles of
-                Nothing ->
-                    chunks
-
-                Just fileName ->
-                    prependContent fileName inclusionData chunks
-
-        parsed_ =
-            List.map (Markup.primitiveBlockToExpressionBlock lang) updatedChunks
-
-        tree_ =
-            forestFromBlocks parsed_
-
-        -- Tree { content } ->
-        ( newAccumulator, tree ) =
-            Compiler.Acc.transformAccumulate lang tree_
-    in
-    { lang = lang
-    , chunks = chunks
-    , parsed = parsed_
-    , tree = tree
-    , accumulator = newAccumulator
-    , messages = Markup.messagesFromForest tree
-    , includedFiles = includedFiles
-    }
-
-
-{-| Prepend a block of tex macros corresponding to the text retrieved from 'dict' with key 'tag'
--}
-prependContent : String -> Dict String String -> List PrimitiveBlock -> List PrimitiveBlock
-prependContent tag dict blocks =
-    makeBlocks tag dict ++ blocks
-
+                _ ->
+                    []
 
 {-| Function makeBlock looks up the text corresponding to 'tag' in 'dict'
 and uses it to produce a primitive block of macro definitions.
 -}
-makeBlocks : String -> Dict String String -> List PrimitiveBlock
-makeBlocks tag dict =
+makeBlocks : String -> Dict String String -> Language -> List ExpressionBlock
+makeBlocks tag dict lang =
     let
         empty =
             []
@@ -122,6 +140,7 @@ makeBlocks tag dict =
             parseL0 (String.lines content)
                 |> List.filter (\pb -> List.member pb.name [ Just "mathmacros", Just "textmacros" ])
                 |> List.map (\pb -> { pb | content = pb.content |> List.filter (\line_ -> line_ /= "") })
+                |> List.map (Markup.primitiveBlockToExpressionBlock lang)
 
 
 parseL0 : List String -> List PrimitiveBlock
