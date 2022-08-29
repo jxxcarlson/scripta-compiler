@@ -1,4 +1,4 @@
-module Parser.Utility exposing (getLeadingBlanks, l0TitleParser, leadingBlanks, microLaTeXTitleParser, parseTitle)
+module Parser.Utility exposing (getKeyedParagraph, getLeadingBlanks, l0TitleParser, leadingBlanks, microLaTeXTitleParser, parseTitle)
 
 import Parser exposing ((|.), (|=), Parser)
 import Scripta.Language exposing (Language(..))
@@ -22,7 +22,44 @@ leadingBlanks =
         |= Parser.getOffset
         |= Parser.getSource
 
+{-|
 
+If the text is
+
+    abc
+    def
+
+    Vacation:
+    sun
+    sea
+    good food
+
+    ho ho ho!
+
+then 'run (keyedParagraphParser "Vacation:") theText'
+will return
+
+    Vacation:
+    sun
+    sea
+    good food
+
+
+-}
+keyedParagraphParser : String -> Parser String
+keyedParagraphParser headline =
+    Parser.succeed (\start end src -> String.slice start end src)
+        |. Parser.chompUntil headline
+        |= Parser.getOffset
+        |. Parser.chompUntil "\n\n"
+        |= Parser.getOffset
+        |= Parser.getSource
+
+getKeyedParagraph : String -> String -> Maybe String
+getKeyedParagraph headline target =
+    case Parser.run (keyedParagraphParser headline) target of
+        Err _ -> Nothing
+        Ok data -> Just data
 l0TitleParser : Parser String
 l0TitleParser =
     Parser.succeed (\start end src -> String.slice start end src |> String.dropLeft 8 |> String.trimRight)
