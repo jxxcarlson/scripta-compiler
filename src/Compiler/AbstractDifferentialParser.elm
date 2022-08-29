@@ -2,6 +2,7 @@ module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions
 
 import Compiler.Differ
 import Compiler.DifferEq
+import Dict exposing (Dict)
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 
@@ -27,16 +28,20 @@ type alias UpdateFunctions chunk parsedChunk acc =
     , accMaker : Scripta.Language.Language -> List (Tree parsedChunk) -> ( acc, List (Tree parsedChunk) )
     }
 
+type alias InitialData parsedChunk =
+    {  language : Language
+     , content : String
+     , macroData : List parsedChunk
+     }
 
-init :
-    Language
-    -> UpdateFunctions chunk parsedChunk acc
-    -> String
+
+init : UpdateFunctions chunk parsedChunk acc
+    -> InitialData parsedChunk
     -> EditRecord chunk parsedChunk acc
-init lang f text =
+init f data =
     let
         chunks =
-            f.chunker text
+            f.chunker data.content
 
         parsed_ =
             List.map f.chunkParser chunks
@@ -45,9 +50,9 @@ init lang f text =
             f.forestFromBlocks parsed_
 
         ( newAccumulator, tree ) =
-            f.accMaker lang tree_
+            f.accMaker data.language tree_
     in
-    { lang = lang
+    { lang = data.language
     , chunks = chunks
     , parsed = parsed_
     , tree = tree
