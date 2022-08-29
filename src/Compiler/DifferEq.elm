@@ -1,6 +1,7 @@
-module Compiler.DifferEq exposing (diff)
+module Compiler.DifferEq exposing (diff, diffc, backwardClosure)
 
 import Compiler.Differ exposing (DiffRecord)
+import List.Extra
 
 
 {-| Let u and v be two lists of strings. Write them as
@@ -36,10 +37,40 @@ diff eq u v =
                 b_
 
         _ =
-            List.map List.length [ a, b, x, y ]
+            List.map List.length [ a, b, x, y ] |> Debug.log "!! DIFF"
     in
     DiffRecord a b x y
 
+backwardClosure : (q -> Int) -> List q -> DiffRecord q -> DiffRecord q
+backwardClosure level t diffRecord =
+    let
+        n = List.length diffRecord.commonInitialSegment
+    in
+    case List.head diffRecord.middleSegmentInTarget of
+        Nothing -> diffRecord
+        Just item ->
+            if level item > 0 then
+              case List.Extra.unconsLast diffRecord.commonInitialSegment of
+                  Nothing -> diffRecord
+                  Just (last, remaining) ->
+                      backwardClosure level t
+                        ({diffRecord | commonInitialSegment = remaining
+                                      , middleSegmentInSource = last :: diffRecord.middleSegmentInSource
+                                      , middleSegmentInTarget = case List.Extra.getAt (n - 1) t of
+                                                Nothing -> diffRecord.middleSegmentInTarget
+                                                Just item_ -> item_ :: diffRecord.middleSegmentInTarget
+                          })
+            else
+            diffRecord
+
+
+
+diffc : (q -> q -> Bool) -> List q -> List q -> List Int
+diffc eq u v =
+    let
+        r = diff eq u v
+    in
+       List.map List.length [r.commonInitialSegment, r.commonTerminalSegment, r.middleSegmentInSource, r.middleSegmentInTarget]
 
 commonInitialSegment : (q -> q -> Bool) -> List q -> List q -> List q
 commonInitialSegment eq x y =
