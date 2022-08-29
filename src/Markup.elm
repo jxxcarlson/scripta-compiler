@@ -1,7 +1,6 @@
 module Markup exposing
     ( parse
-    , isVerbatimLine, messagesFromForest, parsePlainText
-    , primitiveBlockToExpressionBlock, toPrimitiveBlockForest, toPrimitiveBlocks
+    , isVerbatimLine, messagesFromForest, parsePlainText, primitiveBlockToExpressionBlock, toPrimitiveBlockForest, toPrimitiveBlocks
     )
 
 {-| A Parser for the experimental Markup module. See the app folder to see how it is used.

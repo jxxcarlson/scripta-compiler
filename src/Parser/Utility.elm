@@ -22,9 +22,8 @@ leadingBlanks =
         |= Parser.getOffset
         |= Parser.getSource
 
-{-|
 
-If the text is
+{-| If the text is
 
     abc
     def
@@ -44,7 +43,6 @@ will return
     sea
     good food
 
-
 -}
 keyedParagraphParser : String -> Parser String
 keyedParagraphParser headline =
@@ -55,11 +53,17 @@ keyedParagraphParser headline =
         |= Parser.getOffset
         |= Parser.getSource
 
+
 getKeyedParagraph : String -> String -> Maybe String
 getKeyedParagraph headline target =
     case Parser.run (keyedParagraphParser headline) target of
-        Err _ -> Nothing
-        Ok data -> Just data
+        Err _ ->
+            Nothing
+
+        Ok data ->
+            Just data
+
+
 l0TitleParser : Parser String
 l0TitleParser =
     Parser.succeed (\start end src -> String.slice start end src |> String.dropLeft 8 |> String.trimRight)

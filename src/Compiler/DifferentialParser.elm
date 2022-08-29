@@ -42,27 +42,51 @@ forestFromBlocks blocks =
 
 init : Dict String String -> Language -> String -> EditRecord
 init inclusionData lang str =
-  let
-      initialData = makeInitialData inclusionData lang
-  in
-  Compiler.AbstractDifferentialParser.init (updateFunctions lang) initialData str
+    let
+        initialData =
+            makeInitialData inclusionData lang
+    in
+    Compiler.AbstractDifferentialParser.init (updateFunctions lang) initialData str
+
+
+default lang =
+    { language = lang
+    , mathMacros = ""
+    , textMacros = ""
+    , vectorSize = 4
+    }
 
 
 makeInitialData inclusionData lang =
-   case Dict.get "macros" inclusionData of
-       Nothing ->
-           {  language  = lang
-             , mathMacros = ""
-             , textMacros  = ""
-             , vectorSize = 4
-             }
-       Just macroText ->
-           {  language  = lang
-            , mathMacros = Parser.Utility.getKeyedParagraph "|| mathmacros" macroText |> Maybe.withDefault ""
-            , textMacros  = Parser.Utility.getKeyedParagraph "|| textmacros" macroText |> Maybe.withDefault ""
-            , vectorSize = 4
-            }
+    let
+        keys =
+            Dict.keys inclusionData
 
+        macroKeys =
+            List.filter (\k -> String.contains "macro" (String.toLower k)) keys
+    in
+    case List.head macroKeys of
+        Nothing ->
+            default lang
+
+        Just fileName ->
+            case Dict.get fileName inclusionData of
+                Nothing ->
+                    default lang
+
+                Just macroText_ ->
+                    let
+                        macroText =
+                            macroText_ ++ "\n\n"
+
+                        _ =
+                            macroText
+                    in
+                    { language = lang
+                    , mathMacros = Parser.Utility.getKeyedParagraph "|| mathmacros" macroText |> Maybe.withDefault ""
+                    , textMacros = Parser.Utility.getKeyedParagraph "|| textmacros" macroText |> Maybe.withDefault ""
+                    , vectorSize = 4
+                    }
 
 
 updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunctions PrimitiveBlock ExpressionBlock Compiler.Acc.Accumulator
@@ -85,7 +109,6 @@ getMessages_ blocks =
 chunkEq : PrimitiveBlock -> PrimitiveBlock -> Bool
 chunkEq b1 b2 =
     b1.sourceText == b2.sourceText
-
 
 
 update : EditRecord -> String -> EditRecord

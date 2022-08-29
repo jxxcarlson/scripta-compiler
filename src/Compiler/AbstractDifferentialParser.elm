@@ -29,26 +29,29 @@ type alias UpdateFunctions chunk parsedChunk acc =
     , accMaker : Compiler.Acc.InitialAccumulatorData -> List (Tree parsedChunk) -> ( acc, List (Tree parsedChunk) )
     }
 
+
 type alias InitialData1 parsedChunk =
-    {  language : Language
-     , content : String
-     , macroData : List parsedChunk
-     }
+    { language : Language
+    , content : String
+    , macroData : List parsedChunk
+    }
 
-type alias InitialData  =
-   {  language : Language
-     , mathMacros : String
-     , textMacros : String
-     , vectorSize : Int
-     }
 
-init : UpdateFunctions chunk parsedChunk acc
+type alias InitialData =
+    { language : Language
+    , mathMacros : String
+    , textMacros : String
+    , vectorSize : Int
+    }
+
+
+init :
+    UpdateFunctions chunk parsedChunk acc
     -> InitialData
     -> String
     -> EditRecord chunk parsedChunk acc
 init f initialData content =
     let
-
         chunks =
             f.chunker content
 

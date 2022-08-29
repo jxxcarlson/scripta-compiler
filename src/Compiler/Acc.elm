@@ -1,10 +1,10 @@
 module Compiler.Acc exposing
     ( Accumulator
-    , init
-    , transformAccumulate
     , InitialAccumulatorData
-    , transformST
+    , init
     , initialData
+    , transformAccumulate
+    , transformST
     )
 
 import Compiler.ASTTools
@@ -29,13 +29,15 @@ import Tree exposing (Tree)
 indentationQuantum =
     2
 
+
 initialData : Scripta.Language.Language -> InitialAccumulatorData
 initialData lang =
-           {  language  = lang
-             , mathMacros = ""
-             , textMacros  = ""
-             , vectorSize = 4
-             }
+    { language = lang
+    , mathMacros = ""
+    , textMacros = ""
+    , vectorSize = 4
+    }
+
 
 type alias Accumulator =
     { headingIndex : Vector
@@ -85,12 +87,14 @@ transformAccumulate data ast =
     List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init data, [] ) ast
         |> (\( acc_, ast_ ) -> ( acc_, List.reverse ast_ ))
 
-type alias InitialAccumulatorData  =
-    {  language : Language
-     , mathMacros : String
-     , textMacros : String
-     , vectorSize : Int
-     }
+
+type alias InitialAccumulatorData =
+    { language : Language
+    , mathMacros : String
+    , textMacros : String
+    , vectorSize : Int
+    }
+
 
 init : InitialAccumulatorData -> Accumulator
 init data =
@@ -111,7 +115,9 @@ init data =
     , keyValueDict = Dict.empty
     , qAndAList = []
     , qAndADict = Dict.empty
-    } |> updateWithMathMacros data.mathMacros |> updateWithTextMacros data.textMacros
+    }
+        |> updateWithMathMacros data.mathMacros
+        |> updateWithTextMacros data.textMacros
 
 
 mapper ast_ ( acc_, tree_ ) =
@@ -383,13 +389,19 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
         -- provide for numbering of equations
         ( Just "mathmacros", VerbatimBlock [] ) ->
             case content of
-                Right _ -> accumulator
-                Left str -> updateWithMathMacros str accumulator
+                Right _ ->
+                    accumulator
+
+                Left str ->
+                    updateWithMathMacros str accumulator
 
         ( Just "textmacros", VerbatimBlock [] ) ->
             case content of
-                Right _ -> accumulator
-                Left str -> updateWithTextMacros str accumulator
+                Right _ ->
+                    accumulator
+
+                Left str ->
+                    updateWithTextMacros str accumulator
 
         ( Just _, VerbatimBlock _ ) ->
             -- TODO: tighten up
@@ -558,20 +570,21 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
         _ ->
             accumulator
 
-updateWithTextMacros : String -> Accumulator ->  Accumulator
+
+updateWithTextMacros : String -> Accumulator -> Accumulator
 updateWithTextMacros content accumulator =
-        { accumulator | textMacroDict = Compiler.TextMacro.buildDictionary (String.lines content |> normalzeLines) }
+    { accumulator | textMacroDict = Compiler.TextMacro.buildDictionary (String.lines content |> normalzeLines) }
 
-updateWithMathMacros : String -> Accumulator ->  Accumulator
-updateWithMathMacros   content accumulator =
+
+updateWithMathMacros : String -> Accumulator -> Accumulator
+updateWithMathMacros content accumulator =
     let
-        definitions = content
-            |> String.replace "\\begin{mathmacros}" ""
-            |> String.replace "\\end{mathmacros}" ""
-            |> String.replace "end" ""
-            |> String.trim
-
-
+        definitions =
+            content
+                |> String.replace "\\begin{mathmacros}" ""
+                |> String.replace "\\end{mathmacros}" ""
+                |> String.replace "end" ""
+                |> String.trim
 
         mathMacroDict =
             Parser.MathMacro.makeMacroDict (String.trim definitions)
