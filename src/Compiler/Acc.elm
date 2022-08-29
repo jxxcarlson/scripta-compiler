@@ -64,31 +64,33 @@ incrementCounter name dict =
     Dict.insert name (getCounter name dict + 1) dict
 
 
-transformST : Language -> Forest ExpressionBlock -> Forest ExpressionBlock
-transformST lang ast =
-    ast |> transformAccumulate lang |> Tuple.second
+transformST : InitialAccumulatorData -> Forest ExpressionBlock -> Forest ExpressionBlock
+transformST data ast =
+    ast |> transformAccumulate data |> Tuple.second
 
 
 {-| Note that function transformAccumulate operates on initialized accumulator.
 -}
-transformAccumulate : Language -> Forest ExpressionBlock -> ( Accumulator, Forest ExpressionBlock )
-transformAccumulate lang ast =
-    let
-        _ =
-            "1"
-    in
-    List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init 4, [] ) ast
+transformAccumulate : InitialAccumulatorData -> Forest ExpressionBlock -> ( Accumulator, Forest ExpressionBlock )
+transformAccumulate data ast =
+    List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init data, [] ) ast
         |> (\( acc_, ast_ ) -> ( acc_, List.reverse ast_ ))
 
+type alias InitialAccumulatorData  =
+    {  language : Language
+     , mathMacros : String
+     , textMacros : String
+     , vectorSize : Int
+     }
 
-init : Int -> Accumulator
-init k =
-    { headingIndex = Vector.init k
-    , documentIndex = Vector.init k
+init : InitialAccumulatorData -> Accumulator
+init data =
+    { headingIndex = Vector.init data.vectorSize
+    , documentIndex = Vector.init data.vectorSize
     , inList = False
     , counter = Dict.empty
     , blockCounter = 0
-    , itemVector = Vector.init 4
+    , itemVector = Vector.init data.vectorSize
     , numberedItemDict = Dict.empty
     , numberedBlockNames = Parser.Settings.numberedBlockNames
     , reference = Dict.empty
@@ -100,7 +102,7 @@ init k =
     , keyValueDict = Dict.empty
     , qAndAList = []
     , qAndADict = Dict.empty
-    }
+    } |> updateWithMathMacros data.mathMacros |> updateWithTextMacros data.textMacros
 
 
 mapper ast_ ( acc_, tree_ ) =
@@ -371,15 +373,14 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
 
         -- provide for numbering of equations
         ( Just "mathmacros", VerbatimBlock [] ) ->
-            updateWithMathMacros accumulator content
+            case content of
+                Right _ -> accumulator
+                Left str -> updateWithMathMacros str accumulator
 
         ( Just "textmacros", VerbatimBlock [] ) ->
             case content of
-                Left str ->
-                    { accumulator | textMacroDict = Compiler.TextMacro.buildDictionary (String.lines str |> normalzeLines) }
-
-                Right _ ->
-                    accumulator
+                Right _ -> accumulator
+                Left str -> updateWithTextMacros str accumulator
 
         ( Just _, VerbatimBlock _ ) ->
             -- TODO: tighten up
@@ -548,20 +549,20 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
         _ ->
             accumulator
 
+updateWithTextMacros : String -> Accumulator ->  Accumulator
+updateWithTextMacros content accumulator =
+        { accumulator | textMacroDict = Compiler.TextMacro.buildDictionary (String.lines content |> normalzeLines) }
 
-updateWithMathMacros accumulator content =
+updateWithMathMacros : String -> Accumulator ->  Accumulator
+updateWithMathMacros   content accumulator =
     let
-        definitions =
-            case content of
-                Left str ->
-                    str
-                        |> String.replace "\\begin{mathmacros}" ""
-                        |> String.replace "\\end{mathmacros}" ""
-                        |> String.replace "end" ""
-                        |> String.trim
+        definitions = content
+            |> String.replace "\\begin{mathmacros}" ""
+            |> String.replace "\\end{mathmacros}" ""
+            |> String.replace "end" ""
+            |> String.trim
 
-                _ ->
-                    ""
+
 
         mathMacroDict =
             Parser.MathMacro.makeMacroDict (String.trim definitions)
