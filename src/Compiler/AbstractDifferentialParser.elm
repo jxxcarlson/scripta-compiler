@@ -30,20 +30,12 @@ type alias UpdateFunctions chunk parsedChunk acc =
     }
 
 
-type alias InitialData1 parsedChunk =
-    { language : Language
-    , content : String
-    , macroData : List parsedChunk
-    }
-
-
 type alias InitialData =
     { language : Language
     , mathMacros : String
     , textMacros : String
     , vectorSize : Int
     }
-
 
 init :
     UpdateFunctions chunk parsedChunk acc
