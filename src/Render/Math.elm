@@ -47,16 +47,16 @@ displayedMath count acc settings ((ExpressionBlock { id }) as block) =
                 |> List.filter (\line -> not (String.left 6 line == "[label"))
                 |> List.filter (\line -> line /= "")
 
-        adjustedLines =
-            List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
-                |> List.filter (\line -> line /= "")
-                |> List.map (\line -> line ++ "\\\\")
+        --adjustedLines =
+        --    List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
+        --        |> List.filter (\line -> line /= "")
+        --        |> List.map (\line -> line ++ "\\\\")
 
         leftPadding =
             Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
     in
     Element.column [ leftPadding ]
-        [ mathText count w id DisplayMathMode (adjustedLines |> String.join "\n") ]
+        [ mathText count w id DisplayMathMode (filteredLines |> String.join "\n") ]
 
 
 getContent : ExpressionBlock -> String
@@ -95,7 +95,8 @@ equation count acc settings ((ExpressionBlock { id, args, properties }) as block
                     )
 
         content =
-            String.join "\n" adjustedLines
+            --String.join "\n" adjustedLines
+            String.join "\n" filteredLines
 
         leftPadding =
             Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
