@@ -1,6 +1,7 @@
 module L0.Parser.Line exposing (getNameAndArgs)
 
 
+getNameAndArgs : { a | content : String } -> (Maybe String, List String)
 getNameAndArgs line =
     let
         normalizedLine =

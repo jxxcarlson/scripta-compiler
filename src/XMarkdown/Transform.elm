@@ -55,7 +55,6 @@ handleVerbatim : PrimitiveBlock -> List String -> PrimitiveBlock
 handleVerbatim block rest =
     { block
         | name = Just "code"
-        , named = True
         , blockType = PBVerbatim
         , content =
             if Maybe.map String.trim (List.Extra.last rest) == Just "```" then
@@ -68,7 +67,7 @@ handleVerbatim block rest =
 
 handleMath : PrimitiveBlock -> PrimitiveBlock
 handleMath block =
-    { block | name = Just "math", named = True, blockType = PBVerbatim, content = List.filter (\item -> item /= "") block.content }
+    { block | name = Just "math", blockType = PBVerbatim, content = List.filter (\item -> item /= "") block.content }
 
 
 handleTitle : PrimitiveBlock -> String -> PrimitiveBlock

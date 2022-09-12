@@ -15,13 +15,9 @@ diffc a b =
 
 
 textA1 =
-    """abc
-
-  def
-
-  ghi
-
-jkl
+    """| theorem Pythagoras ref:foo bar lol:ga ga
+one two three
+four five six
 """
 
 
