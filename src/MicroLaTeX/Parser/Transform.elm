@@ -60,6 +60,7 @@ transform block =
             block
 
 
+handlePseudoBlockWithContent : PrimitiveBlock -> String -> Maybe String -> PrimitiveBlock
 handlePseudoBlockWithContent block macroName macroExpr =
     case macroExpr of
         Nothing ->
@@ -69,7 +70,7 @@ handlePseudoBlockWithContent block macroName macroExpr =
             case Dict.get macroName sectionDict of
                 Nothing ->
                     { block
-                        | content = ("| " ++ macroName) :: [ str ]
+                        | content = [str] --("| " ++ macroName) :: [ str ]
                         , name = Just macroName
                         , args = []
                         , blockType = PBOrdinary
@@ -77,8 +78,8 @@ handlePseudoBlockWithContent block macroName macroExpr =
 
                 Just val ->
                     { block
-                        | content = ("| section " ++ val) :: [ str ]
-                        , args = val :: []
+                        | content = [str] -- ("| section " ++ val) :: [ str ]
+                        ,  args = val :: []
                         , name = Just "section"
                         , blockType = PBOrdinary
                     }
