@@ -13,8 +13,13 @@ toPrimitiveBlocks =
 diffc a b =
     Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq .indent (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
-
-textA1 =
+textA1 = """$$
+AAA
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+QQQ
+$$
+"""
+textA11 =
     """| theorem Pythagoras ref:foo bar lol:ga ga
 one two three
 four five six

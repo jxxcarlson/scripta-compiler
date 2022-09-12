@@ -37,26 +37,18 @@ getMessages (ExpressionBlock { messages }) =
 
 
 toExpressionBlock : Language -> (Int -> String -> ( List Expr, List String )) -> PrimitiveBlock -> ExpressionBlock
-toExpressionBlock lang parse { name, args, indent, lineNumber, blockType, content, sourceText } =
+toExpressionBlock lang parse { name, args, properties, indent, lineNumber, blockType, content, sourceText } =
     let
         blockType_ =
             toBlockType blockType (List.drop 1 args)
 
-        content_ =
-            case blockType_ of
-                Paragraph ->
-                    content
-
-                _ ->
-                    List.drop 1 content
-
         ( exprs, messages ) =
-            mapContent parse lineNumber blockType_ (String.join "\n" content_)
+            mapContent parse lineNumber blockType_ (String.join "\n" content)
     in
     ExpressionBlock
         { name = name
         , args = args
-        , properties = Dict.empty
+        , properties = properties
         , indent = indent
         , lineNumber = lineNumber
         , numberOfLines = List.length content

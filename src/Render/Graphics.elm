@@ -50,13 +50,14 @@ image settings body =
 image2 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
     let
+        caption = getCaption properties
         label =
-            case params.caption of
+            case caption of
                 "" ->
                     "Figure " ++ getFigureLabel properties
 
                 _ ->
-                    "Figure " ++ getFigureLabel properties ++ ". " ++ params.caption
+                    "Figure " ++ getFigureLabel properties ++ ". " ++ caption
 
         url =
             case content of
@@ -76,7 +77,7 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
                 , params.placement
                 , Element.paddingXY 0 18
                 ]
-                [ Element.image [ Element.width params.width, params.placement ]
+                [ Element.image [ Element.width (getWidth properties), params.placement ]
                     { src = url, description = params.description }
                 , el
                     ([ params.placement, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
@@ -89,6 +90,15 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         { url = url
         , label = inner
         }
+
+-- Property Helpers
+
+getWidth : Dict String String -> Element.Length
+getWidth properties = Dict.get "width" properties |> Maybe.andThen String.toInt |> Maybe.withDefault 400 |> Element.px
+
+getCaption : Dict String String -> String
+getCaption properties = Dict.get "caption" properties |> Maybe.withDefault ""
+
 
 
 getVerbatimContent : ExpressionBlock -> String
