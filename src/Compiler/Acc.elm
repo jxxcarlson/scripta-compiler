@@ -158,13 +158,10 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | args = level :: "-" :: [] }
 
-        ( Just "document", id :: [] ) ->
-            ExpressionBlock
-                { block | args = [ id, "1", Vector.toString acc.documentIndex ] }
+        ( Just "document", _ ) ->
+                    ExpressionBlock
+                        { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
-        ( Just "document", id :: level :: _ ) ->
-            ExpressionBlock
-                { block | properties = Dict.insert "label" (Vector.toString acc.documentIndex) block.properties }
 
         ( Just "equation", _ ) ->
             let

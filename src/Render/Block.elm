@@ -298,10 +298,16 @@ collection _ _ _ _ =
     Element.none
 
 
-document _ _ settings ((ExpressionBlock { id, args }) as block) =
+document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
     let
+
         docId =
-            List.Extra.getAt 0 args |> Maybe.withDefault "--"
+            case args |> List.head of
+                Just idx -> idx
+                Nothing ->
+                    case properties |> Dict.toList |> List.head |> Maybe.map (\(a,b) -> a ++ ":" ++ b) of
+                        Just ident -> ident
+                        Nothing -> "(noId)"
 
         level =
             List.Extra.getAt 1 args |> Maybe.withDefault "1" |> String.toInt |> Maybe.withDefault 1
@@ -310,7 +316,7 @@ document _ _ settings ((ExpressionBlock { id, args }) as block) =
             List.map ASTTools.getText (getExprs block) |> Maybe.Extra.values |> String.join " " |> truncateString 35
 
         sectionNumber =
-            case List.Extra.getAt 2 args of
+            case Dict.get "label" properties of
                 Just "-" ->
                     "- "
 

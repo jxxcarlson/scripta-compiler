@@ -254,7 +254,9 @@ handleOrdinaryBlockError state line name =
             { state | output = "" :: state.output, status = LXNormal } |> fakeDebugLog state.i "ERROR (1)"
 
         else
-            { state | output = "" :: "\\red{^^^ missing end tag (2)}" :: state.output, status = LXNormal, stack = List.drop 1 state.stack } |> fakeDebugLog state.i "ERROR (2a)"
+            -- TODO: this is problematic
+            --{ state | output = "" :: "\\red{^^^ missing end tag (2)}" :: state.output, status = LXNormal, stack = List.drop 1 state.stack } |> fakeDebugLog state.i "ERROR (2a)"
+            { state | output = "" :: state.output, status = LXNormal, stack = List.drop 1 state.stack } |> fakeDebugLog state.i "ERROR (2a)"
 
     else
         case outputHead of
