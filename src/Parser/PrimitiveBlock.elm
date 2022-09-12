@@ -199,8 +199,9 @@ nextStep state =
                 Nothing ->
                     Done (List.reverse state.blocks)
 
-                Just block ->
+                Just block_ ->
                     let
+                        block = {block_ | content = dropLast block_.content}
                         blocks =
                             if block.content == [ "" ] then
                                 -- Debug.log (Tools.cyan "****, DONE" 13)
