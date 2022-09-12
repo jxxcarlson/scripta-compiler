@@ -1,4 +1,4 @@
-module Compiler.DifferentialParser exposing (EditRecord, init, update)
+module Compiler.DifferentialParser exposing (EditRecord, init, toExprBlock, update)
 
 import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
@@ -94,7 +94,7 @@ updateFunctions lang =
     { chunker = chunker lang -- String -> List chunk
     , chunkEq = chunkEq -- chunk -> chunk -> Bool
     , chunkIndent = .indent
-    , chunkParser = parser lang -- : chunk -> parsedChunk
+    , chunkParser = toExprBlock lang -- : chunk -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
     , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> List parsedChunk -> (acc, List parsedChunk)
@@ -121,8 +121,8 @@ chunker lang str =
     str |> Markup.toPrimitiveBlocks lang |> List.map (Compiler.Transform.transform lang)
 
 
-parser : Language -> PrimitiveBlock -> ExpressionBlock
-parser lang =
+toExprBlock : Language -> PrimitiveBlock -> ExpressionBlock
+toExprBlock lang =
     case lang of
         MicroLaTeXLang ->
             Parser.BlockUtil.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse
