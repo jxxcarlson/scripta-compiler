@@ -290,7 +290,7 @@ commitBlock state currentLine =
             let
                 block = case block_.blockType of
                     PBParagraph -> block_
-                    PBOrdinary -> {block_ | content = dropLast block_.content} |> Debug.log "BLOCK !!!"
+                    PBOrdinary -> {block_ | content = dropLast block_.content}
                     PBVerbatim -> {block_ | content = dropLast block_.content}
 
                 ( currentBlock, newBlocks ) =

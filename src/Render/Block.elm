@@ -93,7 +93,6 @@ render count acc settings ((ExpressionBlock { name, indent, args, blockType, con
                                            )
 
         VerbatimBlock _ ->
-            let _ = Debug.log "VERBATIM CONTENT" content in
             case content of
                 Right _ ->
                     Element.none
