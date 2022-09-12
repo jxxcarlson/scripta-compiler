@@ -25,6 +25,7 @@ type alias Options =
     , reverse : Maybe String
     , columns : Maybe (List Int)
     , lowest : Maybe Float
+    , caption : Maybe String
     , label : Maybe String
     , kind : Maybe String -- e.g, kind:line or --kind:scatter
     , domain : Maybe Range
@@ -41,20 +42,22 @@ fontWidth =
 
 
 chart : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-chart count acc settings ((ExpressionBlock { id, args }) as block) =
+chart count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         options : Options
         options =
             { timeseries = getArg "timeseries" args
             , reverse = getArg "reverse" args
-            , columns = getColumns args
-            , lowest = getArg "lowest" args |> getFloat
-            , label = getArgAfter "label" args
-            , kind = getArg "kind" args |> getString
-            , domain = getArg "domain" args |> Maybe.andThen getRange
-            , range = getArg "range" args |> Maybe.andThen getRange
+            , columns = Dict.get "columns" properties |> Maybe.map (String.split "," >> List.map String.trim >> List.map String.toInt >> Maybe.Extra.values)
+            , lowest = Dict.get "lowest" properties |> Maybe.andThen String.toFloat
+            , caption = Dict.get "caption" properties
+            , label = Dict.get "label" properties
+            , kind = Dict.get "kind" properties
+            , domain = Dict.get "domain" properties |> Maybe.andThen getRange
+            , range = Dict.get "range" properties |> Maybe.andThen getRange
             }
 
+        -- || chart timeseries reverse columns:1 lowest:3700 label:S&P  Index, 06/14/2021 to 06/10/2022
         data : Maybe ChartData
         data =
             csvToChartData options (getVerbatimContent block)
@@ -62,12 +65,18 @@ chart count acc settings ((ExpressionBlock { id, args }) as block) =
     Element.column [ Element.width (Element.px settings.width), Element.paddingEach { left = 48, right = 0, top = 36, bottom = 72 }, Element.spacing 24 ]
         [ Element.el [ Element.width (Element.px settings.width) ]
             (rawLineChart options data)
-        , case options.label of
-            Nothing ->
+        , case (options.label, options.caption) of
+             (Nothing, Nothing)->
                 Element.none
 
-            Just labelText ->
-                Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text labelText)
+             (Just labelText, Nothing) ->
+                Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| "Figure " ++ labelText)
+
+             (Nothing, Just captionText) ->
+                Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| captionText)
+
+             (Just labelText, Just captionText) ->
+                Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| "Figure " ++ labelText ++ ". " ++ captionText)
         ]
 
 
@@ -379,6 +388,7 @@ maybeChoose maybe f g x =
 -- ARG
 
 
+getColumns : List String -> Maybe (List Int)
 getColumns args =
     case getArg "columns" args of
         Nothing ->
