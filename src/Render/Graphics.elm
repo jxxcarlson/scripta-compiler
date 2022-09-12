@@ -68,7 +68,7 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
                     "bad block"
 
         params =
-            parameters settings args
+            parameters settings properties
 
         inner =
             column
@@ -77,8 +77,8 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
                 , params.placement
                 , Element.paddingXY 0 18
                 ]
-                [ Element.image [ Element.width (getWidth properties), params.placement ]
-                    { src = url, description = params.description }
+                [ Element.image [ Element.width params.width, params.placement ]
+                    { src = url, description = getDescription properties}
                 , el
                     ([ params.placement, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
                         ++ Render.Utility.highlightElement id settings.selectedId
@@ -93,12 +93,21 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
 
 -- Property Helpers
 
+getFigureLabel : Dict String String -> String
+getFigureLabel dict =
+    Dict.get "figure" dict |> Maybe.withDefault ""
+
 getWidth : Dict String String -> Element.Length
 getWidth properties = Dict.get "width" properties |> Maybe.andThen String.toInt |> Maybe.withDefault 400 |> Element.px
 
 getCaption : Dict String String -> String
 getCaption properties = Dict.get "caption" properties |> Maybe.withDefault ""
 
+getDescription : Dict String String -> String
+getDescription properties = Dict.get "description" properties |> Maybe.withDefault ""
+
+getPlacement : Dict String String -> String
+getPlacement properties = Dict.get "placement" properties |> Maybe.withDefault ""
 
 
 getVerbatimContent : ExpressionBlock -> String
@@ -161,7 +170,7 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
         -- arguments: ["width:250","caption:Fig","1"]
         qArgs : { caption : String, description : String, placement : Element.Attribute a, width : Element.Length }
         qArgs =
-            parameters settings args
+            parameters settings properties
 
         maybePair =
             case String.split "---" (getVerbatimContent block) of
@@ -286,37 +295,22 @@ imageParameters settings arguments =
     { caption = caption, description = description, placement = placement, width = width, url = url }
 
 
-parameters : Settings -> List String -> { caption : String, description : String, placement : Element.Attribute msg, width : Element.Length }
-parameters settings arguments =
+parameters : Settings -> Dict String String -> { caption : String, description : String, placement : Element.Attribute msg, width : Element.Length }
+parameters settings properties =
     let
-        keyValueStrings_ =
-            List.filter (\s -> String.contains ":" s) arguments
 
-        keyValueStrings : List String
-        keyValueStrings =
-            List.filter (\s -> not (String.contains "caption" s)) keyValueStrings_
+        captionPhrase = getCaption properties
 
-        captionLeadString =
-            List.filter (\s -> String.contains "caption" s) keyValueStrings_
-                |> String.join ""
-                |> String.replace "caption:" ""
-
-        captionPhrase =
-            (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) arguments) |> String.join " "
-
-        dict =
-            Render.Utility.keyValueDict keyValueStrings
 
         description : String
-        description =
-            Dict.get "caption" dict |> Maybe.withDefault ""
+        description = getDescription properties
 
         displayWidth =
             settings.width
 
         width : Element.Length
         width =
-            case Dict.get "width" dict of
+            case Dict.get "width" properties of
                 Nothing ->
                     px displayWidth
 
@@ -332,7 +326,7 @@ parameters settings arguments =
                             px w
 
         placement =
-            case Dict.get "placement" dict of
+            case Dict.get "placement" properties of
                 Nothing ->
                     centerX
 
@@ -351,6 +345,3 @@ parameters settings arguments =
     { caption = captionPhrase, description = description, placement = placement, width = width }
 
 
-getFigureLabel : Dict String String -> String
-getFigureLabel dict =
-    Dict.get "figure" dict |> Maybe.withDefault ""
