@@ -46,6 +46,7 @@ displayedMath count acc settings ((ExpressionBlock { id }) as block) =
                 |> List.filter (\line -> not (String.left 2 (String.trim line) == "$$"))
                 |> List.filter (\line -> not (String.left 6 line == "[label"))
                 |> List.filter (\line -> line /= "")
+                |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
 
         --adjustedLines =
         --    List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
@@ -79,6 +80,7 @@ equation count acc settings ((ExpressionBlock { id, args, properties }) as block
             -- lines of math text to be rendered: filter stuff out
             String.lines (getContent block)
                 |> List.filter (\line -> not (String.left 2 line == "$$") && not (String.left 6 line == "[label") && not (line == "end"))
+                |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
 
         adjustedLines =
             -- TODO: we need a better solution than the below for not messing up

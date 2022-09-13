@@ -81,7 +81,7 @@ Figure A below is is placed using
   </g>
 </svg>
 
-\\vskip{30}
+\\vspace{30}
 
 The text `|| svg ...` is a Scripta \\term{verbatim block}.
 The general form is
@@ -113,18 +113,18 @@ Click on an item in the index to view the associated text.
 For example, the `\\item` macro is used
 as in the exmple below.  Notice that there is no
 `\\begin{itemized} ... \\end{itemized}`
-\\vskip{15}
+\\vspace{15}
 
 
-  `\\item` \\vskip{}
+  `\\item` \\vspace{}
   `Fertilizer for the garden`
-   \\vskip{20}
+   \\vspace{20}
 
-  `\\item` \\vskip{}
+  `\\item` \\vspace{}
   `Four 20 lb. bags of compost`
-   \\vskip{20}
+   \\vspace{20}
 
-  `\\item` \\vskip{}
+  `\\item` \\vspace{}
   `Shovel`
 
 
@@ -154,15 +154,15 @@ subtitle: Complete list of macros and environments
 
 \\section{Document}
 
-\\strong{Topics} \\vskip{}
-\\ref{contents} contents, set-key contents-depth \\vskip{}
-\\ref{link-href} link, href \\vskip{}
-\\ref{term-index} term, term_, index \\vskip{}
-\\ref{ref} ref \\vskip{}
-\\ref{abstract} abstract \\vskip{}
-\\ref{footnote-endnotes} footnote, endnotes \\vskip{}
-\\ref{abstract} abstract \\vskip{}
-\\ref{bibitem-cite} bibitem, cite \\vskip{}
+\\strong{Topics} \\vspace{}
+\\ref{contents} contents, set-key contents-depth \\vspace{}
+\\ref{link-href} link, href \\vspace{}
+\\ref{term-index} term, term_, index \\vspace{}
+\\ref{ref} ref \\vspace{}
+\\ref{abstract} abstract \\vspace{}
+\\ref{footnote-endnotes} footnote, endnotes \\vspace{}
+\\ref{abstract} abstract \\vspace{}
+\\ref{bibitem-cite} bibitem, cite \\vspace{}
 
 \\subsection{Contents}
 
@@ -252,7 +252,7 @@ asserted\\footnote{See Jason York, Memoirs, 1988}
 \\term_{footnote}
 
 renders as
-\\vskip{10}
+\\vspace{10}
 
  The the lawyer asserted\\footnote{See Jason York, Memoirs, 1988}
 
@@ -297,11 +297,11 @@ Thus, if we want the section number to be 4, we say `\\setcounter{4}`. \\term_{s
 
 \\section{Formatting}
 
-\\subsection{vskip}
+\\subsection{vspace}
 
 
-Use `\\vskip` to insert vertical space, e.g. `\\vskip{10}`
-for 10 pixels of vertical space. \\term_{vskip}
+Use `\\vspace` to insert vertical space, e.g. `\\vspace{10}`
+for 10 pixels of vertical space. \\term_{vspace}
 
 
 
@@ -317,13 +317,13 @@ for 10 pixels of vertical space. \\term_{vskip}
 
 \\section{Font}
 
-\\strong{Font} \\vskip{}
-\\ref{large} large \\vskip{}
-\\ref{strong-bold-b} strong, bold, b \\vskip{}
-\\ref{italic-emph} italic, emph \\vskip{}
-\\ref{bolditalic-bi} bolditalic, bi \\vskip{}
-\\ref{stike} strike \\vskip{}
-\\ref{underline} underline \\vskip{}
+\\strong{Font} \\vspace{}
+\\ref{large} large \\vspace{}
+\\ref{strong-bold-b} strong, bold, b \\vspace{}
+\\ref{italic-emph} italic, emph \\vspace{}
+\\ref{bolditalic-bi} bolditalic, bi \\vspace{}
+\\ref{stike} strike \\vspace{}
+\\ref{underline} underline \\vspace{}
 
 \\subsection{large}
 
