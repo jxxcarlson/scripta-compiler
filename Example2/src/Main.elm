@@ -221,7 +221,7 @@ update msg model =
                 exportSettings_ =
                     { defaultSettings_ | isStandaloneDocument = True }
             in
-            if Scripta.API.getImageUrls model.editRecord.parsed == [] then
+            if Scripta.API.getImageUrls model.editRecord.tree == [] then
                 let
                     defaultSettings =
                         Scripta.API.defaultSettings
@@ -230,10 +230,10 @@ update msg model =
                         { defaultSettings | isStandaloneDocument = True }
 
                     exportText =
-                        Scripta.API.prepareContentForExport model.currentTime exportSettings model.editRecord.parsed
+                        Scripta.API.prepareContentForExport model.currentTime exportSettings model.editRecord.tree
 
                     fileName =
-                        Scripta.API.fileNameForExport model.editRecord.parsed
+                        Scripta.API.fileNameForExport model.editRecord.tree
                 in
                 ( model, download fileName exportText )
 
@@ -243,7 +243,7 @@ update msg model =
                     , tarFileState = PDF.TarFileProcessing
                     , message = "requesting TAR file"
                   }
-                , PDF.tarCmd model.currentTime exportSettings_ model.editRecord.parsed
+                , PDF.tarCmd model.currentTime exportSettings_ model.editRecord.tree
                     |> Cmd.map PDF
                 )
 
@@ -265,7 +265,7 @@ update msg model =
                 exportSettings =
                     { defaultSettings | isStandaloneDocument = True }
             in
-            ( { model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF" }, PDF.printCmd model.currentTime exportSettings model.editRecord.parsed |> Cmd.map PDF )
+            ( { model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF" }, PDF.printCmd model.currentTime exportSettings model.editRecord.tree |> Cmd.map PDF )
 
         GotTarFile result ->
             ( { model | printingState = PDF.PrintReady, message = "Got TarFile" }, Cmd.none )
@@ -423,7 +423,7 @@ printToPDF model =
                 , Element.Events.onClick (ChangePrintingState PDF.PrintWaiting)
                 , elementAttribute "target" "_blank"
                 ]
-                { url = PDF.pdfServUrl ++ Scripta.API.fileNameForExport model.editRecord.parsed, label = el [] (text "Click for PDF") }
+                { url = PDF.pdfServUrl ++ Scripta.API.fileNameForExport model.editRecord.tree, label = el [] (text "Click for PDF") }
 
 
 tarFileButton : Model -> Element Msg
@@ -444,7 +444,7 @@ tarFileButton model =
                 , Element.Events.onClick (ChangeTarFileState PDF.TarFileProcessing)
                 , elementAttribute "target" "_blank"
                 ]
-                { url = PDF.tarArchiveUrl ++ (Scripta.API.fileNameForExport model.editRecord.parsed |> String.replace ".tex" ".tar"), label = el [] (text "Click for Tar file") }
+                { url = PDF.tarArchiveUrl ++ (Scripta.API.fileNameForExport model.editRecord.tree |> String.replace ".tex" ".tar"), label = el [] (text "Click for Tar file") }
 
 
 elementAttribute : String -> String -> Attribute msg
