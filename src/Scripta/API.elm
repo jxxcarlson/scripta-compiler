@@ -61,7 +61,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, prepareContentForExport, getImageUrls, Settings
+@docs fileNameForExport, prepareContentForExport, getImageUrls, Settings, getBlockNames
 
 
 # Compatibility
@@ -143,7 +143,6 @@ type alias DisplaySettings =
 init : Dict String String -> Language -> String -> Compiler.DifferentialParser.EditRecord
 init importedFileDict language sourceText =
     Compiler.DifferentialParser.init importedFileDict language sourceText
-
 
 {-| -}
 update : Compiler.DifferentialParser.EditRecord -> String -> Compiler.DifferentialParser.EditRecord
@@ -285,7 +284,9 @@ verbatimContent (ExpressionBlock { content }) =
         Right _ ->
             Nothing
 
+{-|
 
+-}
 getBlockNames : Forest ExpressionBlock -> List String
 getBlockNames syntaxTree =
     syntaxTree
