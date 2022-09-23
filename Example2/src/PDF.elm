@@ -134,4 +134,5 @@ encodeForPDF id content urlList =
         [ ( "id", E.string id )
         , ( "content", E.string content )
         , ( "urlList", E.list E.string urlList )
+        , ( "packageList",  E.list E.string [] )
         ]
