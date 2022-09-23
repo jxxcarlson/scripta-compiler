@@ -61,7 +61,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, prepareContentForExport, getImageUrls, Settings, getBlockNames
+@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames
 
 
 # Compatibility
@@ -236,6 +236,9 @@ fileNameForExport ast =
 
 packageDict = Dict.fromList [("quiver", "quiver.sty")]
 
+{-|
+
+-}
 packageNames : Forest ExpressionBlock -> List String
 packageNames syntaxTree = getBlockNames syntaxTree
            |> List.map (\name -> Dict.get name packageDict)
