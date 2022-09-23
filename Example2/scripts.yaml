@@ -1,0 +1,7 @@
+scripts:
+
+  compile: elm-make src
+
+  watch: npx elm-watch hot
+
+  serve: npx serve ./assets -l 4000

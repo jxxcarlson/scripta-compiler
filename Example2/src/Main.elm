@@ -243,7 +243,7 @@ update msg model =
                     , tarFileState = PDF.TarFileProcessing
                     , message = "requesting TAR file"
                   }
-                , PDF.tarCmd model.currentTime exportSettings_ model.editRecord.tree
+                , PDF.tarCmd model.currentTime exportSettings_ model.editRecord
                     |> Cmd.map PDF
                 )
 
@@ -265,7 +265,7 @@ update msg model =
                 exportSettings =
                     { defaultSettings | isStandaloneDocument = True }
             in
-            ( { model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF" }, PDF.printCmd model.currentTime exportSettings model.editRecord.tree |> Cmd.map PDF )
+            ( { model | ticks = 0, printingState = PDF.PrintProcessing, message = "requesting PDF" }, PDF.printCmd model.currentTime exportSettings model.editRecord |> Cmd.map PDF )
 
         GotTarFile result ->
             ( { model | printingState = PDF.PrintReady, message = "Got TarFile" }, Cmd.none )

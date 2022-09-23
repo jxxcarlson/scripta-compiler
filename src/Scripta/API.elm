@@ -1,7 +1,7 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, prepareContentForExport, getImageUrls, Settings
+    , fileNameForExport, packageNames,  prepareContentForExport, getImageUrls, Settings
     , Msg, SyntaxTree
     , getBlockNames
     )
@@ -234,6 +234,12 @@ fileNameForExport ast =
         |> (\s -> s ++ ".tex")
 
 
+packageDict = Dict.fromList [("quiver", "quiver.sty")]
+
+packageNames : Forest ExpressionBlock -> List String
+packageNames syntaxTree = getBlockNames syntaxTree
+           |> List.map (\name -> Dict.get name packageDict)
+           |> Maybe.Extra.values
 {-| -}
 prepareContentForExport : Time.Posix -> Settings -> Forest ExpressionBlock -> String
 prepareContentForExport currentTime settings syntaxTree =
