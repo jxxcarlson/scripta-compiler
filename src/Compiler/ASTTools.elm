@@ -292,7 +292,13 @@ pairFromList strings =
 
 fixFrontMatterList : List String -> List String
 fixFrontMatterList strings =
-    loop { count = 1, input = strings, output = [] } nextStepFix |> List.reverse
+    loop { count = 1, input = strings, output = [] } nextStepFix |> List.reverse 
+    |> handleEmptyDocInfo
+
+handleEmptyDocInfo : List String -> List String
+handleEmptyDocInfo strings =
+    if strings == ["(docinfo)"] then ["date:"]
+    else strings
 
 
 type alias FixState =

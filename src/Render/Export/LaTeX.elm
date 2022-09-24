@@ -82,7 +82,7 @@ frontMatter currentTime ast =
             ASTTools.title ast |> (\title_ -> "\\title{" ++ title_ ++ "}")
 
         date =
-            Dict.get "date" dict |> Maybe.map (\date_ -> "\\date{" ++ date_ ++ "}") |> Maybe.withDefault "\\date{Today}"
+            Dict.get "date" dict |> Maybe.map (\date_ -> "\\date{" ++ date_ ++ "}") |> Maybe.withDefault ""
     in
     ("\\begin{document}"
         :: title
