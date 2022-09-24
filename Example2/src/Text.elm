@@ -569,7 +569,7 @@ In the case of our electron, we find that $t_{double} \\sim 10^{-16}\\,\\text{se
 """
 
 
-testFile =
+testFile2 =
     """
 \\title{Test Math Macros (MicroLaTeX)}
 
@@ -613,4 +613,13 @@ $$
 2: $\\cal{\\red{A}}$
 3: $\\foo{x}$,
 4: $\\foo{\\cal{C}}$
+"""
+
+testFile = """
+\\title{Image Export Test)}
+
+
+\\image{https://i.ibb.co/TKn2dBh/image.png width:400 caption:Test image}
+
+
 """

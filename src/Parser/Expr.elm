@@ -71,7 +71,7 @@ condenseUrl expr =
 
 
 smashUrl url =
-    String.split "/" url |> List.Extra.last |> Maybe.withDefault "?"
+    url |> String.replace "https://" "" |> String.replace "http://" ""
 
 
 type SExpr
