@@ -1,8 +1,11 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, packageNames,  prepareContentForExport, getImageUrls, Settings
-    , Msg, SyntaxTree, rawExport
+    , fileNameForExport
+    , packageNames  -- note used
+    ,  prepareContentForExport, getImageUrls
+    , Settings
+    , Msg, SyntaxTree, rawExport, encodeForPDF
     , getBlockNames
     )
 
@@ -74,7 +77,7 @@ The PDF module in Example2 requires these.
 
 import Compiler.ASTTools as ASTTools
 import Compiler.AbstractDifferentialParser
-import Compiler.Acc
+import Json.Encode as E
 import Compiler.DifferentialParser
 import Dict exposing (Dict)
 import Either exposing (Either(..))
@@ -83,7 +86,6 @@ import List.Extra
 import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Forest exposing (Forest)
-import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Regex
 import Render.Block
 import Render.Export.LaTeX
@@ -256,6 +258,33 @@ prepareContentForExport currentTime settings syntaxTree =
 {-| -}
 rawExport : Settings -> Forest ExpressionBlock -> String
 rawExport = Render.Export.LaTeX.rawExport
+
+
+encodeForPDF : Time.Posix -> Settings -> Forest ExpressionBlock -> E.Value
+encodeForPDF currentTime settings forest  =
+     let
+            imageUrls : List String
+            imageUrls =
+                getImageUrls forest
+
+            fileName : String
+            fileName =
+                fileNameForExport forest
+
+            contentForExport : String
+            contentForExport =
+                prepareContentForExport currentTime settings forest
+
+            packages : List String
+            packages = packageNames forest
+        in
+    E.object
+        [ ( "id", E.string fileName )
+        , ( "content", E.string contentForExport )
+        , ( "urlList", E.list E.string imageUrls )
+        , ( "packageList", E.list E.string packages )
+        ]
+
 
 {-| -}
 getImageUrls : Forest ExpressionBlock -> List String
