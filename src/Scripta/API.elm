@@ -2,7 +2,7 @@ module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
     , fileNameForExport, packageNames,  prepareContentForExport, getImageUrls, Settings
-    , Msg, SyntaxTree
+    , Msg, SyntaxTree, rawExport
     , getBlockNames
     )
 
@@ -61,7 +61,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames
+@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport
 
 
 # Compatibility
@@ -253,6 +253,9 @@ prepareContentForExport currentTime settings syntaxTree =
     in
     contentForExport
 
+{-| -}
+rawExport : Settings -> Forest ExpressionBlock -> String
+rawExport = Render.Export.LaTeX.rawExport
 
 {-| -}
 getImageUrls : Forest ExpressionBlock -> List String
