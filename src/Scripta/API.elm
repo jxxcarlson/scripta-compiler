@@ -64,7 +64,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport
+@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport,encodeForPDF
 
 
 # Compatibility
@@ -259,7 +259,7 @@ prepareContentForExport currentTime settings syntaxTree =
 rawExport : Settings -> Forest ExpressionBlock -> String
 rawExport = Render.Export.LaTeX.rawExport
 
-
+{-| -}
 encodeForPDF : Time.Posix -> Settings -> Forest ExpressionBlock -> E.Value
 encodeForPDF currentTime settings forest  =
      let
