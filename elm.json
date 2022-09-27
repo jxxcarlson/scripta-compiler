@@ -3,7 +3,7 @@
     "name": "jxxcarlson/scripta-compiler",
     "summary": "A compiler that transforms markup source text to HTML",
     "license": "MIT",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "exposed-modules": [
         "Scripta.API",
         "Scripta.Language"
