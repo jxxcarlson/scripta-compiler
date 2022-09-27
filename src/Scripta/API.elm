@@ -7,6 +7,7 @@ module Scripta.API exposing
     , Settings
     , Msg, SyntaxTree, rawExport, encodeForPDF
     , getBlockNames
+    , matchingIdsInAST
     )
 
 {-| Scripta.API provides the functions you will need for an application
@@ -72,6 +73,10 @@ See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 The PDF module in Example2 requires these.
 
 @docs Msg, SyntaxTree
+
+# Utility
+
+@docs matchingIdsInAST
 
 -}
 
@@ -157,6 +162,12 @@ type alias EditRecord =
    -- Compiler.AbstractDifferentialParser.EditRecord (Tree.Tree PrimitiveBlock) (Tree.Tree ExpressionBlock) Compiler.Acc.Accumulator
   Compiler.DifferentialParser.EditRecord
 
+
+-- EDITOR
+
+{-| -}
+matchingIdsInAST : String -> Forest ExpressionBlock -> List String
+matchingIdsInAST = ASTTools.matchingIdsInAST
 
 -- VIEW
 

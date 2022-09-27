@@ -62,8 +62,8 @@ printCmd currentTime settings forest =
         ]
 
 
-pdfCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
-pdfCmd currentTime settings editRecord =
+pdfCmd1 : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+pdfCmd1 currentTime settings editRecord =
     let
         imageUrls : List String
         imageUrls =
@@ -83,6 +83,21 @@ pdfCmd currentTime settings editRecord =
             , headers = [ Http.header "Content-Type" "application/json" ]
             , url = pdfServUrl
             , body = Http.jsonBody (encodeForPDF fileName contentForExport imageUrls packageNames)
+            , expect = Http.expectString GotPdfLink
+            , timeout = Nothing
+            , tracker = Nothing
+            }
+        ]
+
+
+pdfCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+pdfCmd currentTime settings editRecord =
+    Cmd.batch
+        [ Http.request
+            { method = "POST"
+            , headers = [ Http.header "Content-Type" "application/json" ]
+            , url = pdfServUrl
+            , body = Http.jsonBody (Scripta.API.encodeForPDF (currentTime |> Debug.log "TIME") settings editRecord.tree)
             , expect = Http.expectString GotPdfLink
             , timeout = Nothing
             , tracker = Nothing
