@@ -102,6 +102,7 @@ import Scripta.TOC
 import Time
 import Tree
 
+-- type alias MarkupMsg = Render.Msg.MarkupMsg
 
 {-| -}
 type alias SyntaxTree =

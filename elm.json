@@ -6,7 +6,8 @@
     "version": "2.4.0",
     "exposed-modules": [
         "Scripta.API",
-        "Scripta.Language"
+        "Scripta.Language",
+        "Render.Msg"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
