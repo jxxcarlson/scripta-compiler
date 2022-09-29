@@ -46,7 +46,7 @@ init inclusionData lang str =
         initialData =
             makeInitialData inclusionData lang
     in
-    Compiler.AbstractDifferentialParser.init (updateFunctions lang) initialData str
+    Compiler.AbstractDifferentialParser.init (updateFunctions lang) initialData (str ++ "\n")
 
 
 default lang =
@@ -113,7 +113,7 @@ chunkEq b1 b2 =
 
 update : EditRecord -> String -> EditRecord
 update editRecord text =
-    Compiler.AbstractDifferentialParser.update (updateFunctions editRecord.lang) editRecord text
+    Compiler.AbstractDifferentialParser.update (updateFunctions editRecord.lang) editRecord (text ++ "\n")
 
 
 chunker : Language -> String -> List PrimitiveBlock

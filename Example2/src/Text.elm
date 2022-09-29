@@ -615,11 +615,28 @@ $$
 4: $\\foo{\\cal{C}}$
 """
 
-testFile = """
-\\title{Image Export Test)}
+testFile = """| title
+Astronomy Images
 
+[tags jxxcarlson:astronomy-images]
 
-\\image{https://i.ibb.co/TKn2dBh/image.png width:400 caption:Test image}
+| subheading
+Early Galaxies
 
+[image https://d2r55xnwy6nx47.cloudfront.net/uploads/2022/07/Oldest-galaxy.jpg]
 
-"""
+A newfound galaxy dubbed GLASS-z13, which is so far away that we see it as it appeared 300 million years after the Big Bang, now holds the record for the earliest known galaxy. That record is not expected to last long
+
+[link Two Weeks In, the Webb Space Telescope Is Reshaping Astronomy (Quanta Magazine) https://www.quantamagazine.org/two-weeks-in-the-webb-space-telescope-is-reshaping-astronomy-20220725/?mc_cid=4bb88e444c&mc_eid=50eb304b54]
+
+| subheading
+Southern Ring Nebula
+
+[image https://d2r55xnwy6nx47.cloudfront.net/uploads/2022/07/diptych-Nebula.jpg]
+
+| section -
+Neptune
+
+[image https://static01.nyt.com/images/2022/09/21/science/21sci-neptune3/21sci-neptune3-superJumbo.jpg?quality=75&auto=webp Webb Telescope]
+
+[image https://static01.nyt.com/images/2022/09/27/science/21sci-neptune2/21sci-neptune2-superJumbo.jpg?quality=75&auto=webp Voyager]"""
