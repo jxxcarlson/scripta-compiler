@@ -493,8 +493,8 @@ comment count acc settings ((ExpressionBlock { id, args }) as block) =
 quotation count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     Element.column [ Element.spacing 12 ]
         [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-            (renderWithDefault "| indent" count acc settings (getExprs block))
-        , Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
+            (renderWithDefault "(quotation)" count acc settings (getExprs block))
+        --, Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
         ]
 
 

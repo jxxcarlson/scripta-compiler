@@ -43,11 +43,11 @@ transform block =
 
 
 handleItem block firstLine rest =
-    { block | name = Just "item", blockType = PBOrdinary, content = "| item" :: firstLine :: rest }
+    { block | name = Just "item", blockType = PBOrdinary, content = firstLine :: rest }
 
 
 handleNumberedItem block firstLine rest =
-    { block | name = Just "numbered", blockType = PBOrdinary, content = "| numbered" :: firstLine :: rest }
+    { block | name = Just "numbered", blockType = PBOrdinary, content = firstLine :: rest }
 
 
 handleVerbatim : PrimitiveBlock -> List String -> PrimitiveBlock
@@ -101,7 +101,7 @@ handleQuotation block firstLine =
         args =
             firstLine |> String.dropLeft 2 |> String.words
     in
-    { block | args = args, blockType = PBOrdinary, name = Just "quotation" }
+    { block | args = args, content = (String.join " " args) :: List.drop 1 block.content, blockType = PBOrdinary, name = Just "quotation" }
 
 
 
