@@ -150,7 +150,7 @@ type alias DisplaySettings =
 {-| -}
 init : Dict String String -> Language -> String -> Compiler.DifferentialParser.EditRecord
 init importedFileDict language sourceText =
-    Compiler.DifferentialParser.init importedFileDict language sourceText
+    Compiler.DifferentialParser.init importedFileDict language sourceText |> Debug.log "!! ER"
 
 {-| -}
 update : Compiler.DifferentialParser.EditRecord -> String -> Compiler.DifferentialParser.EditRecord

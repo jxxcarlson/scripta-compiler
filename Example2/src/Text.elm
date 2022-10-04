@@ -616,27 +616,115 @@ $$
 """
 
 testFile = """| title
-Astronomy Images
 
-[tags jxxcarlson:astronomy-images]
+| title
+XMarkdown Visual Check
 
-| subheading
-Early Galaxies
+| contents
 
-[image https://d2r55xnwy6nx47.cloudfront.net/uploads/2022/07/Oldest-galaxy.jpg]
 
-A newfound galaxy dubbed GLASS-z13, which is so far away that we see it as it appeared 300 million years after the Big Bang, now holds the record for the earliest known galaxy. That record is not expected to last long
 
-[link Two Weeks In, the Webb Space Telescope Is Reshaping Astronomy (Quanta Magazine) https://www.quantamagazine.org/two-weeks-in-the-webb-space-telescope-is-reshaping-astronomy-20220725/?mc_cid=4bb88e444c&mc_eid=50eb304b54]
 
-| subheading
-Southern Ring Nebula
+@[tags check]
 
-[image https://d2r55xnwy6nx47.cloudfront.net/uploads/2022/07/diptych-Nebula.jpg]
 
-| section -
-Neptune
+# Typography
 
-[image https://static01.nyt.com/images/2022/09/21/science/21sci-neptune3/21sci-neptune3-superJumbo.jpg?quality=75&auto=webp Webb Telescope]
 
-[image https://static01.nyt.com/images/2022/09/27/science/21sci-neptune2/21sci-neptune2-superJumbo.jpg?quality=75&auto=webp Voyager]"""
+Some *italic* and  **bold** text.  @[blue Blue stuff.]
+(Cool, no!)
+
+
+# Link
+
+[New York Times](https://nytimes.com)
+
+# Image
+
+
+
+![Bird](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhXplhW5-ydbNOJiJe1fp7oAM9xjRwX28ung&usqp=CAU)
+
+# Mathematics
+
+This is a formula: $a^2 + b^2 = c^2$.
+
+## Displayed formula
+
+$$
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+
+
+## Numbered formula
+
+|| equation
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+
+## Aligned equations
+
+
+|| aligned
+\\label{foo}
+a &= b + 1 \\\\
+c &= a^2 \\\\
+ &= b^2 + 2b + 1 \\\\
+
+
+## Theorems
+
+| theorem
+There are infinitely many primes $p \\equiv 1\\ mod\\ 4$. Isn't that nice?
+
+
+# Code
+
+Some inline code `a[0] := a[0] + 1`.  A block of code:
+
+```
+# multiplication table
+  for x in range(1, 11):
+      for y in range(1, 11):
+          print('%d ** %d = %d' % (x, y, x**y)
+```
+
+Here is the source text:
+
+|| code
+```
+# multiplication table
+  for x in range(1, 11):
+      for y in range(1, 11):
+          print('%d ** %d = %d' % (x, y, x**y)
+```
+
+# Bulleted Lists
+
+- One
+
+- Two
+
+  - Alpha
+
+  - Beta
+
+    - Ho ho ho!
+
+    - Ha ha !
+
+
+# Numbered Lists
+
+
+. One
+
+. Two
+
+  . Alpha
+
+  . Beta
+
+    . Ho ho ho!
+
+    . Ha ha!
+"""

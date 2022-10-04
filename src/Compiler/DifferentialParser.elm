@@ -43,6 +43,7 @@ forestFromBlocks blocks =
 init : Dict String String -> Language -> String -> EditRecord
 init inclusionData lang str =
     let
+        initialData : { language : Language, mathMacros : String, textMacros : String, vectorSize : number }
         initialData =
             makeInitialData inclusionData lang
     in
@@ -57,6 +58,7 @@ default lang =
     }
 
 
+makeInitialData : Dict String String -> Language -> { language : Language, mathMacros : String, textMacros : String, vectorSize : number }
 makeInitialData inclusionData lang =
     let
         keys =

@@ -93,7 +93,7 @@ handleTitle block firstLine =
                 level =
                     String.fromInt n
             in
-            { block | args = [ level ], blockType = PBOrdinary, name = Just "section", content = [ first, String.join " " (List.drop 1 words) ] }
+            { block | args = [ level ], blockType = PBOrdinary, name = Just "section", content = [ String.join " " (List.drop 1 words) ] }
 
 
 handleQuotation block firstLine =
