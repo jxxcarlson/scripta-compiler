@@ -31,13 +31,12 @@ transform block =
 
             else if String.left 2 firstLine == "> " then
                 handleQuotation block firstLine
-                --    handleOrdinaryBlock block (String.dropLeft 1 firstLine) rest_
-                --
-                --else if String.left 1 firstLine == "!" then
-                --    handleImageBlock block (String.dropLeft 1 firstLine) rest_
 
             else
-                block
+                if block.blockType == PBVerbatim then
+                  {block | name = Just "code", content = List.filter (\line -> line /= "```") block.content}
+                else
+                  block
 
         _ ->
             block
