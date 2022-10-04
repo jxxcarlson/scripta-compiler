@@ -32,11 +32,11 @@ transform block =
             else if String.left 2 firstLine == "> " then
                 handleQuotation block firstLine
 
+            else if block.blockType == PBVerbatim then
+                { block | name = Just "code", content = List.filter (\line -> line /= "```") block.content }
+
             else
-                if block.blockType == PBVerbatim then
-                  {block | name = Just "code", content = List.filter (\line -> line /= "```") block.content}
-                else
-                  block
+                block
 
         _ ->
             block
@@ -101,7 +101,7 @@ handleQuotation block firstLine =
         args =
             firstLine |> String.dropLeft 2 |> String.words
     in
-    { block | args = args, content = (String.join " " args) :: List.drop 1 block.content, blockType = PBOrdinary, name = Just "quotation" }
+    { block | args = args, content = String.join " " args :: List.drop 1 block.content, blockType = PBOrdinary, name = Just "quotation" }
 
 
 

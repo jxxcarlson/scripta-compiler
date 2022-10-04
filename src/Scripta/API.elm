@@ -1,13 +1,10 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport
-    , packageNames  -- note used
-    ,  prepareContentForExport, getImageUrls
-    , Settings
-    , Msg, SyntaxTree, rawExport, encodeForPDF
-    , getBlockNames
+    , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport, encodeForPDF
+    , Msg, SyntaxTree
     , matchingIdsInAST
+    -- note used
     )
 
 {-| Scripta.API provides the functions you will need for an application
@@ -65,7 +62,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport,encodeForPDF
+@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport, encodeForPDF
 
 
 # Compatibility
@@ -73,6 +70,7 @@ See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 The PDF module in Example2 requires these.
 
 @docs Msg, SyntaxTree
+
 
 # Utility
 
@@ -82,11 +80,11 @@ The PDF module in Example2 requires these.
 
 import Compiler.ASTTools as ASTTools
 import Compiler.AbstractDifferentialParser
-import Json.Encode as E
 import Compiler.DifferentialParser
 import Dict exposing (Dict)
 import Either exposing (Either(..))
 import Element exposing (..)
+import Json.Encode as E
 import List.Extra
 import Maybe.Extra
 import Parser.Block exposing (ExpressionBlock(..))
@@ -102,7 +100,10 @@ import Scripta.TOC
 import Time
 import Tree
 
+
+
 -- type alias MarkupMsg = Render.Msg.MarkupMsg
+
 
 {-| -}
 type alias SyntaxTree =
@@ -152,6 +153,7 @@ init : Dict String String -> Language -> String -> Compiler.DifferentialParser.E
 init importedFileDict language sourceText =
     Compiler.DifferentialParser.init importedFileDict language sourceText
 
+
 {-| -}
 update : Compiler.DifferentialParser.EditRecord -> String -> Compiler.DifferentialParser.EditRecord
 update =
@@ -160,15 +162,20 @@ update =
 
 {-| -}
 type alias EditRecord =
-   -- Compiler.AbstractDifferentialParser.EditRecord (Tree.Tree PrimitiveBlock) (Tree.Tree ExpressionBlock) Compiler.Acc.Accumulator
-  Compiler.DifferentialParser.EditRecord
+    -- Compiler.AbstractDifferentialParser.EditRecord (Tree.Tree PrimitiveBlock) (Tree.Tree ExpressionBlock) Compiler.Acc.Accumulator
+    Compiler.DifferentialParser.EditRecord
+
 
 
 -- EDITOR
 
+
 {-| -}
 matchingIdsInAST : String -> Forest ExpressionBlock -> List String
-matchingIdsInAST = ASTTools.matchingIdsInAST
+matchingIdsInAST =
+    ASTTools.matchingIdsInAST
+
+
 
 -- VIEW
 
@@ -248,15 +255,18 @@ fileNameForExport ast =
         |> (\s -> s ++ ".tex")
 
 
-packageDict = Dict.fromList [("quiver", "quiver.sty")]
+packageDict =
+    Dict.fromList [ ( "quiver", "quiver.sty" ) ]
 
-{-|
 
--}
+{-| -}
 packageNames : Forest ExpressionBlock -> List String
-packageNames syntaxTree = getBlockNames syntaxTree
-           |> List.map (\name -> Dict.get name packageDict)
-           |> Maybe.Extra.values
+packageNames syntaxTree =
+    getBlockNames syntaxTree
+        |> List.map (\name -> Dict.get name packageDict)
+        |> Maybe.Extra.values
+
+
 {-| -}
 prepareContentForExport : Time.Posix -> Settings -> Forest ExpressionBlock -> String
 prepareContentForExport currentTime settings syntaxTree =
@@ -267,29 +277,33 @@ prepareContentForExport currentTime settings syntaxTree =
     in
     contentForExport
 
+
 {-| -}
 rawExport : Settings -> Forest ExpressionBlock -> String
-rawExport = Render.Export.LaTeX.rawExport
+rawExport =
+    Render.Export.LaTeX.rawExport
+
 
 {-| -}
 encodeForPDF : Time.Posix -> Settings -> Forest ExpressionBlock -> E.Value
-encodeForPDF currentTime settings forest  =
-     let
-            imageUrls : List String
-            imageUrls =
-                getImageUrls forest
+encodeForPDF currentTime settings forest =
+    let
+        imageUrls : List String
+        imageUrls =
+            getImageUrls forest
 
-            fileName : String
-            fileName =
-                fileNameForExport forest
+        fileName : String
+        fileName =
+            fileNameForExport forest
 
-            contentForExport : String
-            contentForExport =
-                prepareContentForExport currentTime settings forest
+        contentForExport : String
+        contentForExport =
+            prepareContentForExport currentTime settings forest
 
-            packages : List String
-            packages = packageNames forest
-        in
+        packages : List String
+        packages =
+            packageNames forest
+    in
     E.object
         [ ( "id", E.string fileName )
         , ( "content", E.string contentForExport )
@@ -337,9 +351,8 @@ verbatimContent (ExpressionBlock { content }) =
         Right _ ->
             Nothing
 
-{-|
 
--}
+{-| -}
 getBlockNames : Forest ExpressionBlock -> List String
 getBlockNames syntaxTree =
     syntaxTree

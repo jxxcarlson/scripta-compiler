@@ -37,6 +37,7 @@ type alias InitialData =
     , vectorSize : Int
     }
 
+
 init :
     UpdateFunctions chunk parsedChunk acc
     -> InitialData

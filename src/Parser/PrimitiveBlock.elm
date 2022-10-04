@@ -11,11 +11,12 @@ module Parser.PrimitiveBlock exposing
 
 -}
 
+import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..), isEmpty, isNonEmptyBlank)
 import Scripta.Language exposing (Language(..))
-import Dict exposing(Dict)
+
 
 eq : PrimitiveBlock -> PrimitiveBlock -> Bool
 eq b1 b2 =
@@ -130,6 +131,7 @@ parsePlainText_ lines =
       }
     ]
 
+
 parse_ : Language -> (String -> Bool) -> List String -> List PrimitiveBlock
 parse_ lang isVerbatimLine lines =
     loop (init lang isVerbatimLine lines) nextStep
@@ -201,7 +203,9 @@ nextStep state =
 
                 Just block_ ->
                     let
-                        block = {block_ | content = dropLast block_.content}
+                        block =
+                            { block_ | content = dropLast block_.content }
+
                         blocks =
                             if block.content == [ "" ] then
                                 -- Debug.log (Tools.cyan "****, DONE" 13)
@@ -289,10 +293,16 @@ commitBlock state currentLine =
 
         Just block_ ->
             let
-                block = case block_.blockType of
-                    PBParagraph -> block_
-                    PBOrdinary -> {block_ | content = dropLast block_.content}
-                    PBVerbatim -> {block_ | content = dropLast block_.content}
+                block =
+                    case block_.blockType of
+                        PBParagraph ->
+                            block_
+
+                        PBOrdinary ->
+                            { block_ | content = dropLast block_.content }
+
+                        PBVerbatim ->
+                            { block_ | content = dropLast block_.content }
 
                 ( currentBlock, newBlocks ) =
                     if block.content == [ "" ] then
@@ -356,11 +366,14 @@ elaborate line pb =
                 -- TODO: note this change: it needs to be verified
                 Line.getNameAndArgs L0Lang line
 
-            args = cleanArgs args_
+            args =
+                cleanArgs args_
 
-            namedArgs = List.drop (List.length args) args_
+            namedArgs =
+                List.drop (List.length args) args_
 
-            properties = namedArgs |> prepareList |> prepareKVData
+            properties =
+                namedArgs |> prepareList |> prepareKVData
 
             content =
                 if pb.blockType == PBVerbatim then
@@ -373,93 +386,131 @@ elaborate line pb =
 
 
 {-| return all the elements in the list 'strs' up to the first element contaiing ':'
-    This functio is used to return the positional arguments but not the named ones. -}
+This functio is used to return the positional arguments but not the named ones.
+-}
 cleanArgs : List String -> List String
 cleanArgs strs =
     case List.Extra.findIndex (\t -> String.contains ":" t) strs of
-        Nothing -> strs
-        Just k -> List.take k strs
+        Nothing ->
+            strs
 
-explode :  List String -> List (List String)
-explode txt = List.map (String.split ":") txt
+        Just k ->
+            List.take k strs
+
+
+explode : List String -> List (List String)
+explode txt =
+    List.map (String.split ":") txt
+
 
 prepareList : List String -> List String
 prepareList strs =
     strs |> explode |> List.map fix |> List.concat
 
+
 fix : List String -> List String
 fix strs =
-   case strs of
-     (a::b::_) -> (a ++ ":")::b::[]
-     (a::[]) -> a::[]
-     [] -> []
+    case strs of
+        a :: b :: _ ->
+            (a ++ ":") :: b :: []
+
+        a :: [] ->
+            a :: []
+
+        [] ->
+            []
 
 
 prepareKVData : List String -> Dict String String
 prepareKVData data_ =
     let
-        initialState = {input = data_, kvList = [], currentKey = Nothing, currentValue = [], kvStatus = KVInKey}
+        initialState =
+            { input = data_, kvList = [], currentKey = Nothing, currentValue = [], kvStatus = KVInKey }
     in
     loop initialState nextKVStep
 
-type alias KVState = { input : List String
-   , kvList : List (String, List String)
-   , currentKey : Maybe String
-   , currentValue : List String
-   , kvStatus : KVStatus
-   }
 
-type KVStatus = KVInKey | KVInValue
+type alias KVState =
+    { input : List String
+    , kvList : List ( String, List String )
+    , currentKey : Maybe String
+    , currentValue : List String
+    , kvStatus : KVStatus
+    }
 
-nextKVStep :  KVState -> Step (KVState) (Dict String String)
+
+type KVStatus
+    = KVInKey
+    | KVInValue
+
+
+nextKVStep : KVState -> Step KVState (Dict String String)
 nextKVStep state =
     case List.Extra.uncons <| state.input of
         Nothing ->
             let
-              kvList_ =
-                case state.currentKey of
-                    Nothing -> state.kvList
-                    Just key -> (key,  state.currentValue) :: state.kvList
-                        |> List.map (\(k, v) -> (k, List.reverse v))
+                kvList_ =
+                    case state.currentKey of
+                        Nothing ->
+                            state.kvList
+
+                        Just key ->
+                            ( key, state.currentValue )
+                                :: state.kvList
+                                |> List.map (\( k, v ) -> ( k, List.reverse v ))
             in
-            Done (Dict.fromList (List.map (\(k,v) -> (k, String.join " " v)) kvList_))
-        Just (item, rest) ->
+            Done (Dict.fromList (List.map (\( k, v ) -> ( k, String.join " " v )) kvList_))
+
+        Just ( item, rest ) ->
             case state.kvStatus of
                 KVInKey ->
                     if String.contains ":" item then
                         case state.currentKey of
                             Nothing ->
-                              Loop {state | input = rest, currentKey = Just (String.dropRight 1 item), kvStatus = KVInValue }
+                                Loop { state | input = rest, currentKey = Just (String.dropRight 1 item), kvStatus = KVInValue }
+
                             Just key ->
-                              Loop {  input = rest
-                                     , currentKey = Just (String.dropRight 1 item)
-                                     , kvStatus = KVInValue
-                                     , kvList = (key,  state.currentValue) :: state.kvList
-                                     , currentValue = []
-                                     }
+                                Loop
+                                    { input = rest
+                                    , currentKey = Just (String.dropRight 1 item)
+                                    , kvStatus = KVInValue
+                                    , kvList = ( key, state.currentValue ) :: state.kvList
+                                    , currentValue = []
+                                    }
+
                     else
-                        Loop {state | input = rest}
+                        Loop { state | input = rest }
+
                 KVInValue ->
                     if String.contains ":" item then
                         case state.currentKey of
                             Nothing ->
-                              Loop { state | input = rest
-                                          , currentKey = Just (String.dropRight 1 item)
-                                          , currentValue = []
-                                          , kvStatus = KVInValue }
+                                Loop
+                                    { state
+                                        | input = rest
+                                        , currentKey = Just (String.dropRight 1 item)
+                                        , currentValue = []
+                                        , kvStatus = KVInValue
+                                    }
+
                             Just key ->
-                              Loop {  state | input = rest
-                                     , currentKey = Just (String.dropRight 1 item)
-                                     , kvStatus = KVInValue
-                                     , kvList = (key, state.currentValue) :: state.kvList
-                                     , currentValue = []
-                                     }
+                                Loop
+                                    { state
+                                        | input = rest
+                                        , currentKey = Just (String.dropRight 1 item)
+                                        , kvStatus = KVInValue
+                                        , kvList = ( key, state.currentValue ) :: state.kvList
+                                        , currentValue = []
+                                    }
+
                     else
-                       Loop {state | input = rest, currentValue = item :: state.currentValue}
+                        Loop { state | input = rest, currentValue = item :: state.currentValue }
+
 
 dropLast : List a -> List a
 dropLast list =
-    List.take ((List.length list) - 1) list
+    List.take (List.length list - 1) list
+
 
 addCurrentLine_ : Line -> PrimitiveBlock -> PrimitiveBlock
 addCurrentLine_ ({ prefix, content } as line) block =

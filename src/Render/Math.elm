@@ -52,7 +52,6 @@ displayedMath count acc settings ((ExpressionBlock { id }) as block) =
         --    List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
         --        |> List.filter (\line -> line /= "")
         --        |> List.map (\line -> line ++ "\\\\")
-
         leftPadding =
             Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
     in

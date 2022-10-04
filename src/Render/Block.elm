@@ -300,14 +300,18 @@ collection _ _ _ _ =
 
 document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
     let
-
         docId =
             case args |> List.head of
-                Just idx -> idx
+                Just idx ->
+                    idx
+
                 Nothing ->
-                    case properties |> Dict.toList |> List.head |> Maybe.map (\(a,b) -> a ++ ":" ++ b) of
-                        Just ident -> ident
-                        Nothing -> "(noId)"
+                    case properties |> Dict.toList |> List.head |> Maybe.map (\( a, b ) -> a ++ ":" ++ b) of
+                        Just ident ->
+                            ident
+
+                        Nothing ->
+                            "(noId)"
 
         level =
             List.Extra.getAt 1 args |> Maybe.withDefault "1" |> String.toInt |> Maybe.withDefault 1
@@ -494,6 +498,7 @@ quotation count acc settings ((ExpressionBlock { id, args, properties }) as bloc
     Element.column [ Element.spacing 12 ]
         [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "(quotation)" count acc settings (getExprs block))
+
         --, Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
         ]
 

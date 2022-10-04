@@ -65,17 +65,17 @@ chart count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     Element.column [ Element.width (Element.px settings.width), Element.paddingEach { left = 48, right = 0, top = 36, bottom = 72 }, Element.spacing 24 ]
         [ Element.el [ Element.width (Element.px settings.width) ]
             (rawLineChart options data)
-        , case (options.label, options.caption) of
-             (Nothing, Nothing)->
+        , case ( options.label, options.caption ) of
+            ( Nothing, Nothing ) ->
                 Element.none
 
-             (Just labelText, Nothing) ->
+            ( Just labelText, Nothing ) ->
                 Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| "Figure " ++ labelText)
 
-             (Nothing, Just captionText) ->
+            ( Nothing, Just captionText ) ->
                 Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| captionText)
 
-             (Just labelText, Just captionText) ->
+            ( Just labelText, Just captionText ) ->
                 Element.el [ Element.centerX, Font.size 14, Font.color (Element.rgb 0.5 0.5 0.7), Element.paddingEach { left = 0, right = 0, top = 24, bottom = 0 } ] (Element.text <| "Figure " ++ labelText ++ ". " ++ captionText)
         ]
 

@@ -50,7 +50,9 @@ image settings body =
 image2 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
     let
-        caption = getCaption properties
+        caption =
+            getCaption properties
+
         label =
             case caption of
                 "" ->
@@ -78,7 +80,7 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
                 , Element.paddingXY 0 18
                 ]
                 [ Element.image [ Element.width params.width, params.placement ]
-                    { src = url, description = getDescription properties}
+                    { src = url, description = getDescription properties }
                 , el
                     ([ params.placement, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
                         ++ Render.Utility.highlightElement id settings.selectedId
@@ -91,23 +93,34 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         , label = inner
         }
 
+
+
 -- Property Helpers
+
 
 getFigureLabel : Dict String String -> String
 getFigureLabel dict =
     Dict.get "figure" dict |> Maybe.withDefault ""
 
+
 getWidth : Dict String String -> Element.Length
-getWidth properties = Dict.get "width" properties |> Maybe.andThen String.toInt |> Maybe.withDefault 400 |> Element.px
+getWidth properties =
+    Dict.get "width" properties |> Maybe.andThen String.toInt |> Maybe.withDefault 400 |> Element.px
+
 
 getCaption : Dict String String -> String
-getCaption properties = Dict.get "caption" properties |> Maybe.withDefault ""
+getCaption properties =
+    Dict.get "caption" properties |> Maybe.withDefault ""
+
 
 getDescription : Dict String String -> String
-getDescription properties = Dict.get "description" properties |> Maybe.withDefault ""
+getDescription properties =
+    Dict.get "description" properties |> Maybe.withDefault ""
+
 
 getPlacement : Dict String String -> String
-getPlacement properties = Dict.get "placement" properties |> Maybe.withDefault ""
+getPlacement properties =
+    Dict.get "placement" properties |> Maybe.withDefault ""
 
 
 getVerbatimContent : ExpressionBlock -> String
@@ -298,12 +311,12 @@ imageParameters settings arguments =
 parameters : Settings -> Dict String String -> { caption : String, description : String, placement : Element.Attribute msg, width : Element.Length }
 parameters settings properties =
     let
-
-        captionPhrase = getCaption properties
-
+        captionPhrase =
+            getCaption properties
 
         description : String
-        description = getDescription properties
+        description =
+            getDescription properties
 
         displayWidth =
             settings.width
@@ -343,5 +356,3 @@ parameters settings properties =
                     centerX
     in
     { caption = captionPhrase, description = description, placement = placement, width = width }
-
-

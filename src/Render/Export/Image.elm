@@ -13,7 +13,6 @@ import Render.Utility
 exportBlock : Settings -> ExpressionBlock -> String
 exportBlock settings ((ExpressionBlock { content, args }) as block) =
     let
-
         params =
             imageParameters2 settings block
 
@@ -26,7 +25,6 @@ exportBlock settings ((ExpressionBlock { content, args }) as block) =
 export : Settings -> List Expr -> String
 export s exprs =
     let
-
         args =
             Render.Export.Util.getOneArg exprs |> String.words
 

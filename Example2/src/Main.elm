@@ -168,7 +168,7 @@ update msg model =
         SetDocument ->
             ( { model
                 | language = MicroLaTeXLang
-                , editRecord = Scripta.API.init Dict.empty XMarkdownLang Text.testFile
+                , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Text.testFile
                 , input = Text.testFile
                 , count = model.count + 1
                 , documentType = TestDocument

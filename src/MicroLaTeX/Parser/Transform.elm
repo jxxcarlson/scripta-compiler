@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.Transform exposing (transform)
+module MicroLaTeX.Parser.Transform exposing (macroArg, transform)
 
 import Compiler.Util
 import Dict exposing (Dict)
@@ -51,13 +51,18 @@ transform block =
                             Nothing
             in
             if List.member name pseudoBlockNamesWithContent then
-                handlePseudoBlockWithContent block name macroExpr
+                handlePseudoBlockWithContent block name (macroArg name name_ |> Just)
 
             else
                 block
 
         _ ->
             block
+
+
+macroArg : String -> String -> String
+macroArg macroName str =
+    String.replace ("\\" ++ macroName ++ "{") "" str |> String.dropRight 1
 
 
 handlePseudoBlockWithContent : PrimitiveBlock -> String -> Maybe String -> PrimitiveBlock
@@ -70,7 +75,7 @@ handlePseudoBlockWithContent block macroName macroExpr =
             case Dict.get macroName sectionDict of
                 Nothing ->
                     { block
-                        | content = [str] --("| " ++ macroName) :: [ str ]
+                        | content = [ str ] --("| " ++ macroName) :: [ str ]
                         , name = Just macroName
                         , args = []
                         , blockType = PBOrdinary
@@ -78,8 +83,8 @@ handlePseudoBlockWithContent block macroName macroExpr =
 
                 Just val ->
                     { block
-                        | content = [str] -- ("| section " ++ val) :: [ str ]
-                        ,  args = val :: []
+                        | content = [ str ] -- ("| section " ++ val) :: [ str ]
+                        , args = val :: []
                         , name = Just "section"
                         , blockType = PBOrdinary
                     }
