@@ -68,9 +68,11 @@ markupDict =
         -- STYLE
         , ( "strong", \g acc s exprList -> strong g acc s exprList )
         , ( "bold", \g acc s exprList -> strong g acc s exprList )
+        , ( "textbf", \g acc s exprList -> strong g acc s exprList )
         , ( "b", \g acc s exprList -> strong g acc s exprList )
         , ( "var", \g acc s exprList -> var g acc s exprList )
         , ( "italic", \g acc s exprList -> italic g acc s exprList )
+        , ( "textit", \g acc s exprList -> italic g acc s exprList )
         , ( "bi", \g acc s exprList -> boldItalic g acc s exprList )
         , ( "i", \g acc s exprList -> italic g acc s exprList )
         , ( "boldItalic", \g acc s exprList -> boldItalic g acc s exprList )
