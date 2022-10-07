@@ -1,4 +1,4 @@
-module Render.Block exposing (render)
+module Render.Block exposing (render, parseIFrame)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
@@ -23,7 +23,7 @@ import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Utility
 import String.Extra
-
+import Html
 
 
 -- TOPLEVEL
@@ -174,6 +174,7 @@ verbatimDict =
         , ( "tikz", Render.Graphics.tikz )
         , ( "load-files", renderNothing )
         , ( "include", renderNothing )
+        , ("iframe", renderIFrame)
         ]
 
 
@@ -530,6 +531,47 @@ highlightAttrs id settings =
         [ Events.onClick (SendId id) ]
 
 
+
+
+renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderIFrame count acc settings ((ExpressionBlock { id }) as block) =
+      case parseIFrame (getVerbatimContent block) of
+          Nothing -> Element.el [] (Element.text "Error parsing iframe")
+          Just properties ->
+              Element.column
+                  [ Events.onClick (SendId id)
+                  , Render.Utility.elementAttribute "id" id
+                  ]
+                  [Html.iframe [Html.Attributes.src <| properties.src
+                                , Html.Attributes.style "border" "none"
+                                 , Html.Attributes.style "width" (properties.width ++ "px")
+                                 , Html.Attributes.style "height" (properties.height ++ "px")
+                                 ] [] |> Element.html]
+
+
+parseIFrame : String -> Maybe {width: String, height: String, src: String}
+parseIFrame str =
+    let
+        data =
+            str
+              |> String.trim
+              |> String.replace "<iframe " ""
+              |> String.replace "</iframe>" ""
+              |> String.split " "
+              |> List.take 3
+              |> List.map (String.split "=" >> List.drop 1)
+              |> List.concat
+              |> List.map (String.replace "\"" "")
+    in
+    case data of
+        [src, width, height] -> Just {width = width, height = height, src = src}
+        _ -> Nothing
+
+
+
+
+
+ -- <iframe src="https://www.desmos.com/calculator/ycaswggsgb?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
 
 -- VERBATIM
 

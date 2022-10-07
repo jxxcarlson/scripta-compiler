@@ -116,4 +116,5 @@ isVerbatimLine str =
         || (String.left 12 str == "\\begin{code}")
         || (String.left 12 str == "\\begin{verbatim}")
         || (String.left 18 str == "\\begin{mathmacros}")
+        || (String.left 14 str == "\\begin{iframe}")
         || (String.left 2 str == "$$")

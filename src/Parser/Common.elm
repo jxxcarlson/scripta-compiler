@@ -8,7 +8,7 @@ type alias Classification =
 
 
 verbatimBlockNames =
-    [ "comment", "equation", "aligned", "code", "mathmacros" ]
+    [ "comment", "equation", "aligned", "code", "mathmacros", "iframe" ]
 
 
 bareBlockNames =

@@ -35,6 +35,7 @@ blockData =
     , ( "definition", { prefix = "|", arity = Arity 0 } )
     , ( "equation", { prefix = "||", arity = Arity 0 } )
     , ( "aligned", { prefix = "||", arity = Arity 0 } )
+    , ( "iframe", { prefix = "||", arity = Arity 0 } )
     , ( "example", { prefix = "|", arity = Arity 0 } )
     , ( "lemma", { prefix = "|", arity = Arity 0 } )
     , ( "note", { prefix = "|", arity = Arity 0 } )
