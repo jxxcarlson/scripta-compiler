@@ -1,5 +1,6 @@
 module Render.Block exposing (render, parseIFrame)
 
+import Bool.Extra
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
 import Dict exposing (Dict)
@@ -14,6 +15,7 @@ import List.Extra
 import Maybe.Extra
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
+import Parser.Utility
 import Render.Color as Color
 import Render.Data
 import Render.Elm
@@ -536,7 +538,7 @@ highlightAttrs id settings =
 renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderIFrame count acc settings ((ExpressionBlock { id }) as block) =
       case parseIFrame (getVerbatimContent block) of
-          Nothing -> Element.el [] (Element.text "Error parsing iframe")
+          Nothing -> Element.el [] (Element.text "Error parsing iframe or unregistered src")
           Just properties ->
               Element.column
                   [ Events.onClick (SendId id)
@@ -552,22 +554,24 @@ renderIFrame count acc settings ((ExpressionBlock { id }) as block) =
 parseIFrame : String -> Maybe {width: String, height: String, src: String}
 parseIFrame str =
     let
-        data =
-            str
-              |> String.trim
-              |> String.replace "<iframe " ""
-              |> String.replace "</iframe>" ""
-              |> String.split " "
-              |> List.take 3
-              |> List.map (String.split "=" >> List.drop 1)
-              |> List.concat
-              |> List.map (String.replace "\"" "")
+        src_ = Parser.Utility.parseItem "src" str
+        width_ = Parser.Utility.parseItem "width" str
+        height_ = Parser.Utility.parseItem "height" str
     in
-    case data of
-        [src, width, height] -> Just {width = width, height = height, src = src}
+    case (src_, width_, height_) of
+        (Just src, Just width, Just height) ->
+            if validSrc src then
+              Just {width = width, height = height, src = src}
+            else
+              Nothing
         _ -> Nothing
 
 
+allowedIFrameSrcList = ["https://www.desmos.com/calculator/"]
+
+validSrc : String -> Bool
+validSrc src =
+   List.map (\src_ -> String.contains src_ src) allowedIFrameSrcList |> Bool.Extra.any
 
 
 
