@@ -567,7 +567,7 @@ parseIFrame str =
         _ -> Nothing
 
 
-allowedIFrameSrcList = ["https://www.desmos.com/calculator/"]
+allowedIFrameSrcList = ["https://www.desmos.com/calculator/", "https://q.uiver.app/"]
 
 validSrc : String -> Bool
 validSrc src =
