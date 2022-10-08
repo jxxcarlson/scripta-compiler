@@ -18,6 +18,7 @@ numberedBlockNames =
     , "aligned"
     , "quiver"
     , "image"
+    , "iframe"
     ]
 
 

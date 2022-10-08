@@ -1,4 +1,4 @@
-module Render.Block exposing (render, parseIFrame)
+module Render.Block exposing (render)
 
 import Bool.Extra
 import Compiler.ASTTools as ASTTools
@@ -536,19 +536,33 @@ highlightAttrs id settings =
 
 
 renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-renderIFrame count acc settings ((ExpressionBlock { id }) as block) =
+renderIFrame count acc settings ((ExpressionBlock { id, properties }) as block) =
       case parseIFrame (getVerbatimContent block) of
           Nothing -> Element.el [] (Element.text "Error parsing iframe or unregistered src")
-          Just properties ->
+          Just iframeProperties ->
+              let
+                  w = String.toInt iframeProperties.width |> Maybe.withDefault 400
+
+                  caption_ = Dict.get "caption" properties
+                  label_ = Dict.get "figure" properties
+
+                  figureLabel = case (label_, caption_) of
+                        (Just label, Just caption ) ->"Figure " ++ label ++ ". " ++ caption
+                        (Just label, Nothing)  -> "Figure " ++ label
+                        (Nothing, Just caption) -> caption
+                        (Nothing, Nothing) -> ""
+              in
               Element.column
                   [ Events.onClick (SendId id)
                   , Render.Utility.elementAttribute "id" id
+                  , Element.width (Element.px w)
                   ]
-                  [Html.iframe [Html.Attributes.src <| properties.src
+                  [  Html.iframe [Html.Attributes.src <| iframeProperties.src
                                 , Html.Attributes.style "border" "none"
-                                 , Html.Attributes.style "width" (properties.width ++ "px")
-                                 , Html.Attributes.style "height" (properties.height ++ "px")
-                                 ] [] |> Element.html]
+                                 , Html.Attributes.style "width" (iframeProperties.width ++ "px")
+                                 , Html.Attributes.style "height" (iframeProperties.height ++ "px")
+                                 ] [] |> Element.html
+                    , Element.row [Element.centerX, Element.paddingXY 0 12] [Element.text figureLabel]]
 
 
 parseIFrame : String -> Maybe {width: String, height: String, src: String}

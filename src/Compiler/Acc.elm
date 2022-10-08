@@ -154,6 +154,11 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
 
+        ( Just "iframe", _ ) ->
+            ExpressionBlock
+                { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
+
+
         ( Just "section", level :: "-" :: [] ) ->
             ExpressionBlock
                 { block | args = level :: "-" :: [] }
@@ -253,7 +258,7 @@ reduceName str =
     if List.member str [ "equation", "aligned" ] then
         "equation"
 
-    else if List.member str [ "quiver", "image" ] then
+    else if List.member str [ "quiver", "image" , "iframe"] then
         "figure"
 
     else
