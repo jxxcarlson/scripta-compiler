@@ -4,9 +4,10 @@ import Compiler.Differ exposing (DiffRecord)
 import List.Extra
 
 
-{-| Let u and v be two lists of strings. Write them as
-u = axb, v = ayb, where a is the greatest common prefix
-and b is the greatest common suffix. Return DiffRecord a b x y
+{-| Let u and v be two lists of q's (strings, primitive blocks,
+whatever). Write them as u = axb, v = ayb, where a is the greatest
+common prefix and b is the greatest common suffix.
+Return DiffRecord a b x y
 -}
 diff : (q -> q -> Bool) -> (q -> Int) -> List q -> List q -> DiffRecord q
 diff eq indentation u v =
@@ -35,9 +36,6 @@ diff eq indentation u v =
 
             else
                 b_
-
-        --_ =
-        --    List.map List.length [ a, b, x, y ]
     in
     DiffRecord a b x y |> backwardClosure indentation |> forwardClosure indentation
 
