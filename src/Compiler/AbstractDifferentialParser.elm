@@ -86,6 +86,7 @@ update f editRecord sourceText =
         newChunks =
             f.chunker sourceText
 
+        diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
             Compiler.DifferEq.diff f.chunkEq f.chunkIndent editRecord.chunks newChunks
 
