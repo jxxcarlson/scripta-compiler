@@ -93,15 +93,19 @@ makeInitialData inclusionData lang =
 
 updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunctions PrimitiveBlock ExpressionBlock Compiler.Acc.Accumulator
 updateFunctions lang =
-    { chunker = chunker lang -- String -> List chunk
-    , chunkEq = chunkEq -- chunk -> chunk -> Bool
-    , chunkIndent = .indent
-    , chunkParser = toExprBlock lang -- : chunk -> parsedChunk
+    { chunker = chunker lang -- String -> List PrimitiveBlock
+    , chunkEq = chunkEq -- PrimitiveBlock -> PrimitiveBlock -> Bool
+    , chunkLevel = chunkLevel  -- PrimitiveBlock -> Bool
+    , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
-    , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> List parsedChunk -> (acc, List parsedChunk)
+    , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> Forest parsedChunk -> (acc, Forest parsedChunk)
     }
 
+
+chunkLevel : PrimitiveBlock -> Int
+chunkLevel block =
+    block.indent + (if block.name == Just "item" || block.name == Just "numbered" then 1 else 0)
 
 getMessages_ : List ExpressionBlock -> List String
 getMessages_ blocks =
