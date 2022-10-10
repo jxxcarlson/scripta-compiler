@@ -60,7 +60,8 @@ renderParagraph count acc settings ((ExpressionBlock { name, indent, args, block
                                     Background.color settings.backgroundColor
                         in
                         List.map (Render.Elm.render count acc settings) exprs
-                            |> (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
+                            |> clickableParagraph id (selectedColor id settings)
+                            -- (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
                             |> (\x ->
                                     if indent > 0 then
                                         Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
@@ -71,6 +72,19 @@ renderParagraph count acc settings ((ExpressionBlock { name, indent, args, block
 
                     Left _ ->
                         Element.none
+
+
+selectedColor id settings =
+    if id == settings.selectedId then
+        Background.color (Element.rgb 0.9 0.9 1.0)
+
+    else
+        Background.color settings.backgroundColor
+
+
+clickableParagraph : String -> Element.Attribute MarkupMsg ->  List (Element MarkupMsg) -> Element MarkupMsg
+clickableParagraph  id color elements = Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
+
 
 
 renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
@@ -89,7 +103,7 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                         env count acc settings block
                                             |> (\x ->
                                                     if indent > 0 then
-                                                        Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                                                        Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
                                                     else
                                                         x
@@ -99,7 +113,7 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                         f count acc settings block
                                             |> (\x ->
                                                     if indent > 0 then
-                                                        Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                                                        Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
                                                     else
                                                         x
@@ -121,7 +135,7 @@ renderVerbatimBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                         noSuchVerbatimBlock functionName str
 
                                     Just f ->
-                                        f count acc settings block
+                                        Element.el [selectedColor id settings] (f count acc settings block)
 
 -- DICT OF BLOCKS
 
