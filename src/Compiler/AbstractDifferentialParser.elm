@@ -22,7 +22,7 @@ type alias EditRecord chunk parsedChunk accumulator =
 type alias UpdateFunctions chunk parsedChunk acc =
     { chunker : String -> List chunk
     , chunkEq : chunk -> chunk -> Bool
-    , chunkIndent : chunk -> Int
+    , chunkLevel : chunk -> Int
     , chunkParser : chunk -> parsedChunk
     , forestFromBlocks : List parsedChunk -> List (Tree parsedChunk)
     , getMessages : List (Tree parsedChunk) -> List String
@@ -88,7 +88,7 @@ update f editRecord sourceText =
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
-            Compiler.DifferEq.diff f.chunkEq f.chunkIndent editRecord.chunks newChunks
+            Compiler.DifferEq.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks
 
         parsed_ =
             differentialParser f.chunkParser diffRecord editRecord
