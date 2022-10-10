@@ -2,7 +2,7 @@ module TestStuff exposing (..)
 
 import Compiler.DifferEq
 import Markup
-import Parser.PrimitiveBlock
+import Parser.PrimitiveBlock exposing(PrimitiveBlock)
 import Scripta.Language exposing (Language(..))
 
 
@@ -10,72 +10,69 @@ toPrimitiveBlocks =
     Markup.toPrimitiveBlocks L0Lang
 
 
+diff a b =
+    Compiler.DifferEq.diff Parser.PrimitiveBlock.eq (\block -> block.indent + (itemLevel block)) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+
+
 diffc a b =
-    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq .indent (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq (\block -> block.indent + (itemLevel block)) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 
-textA1 =
-    """$$
-AAA
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-QQQ
-$$
+itemLevel : PrimitiveBlock -> Int
+itemLevel block =
+    if block.name == Just "item" || block.name == Just "numbered" then 1 else 0
+
+y1 = """
+aaa
+
+bbb
+
+  ccc
+
+  ddd
+
+eee
 """
 
+y2 = """
+aaa
 
-textA11 =
-    """| theorem Pythagoras ref:foo bar lol:ga ga
-one two three
-four five six
+bbb
+
+  ccc
+
+  dxd
+
+eee
 """
 
-
-textB1 =
-    """abc
-
-  def!
-
-  ghi
-
-jkl
-"""
-
-
-textB =
-    String.replace "In this case, $G$ is the functor with" "In this case, $G$ is the functor wieth" textA
-
-
-textA =
+x1 =
     """
 | title
-Category Theory Macros
+L0 Test
 
-[tags jxxcarlson:category-theory-macros]
+| item
+Bread
 
+| item
+Cheese
 
-|| mathmacros
-\\newcommand{\\op}[1]{\\mathop{\\text{#1}}}
-\\newcommand{\\Set}{\\mathop{\\underline{\\text{Set}}}}
-\\newcommand{\\Group}{\\mathop{\\underline{\\text{Group}}}}
-\\newcommand{\\Etale}{\\mathop{\\bold{Etale}}}
-\\newcommand{\\Sh}{\\op{Sh}}
-\\newcommand{\\bN}{\\mathbb{N}}
-\\newcommand{\\cA}{\\mathcal{A}}
-\\newcommand{\\cB}{\\mathcal{B}}
-\\newcommand{\\cC}{\\mathcal{C}}
-\\newcommand{\\cD}{\\mathcal{D}}
-\\newcommand{\\cO}{\\mathcal{O}}
-\\newcommand{\\cH}{\\mathcal{H}}
-\\newcommand{\\cP}{\\mathcal{P}}
-\\newcommand{\\cV}{\\mathcal{V}}
-\\newcommand{\\Hom}{\\op{Hom}}
-\\newcommand{\\Prop}{\\op{Prop}}
-\\newcommand{\\cat}[1]{\\mathcal{#1}}
-\\newcommand{\\nat}{\\mathbb{N}}
-\\newcommand{\\reals}{\\mathbb{R}}
-\\newcommand{\\set}[1]{\\{ #1 \\}}
-\\newcommand{\\sett}[2]{\\{ #1\\ |\\ #2 \\}}
-\\newcommand {\\hom}{\\mathop{\\text{hom}}}
+| item
+Wine
+"""
 
 
+x2 =
+    """
+| title
+L0 Test
+
+| item
+Bread
+
+| numbered
+Cheese
+
+| item
+Wine
 """
