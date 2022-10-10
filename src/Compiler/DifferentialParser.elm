@@ -94,7 +94,7 @@ makeInitialData inclusionData lang =
 updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunctions PrimitiveBlock ExpressionBlock Compiler.Acc.Accumulator
 updateFunctions lang =
     { chunker = chunker lang -- String -> List PrimitiveBlock
-    , chunkEq = chunkEq -- PrimitiveBlock -> PrimitiveBlock -> Bool
+    , chunkEq = Parser.PrimitiveBlock.eq -- PrimitiveBlock -> PrimitiveBlock -> Bool
     , chunkLevel = chunkLevel  -- PrimitiveBlock -> Bool
     , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
@@ -110,11 +110,6 @@ chunkLevel block =
 getMessages_ : List ExpressionBlock -> List String
 getMessages_ blocks =
     List.map Parser.BlockUtil.getMessages blocks |> List.concat
-
-
-chunkEq : PrimitiveBlock -> PrimitiveBlock -> Bool
-chunkEq b1 b2 =
-    b1.sourceText == b2.sourceText
 
 
 update : EditRecord -> String -> EditRecord
