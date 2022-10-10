@@ -20,7 +20,8 @@ import Scripta.Language exposing (Language(..))
 
 eq : PrimitiveBlock -> PrimitiveBlock -> Bool
 eq b1 b2 =
-    b1.content == b2.content
+    b1.name == b2.name && b1.sourceText ==  b2.sourceText
+
 
 
 {-| -}
