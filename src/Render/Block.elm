@@ -147,7 +147,6 @@ blockDict =
         , ( "quotation", quotation )
         , ( "set-key", \_ _ _ _ -> Element.none )
         , ( "comment", comment )
-        , ( "set-key", \_ _ _ _ -> Element.none )
         , ( "q", question ) -- xx
         , ( "a", answer ) -- xx
         , ( "document", document )
@@ -155,12 +154,8 @@ blockDict =
         , ( "bibitem", bibitem )
         , ( "section", section ) -- xx
         , ( "subheading", subheading ) -- xx
-
-        --, ( "runninghead", \_ _ _ _ -> Element.none )
-        , ( "runninghead_", runninghead ) -- ??
+        , ( "runninghead_", \_ _ _ _ -> Element.none ) -- DEPRECATED
         , ( "banner", \_ _ _ _ -> Element.none )
-
-        --, ( "banner_", \_ _ _ _ -> Element.none ) -- ??
         , ( "title", \_ _ _ _ -> Element.none )
         , ( "subtitle", \_ _ _ _ -> Element.none )
         , ( "author", \_ _ _ _ -> Element.none )
@@ -199,7 +194,7 @@ verbatimDict =
         , ( "tikz", Render.Graphics.tikz )
         , ( "load-files", renderNothing )
         , ( "include", renderNothing )
-        , ("iframe", renderIFrame)
+        , ( "iframe", renderIFrame)
         ]
 
 
@@ -307,23 +302,44 @@ section count acc settings ((ExpressionBlock { id, args, properties }) as block)
 
 
 -- SCRIPTA
+-- Some blocks are signals to Scripta.  There is nothing to render
 
+{-|
+    A block of the form "| collection" informs Scripta that the body
+    of the document is a collection of links to other documents and
+    that it should be interpreted as a kind of table of contents
 
-runninghead : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-runninghead count acc settings ((ExpressionBlock { id, args }) as block) =
-    Element.paragraph ([ Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "| runninghead" count acc settings (getExprs block))
+    A collection document might look like this:
 
+    | title
+    Quantum Mechanics Notes
 
-banner count acc settings _ id exprs =
-    Element.paragraph ([ Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "| banner" count acc settings exprs)
+    [tags jxxcarlson:quantum-mechanics-notes, collection, system:startup, folder:krakow]
 
+    | collection
 
+    | document jxxcarlson:qmnotes-trajectories-uncertainty
+    Trajectories and Uncertainty
+
+    | document jxxcarlson:wave-packets-dispersion
+    Wave Packets and the Dispersion Relation
+
+    | document jxxcarlson:wave-packets-schroedinger
+    Wave Packets and Schrödinger's Equation
+
+-}
+collection : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 collection _ _ _ _ =
     Element.none
 
+{-|
+    Use a document block to include another document in a collection, e.g,
 
+        | document jxxcarlson:wave-packets-schroedinger
+        Wave Packets and Schrödinger's Equation
+
+-}
+document : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         docId =
@@ -373,6 +389,8 @@ document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
         ]
 
 
+
+-- DEPRECATE?? WE ARE USING THE ELEMENT VERSION
 ilink : String -> String -> Maybe String -> String -> Element MarkupMsg
 ilink docTitle selectedId selecteSlug docId =
     Element.Input.button []
@@ -394,6 +412,7 @@ ilink docTitle selectedId selecteSlug docId =
 -- QUESTIONS AND ANSWERS (FOR TEACHING)
 
 
+question : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 question count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     let
         title =
@@ -411,7 +430,7 @@ question count acc settings ((ExpressionBlock { id, args, properties }) as block
             (renderWithDefault "..." count acc settings (getExprs block))
         ]
 
-
+answer : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 answer count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         _ =
@@ -443,7 +462,10 @@ answer count acc settings ((ExpressionBlock { id, args }) as block) =
 
 -- LATEXY STUFF
 
+{-|
+    Used to render generic LaTeX environments
 
+-}
 env_ : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id, properties }) as block) =
     case List.head args of
@@ -453,7 +475,10 @@ env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, conte
         Just _ ->
             env count acc settings block
 
+{-|
+    Used to render generic LaTeX environments
 
+-}
 env : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 env count acc settings (ExpressionBlock { name, indent, args, blockType, content, id, properties }) =
     case content of
@@ -467,7 +492,9 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
                     (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
                 ]
 
-
+{-|
+    Used in function env (ender generic LaTeX environments)
+-}
 blockHeading : Maybe String -> List String -> Dict String String -> String
 blockHeading name args properties =
     if List.member name [ Just "banner_", Just "banner" ] then
@@ -480,27 +507,31 @@ blockHeading name args properties =
             ++ " "
             ++ String.join " " args
 
-
+{-|
+    Used in function env (ender generic LaTeX environments)
+-}
 blockLabel : Dict String String -> String
 blockLabel properties =
     Dict.get "label" properties |> Maybe.withDefault "??"
 
 
+
+-- VARIOUS BLOCKS
+
+{-|
+   indented block
+
+-}
+indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 indented count acc settings ((ExpressionBlock { id }) as block) =
     Element.paragraph ([ Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
         (renderWithDefault "| indent" count acc settings (getExprs block))
 
 
-getExprs : ExpressionBlock -> List Expr
-getExprs (ExpressionBlock { content }) =
-    case content of
-        Left _ ->
-            []
 
-        Right stuff ->
-            stuff
+{-|
 
-
+-}
 comment count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         author_ =
@@ -515,8 +546,8 @@ comment count acc settings ((ExpressionBlock { id, args }) as block) =
     in
     Element.column [ Element.spacing 6 ]
         [ Element.el [ Font.bold, Font.color Color.blue ] (Element.text author)
-        , Element.paragraph ([ Font.italic, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-            (renderWithDefault "| indent" count acc settings (getExprs block))
+        , Element.paragraph ([ Font.italic, Font.color Color.blue, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+            (renderWithDefault "| comment" count acc settings (getExprs block))
         ]
 
 
@@ -974,6 +1005,16 @@ vspace =
 
 
 -- HELPERS
+
+getExprs : ExpressionBlock -> List Expr
+getExprs (ExpressionBlock { content }) =
+    case content of
+        Left _ ->
+            []
+
+        Right stuff ->
+            stuff
+
 
 
 truncateString : Int -> String -> String

@@ -20,7 +20,33 @@ sectionDict =
         , ( "subheading", "4" )
         ]
 
+{-|
 
+        { indent = 0
+        , lineNumber = 123
+        , position = 4561
+        , content = ["\section{Introduction}"]
+        , name = Nothing
+        , args = []
+        , properties = Dict.empty
+        , sourceText "\section{Introduction}"
+        , blockType = PBParagraph
+        }
+
+        -->
+
+        { indent = 0
+        , lineNumber = 123
+        , position = 4561
+        , content = ["Introduction"]
+        , name = Just "section"
+        , args = ["1"]
+        , properties = Dict.empty
+        , sourceText "\section{Introduction}"
+        , blockType = PBOrdinaryBlock
+        }
+
+-}
 transform : PrimitiveBlock -> PrimitiveBlock
 transform block =
     let

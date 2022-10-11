@@ -19,5 +19,4 @@ transform lang block =
             block
 
         XMarkdownLang ->
-            -- TODO: implement this
             XMarkdown.Transform.transform block
