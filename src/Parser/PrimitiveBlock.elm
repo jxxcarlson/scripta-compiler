@@ -20,7 +20,10 @@ import Scripta.Language exposing (Language(..))
 
 eq : PrimitiveBlock -> PrimitiveBlock -> Bool
 eq b1 b2 =
-    b1.name == b2.name && b1.sourceText ==  b2.sourceText
+    if b1.sourceText /=  b2.sourceText then False
+    else if b1.name /= b2.name then False
+    else if b1.args /= b2.args then False
+    else True
 
 
 
