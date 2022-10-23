@@ -96,17 +96,40 @@ init isVerbatimLine lines =
 
 blockFromLine : Line -> PrimitiveLaTeXBlock
 blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
+    let
+        _ =
+            Debug.log "blockFromLine" line
+
+        _ =
+            Debug.log "blockType" (Line.getBlockType Scripta.Language.MicroLaTeXLang line.content)
+
+        classifier =
+            ClassifyBlock.classify line.content
+
+        ( blockType, label ) =
+            getBlockTypeAndLabel line.content
+    in
     { indent = indent
     , lineNumber = lineNumber
     , position = position
     , content = []
-    , name = Nothing
+    , name = label
     , args = []
     , properties = Dict.empty -- TODO complete this
     , sourceText = ""
-    , blockType = Line.getBlockType Scripta.Language.MicroLaTeXLang line.content
+    , blockType = blockType
     , status = Incomplete
     }
+
+
+getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
+getBlockTypeAndLabel str =
+    case ClassifyBlock.classify str of
+        CBeginBlock label ->
+            ( PBOrdinary, Just label )
+
+        _ ->
+            ( PBParagraph, Nothing )
 
 
 
@@ -115,7 +138,7 @@ blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
 
 nextStep : State -> Step State (List PrimitiveLaTeXBlock)
 nextStep state =
-    case List.head state.lines of
+    case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
             case state.currentBlock of
                 Nothing ->
@@ -153,30 +176,47 @@ nextStep state =
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
-                    if state.inBlock then
+                    if state.level > -1 then
                         Loop (addLine currentLine state)
 
                     else
-                        Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
+                        -- Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
+                        Loop (state |> beginBlock (CBeginBlock label) currentLine)
 
                 CEndBlock label ->
-                    if state.inBlock then
+                    if state.level > -1 then
                         Loop (state |> endBlock (CBeginBlock label) currentLine)
 
                     else
                         Loop (state |> endBlock (CBeginBlock label) currentLine |> transfer)
 
                 CSpecialBlock label ->
+                    let
+                        _ =
+                            Debug.log "CSpecialBlock" state.count
+                    in
                     Done []
 
                 CMathBlockDelim ->
+                    let
+                        _ =
+                            Debug.log "CMathBlockDelim" state.count
+                    in
                     Done []
 
                 CVerbatimBlockDelim ->
+                    let
+                        _ =
+                            Debug.log "CVerbatimBlockDelim" state.count
+                    in
                     Done []
 
                 CPlainText ->
-                    if state.inBlock then
+                    let
+                        _ =
+                            Debug.log "CPLainText" ( state.level, state.count, currentLine )
+                    in
+                    if state.level > -1 then
                         Loop (state |> addLine currentLine)
 
                     else if isEmpty currentLine then
@@ -186,7 +226,11 @@ nextStep state =
                         Loop (beginBlock CPlainText currentLine state)
 
                 CEmpty ->
-                    Done []
+                    let
+                        _ =
+                            Debug.log "CEmpty" state.count
+                    in
+                    Loop { state | lineNumber = state.lineNumber + 1 }
 
 
 
@@ -196,6 +240,9 @@ nextStep state =
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
     let
+        _ =
+            Debug.log "beginBlock" ( level, state.count, line )
+
         level =
             state.level + 1
 
@@ -203,36 +250,50 @@ beginBlock classifier line state =
             blockFromLine line
     in
     { state
-        | firstBlockLine = line.lineNumber
+        | lineNumber = state.lineNumber + 1
+        , firstBlockLine = line.lineNumber
         , indent = line.indent
         , level = level
-        , labelStack = ( classifier, level ) :: state.labelStack
+        , labelStack = ( classifier, level ) :: state.labelStack |> Debug.log "beginBlock, labelStack"
         , stack = newBlock :: state.stack
+        , count = state.count + 1
     }
 
 
 endBlock : Classification -> Line -> State -> State
 endBlock classifier line state =
+    let
+        _ =
+            Debug.log "endBlock" ( state.level, state.count, line )
+    in
     if Just ( classifier, state.level ) == List.head state.labelStack then
         case List.Extra.uncons state.stack of
             Nothing ->
-                state
+                { state | lineNumber = state.lineNumber + 1 }
 
             -- TODO: error state!
             Just ( block, stack_ ) ->
                 let
+                    content =
+                        slice state.firstBlockLine (line.lineNumber - 2) state.lines
+
                     newBlock =
-                        { block | content = slice state.firstBlockLine line.lineNumber state.lines }
+                        { block | content = content }
+
+                    _ =
+                        Debug.log "endBlock, newBlock.content" content
                 in
                 { state
-                    | blocks = newBlock :: state.blocks
+                    | lineNumber = state.lineNumber + 1
+                    , blocks = newBlock :: state.blocks |> Debug.log "endBlock, blocks"
                     , stack = List.drop 1 state.stack
-                    , labelStack = List.drop 1 state.labelStack
-                    , level = state.level - 1
+                    , labelStack = List.drop 1 state.labelStack |> Debug.log "endBlock, labelStack"
+                    , level = state.level - 1 |> Debug.log "endBlock, finalLevel"
+                    , count = state.count + 1
                 }
 
     else
-        state
+        { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
 
 
 
@@ -246,12 +307,16 @@ slice a b list =
 
 addLine : Line -> State -> State
 addLine line state =
-    state
+    { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
 
 
 handleBlank : State -> State
 handleBlank state =
-    state
+    let
+        _ =
+            Debug.log "handleBlank" ( state.level, state.count, state.lineNumber )
+    in
+    { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
 
 
 transfer : State -> State

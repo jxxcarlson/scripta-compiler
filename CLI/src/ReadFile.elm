@@ -17,8 +17,16 @@ program process =
                 )
             <|
                 \content ->
-                    IO.do (Proc.print content) <|
-                        -- IO.do (Proc.print (content |> )) <|
+                    -- IO.do (Proc.print content) <|
+                    let
+                        parsed : List PrimitiveLaTeXBlock
+                        parsed =
+                            content |> String.lines |> parse_ (\_ -> False)
+
+                        out =
+                            Debug.toString parsed
+                    in
+                    IO.do (Proc.print out) <|
                         \_ ->
                             IO.return ()
 
