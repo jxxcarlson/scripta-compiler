@@ -1,4 +1,4 @@
-module Parser.Utility exposing (parseItem, getKeyedParagraph, getLeadingBlanks, l0TitleParser, leadingBlanks, microLaTeXTitleParser, parseTitle)
+module Parser.Utility exposing (getKeyedParagraph, getLeadingBlanks, l0TitleParser, leadingBlanks, microLaTeXTitleParser, parseItem, parseTitle)
 
 import Parser exposing ((|.), (|=), Parser)
 import Scripta.Language exposing (Language(..))
@@ -76,15 +76,17 @@ l0TitleParser =
 
 itemParser : String -> Parser String
 itemParser item =
-     Parser.succeed (\start end src -> String.slice start end src )
-            |. Parser.chompUntil (item ++ "=")
-            |. Parser.symbol (item ++ "=\"")
-            |= Parser.getOffset
-            |. Parser.chompUntil "\""
-            |= Parser.getOffset
-            |= Parser.getSource
+    Parser.succeed (\start end src -> String.slice start end src)
+        |. Parser.chompUntil (item ++ "=")
+        |. Parser.symbol (item ++ "=\"")
+        |= Parser.getOffset
+        |. Parser.chompUntil "\""
+        |= Parser.getOffset
+        |= Parser.getSource
+
 
 {-|
+
     > str = """<iframe src="https://www.desmos.com/calculator/ycaswggsgb?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>"""
     > parseItem "src" str
       Just  "https://www.desmos.com/calculator/ycaswggsgb?embed"
@@ -93,8 +95,12 @@ itemParser item =
 parseItem : String -> String -> Maybe String
 parseItem item str =
     case Parser.run (itemParser item) str of
-        Ok output -> Just output
-        Err _ -> Nothing
+        Ok output ->
+            Just output
+
+        Err _ ->
+            Nothing
+
 
 microLaTeXTitleParser : Parser String
 microLaTeXTitleParser =

@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , eq, parse_, elaborate
+    , elaborate, eq, parse_
     )
 
 {-| The main function is
@@ -20,11 +20,17 @@ import Scripta.Language exposing (Language(..))
 
 eq : PrimitiveBlock -> PrimitiveBlock -> Bool
 eq b1 b2 =
-    if b1.sourceText /=  b2.sourceText then False
-    else if b1.name /= b2.name then False
-    else if b1.args /= b2.args then False
-    else True
+    if b1.sourceText /= b2.sourceText then
+        False
 
+    else if b1.name /= b2.name then
+        False
+
+    else if b1.args /= b2.args then
+        False
+
+    else
+        True
 
 
 {-| -}

@@ -1,7 +1,9 @@
-module Parser.PrimitiveLaTeXBlock exposing (..)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
 
 import Dict exposing (Dict)
-import Parser.Line as Line exposing (Line, PrimitiveBlockType(..), isEmpty, isNonEmptyBlank)
+import List.Extra
+import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..))
+import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
 import Scripta.Language
 
 
@@ -18,13 +20,19 @@ type alias PrimitiveLaTeXBlock =
     , status : Status
     }
 
-type Status = Complete  | Incomplete
+
+type Status
+    = Complete
+    | Incomplete
+
 
 type alias State =
     { blocks : List PrimitiveLaTeXBlock
     , stack : List PrimitiveLaTeXBlock
+    , labelStack : List ( ClassifyBlock.Classification, Int )
     , currentBlock : Maybe PrimitiveLaTeXBlock
     , lines : List String
+    , firstBlockLine : Int
     , inBlock : Bool
     , indent : Int
     , level : Int
@@ -37,8 +45,7 @@ type alias State =
     }
 
 
-
-parse_ :  (String -> Bool) -> List String -> List PrimitiveLaTeXBlock
+parse_ : (String -> Bool) -> List String -> List PrimitiveLaTeXBlock
 parse_ isVerbatimLine lines =
     loop (init isVerbatimLine lines) nextStep
         |> List.map (\block -> finalize block)
@@ -67,12 +74,14 @@ finalize block =
     and lineNumber is the index of the current line in the source
 
 -}
-init :(String -> Bool) -> List String -> State
+init : (String -> Bool) -> List String -> State
 init isVerbatimLine lines =
     { blocks = []
     , stack = []
+    , labelStack = []
     , currentBlock = Nothing
     , lines = lines
+    , firstBlockLine = 0
     , indent = 0
     , level = -1
     , lineNumber = 0
@@ -85,12 +94,12 @@ init isVerbatimLine lines =
     }
 
 
-blockFromLine :  Line -> PrimitiveLaTeXBlock
+blockFromLine : Line -> PrimitiveLaTeXBlock
 blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
     { indent = indent
     , lineNumber = lineNumber
     , position = position
-    , content = [ prefix ++ content ]
+    , content = []
     , name = Nothing
     , args = []
     , properties = Dict.empty -- TODO complete this
@@ -98,7 +107,10 @@ blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
     , blockType = Line.getBlockType Scripta.Language.MicroLaTeXLang line.content
     , status = Incomplete
     }
-       --  |> Parser.PrimitiveLaTeXBlock.elaborate line
+
+
+
+--  |> Parser.PrimitiveLaTeXBlock.elaborate line
 
 
 nextStep : State -> Step State (List PrimitiveLaTeXBlock)
@@ -139,28 +151,116 @@ nextStep state =
                     -- TODO: the below is wrong
                     Line.classify state.position (state.lineNumber + 1) rawLine
             in
-            case ( state.inBlock, isEmpty currentLine, isNonEmptyBlank currentLine ) of
-                -- not in a block, pass over empty line
-                ( False, True, _ ) ->
-                    Loop (advance newPosition { state | label = "1, EMPTY" })
+            case ClassifyBlock.classify currentLine.content of
+                CBeginBlock label ->
+                    if state.inBlock then
+                        Loop (addLine currentLine state)
 
-                -- not in a block, pass over blank, non-empty line
-                ( False, False, True ) ->
-                    Loop (advance newPosition { state | label = "2, PASS" })
+                    else
+                        Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
 
-                -- create a new block: we are not in a block, but
-                -- the current line is nonempty and nonblank
-                ( False, False, False ) ->
-                    Loop (createBlock { state | label = "3, NEW" } currentLine)
+                CEndBlock label ->
+                    if state.inBlock then
+                        Loop (state |> endBlock (CBeginBlock label) currentLine)
 
-                -- A nonempty line was encountered inside a block, so add it
-                ( True, False, _ ) ->
-                    Loop (addCurrentLine2 { state | label = "4, ADD" } currentLine)
+                    else
+                        Loop (state |> endBlock (CBeginBlock label) currentLine |> transfer)
 
-                -- commit the current block: we are in a block and the
-                -- current line is empty
-                ( True, True, _ ) ->
-                    Loop (commitBlock { state | label = "5, COMMIT" } currentLine)
+                CSpecialBlock label ->
+                    Done []
+
+                CMathBlockDelim ->
+                    Done []
+
+                CVerbatimBlockDelim ->
+                    Done []
+
+                CPlainText ->
+                    if state.inBlock then
+                        Loop (state |> addLine currentLine)
+
+                    else if isEmpty currentLine then
+                        Loop (handleBlank state)
+
+                    else
+                        Loop (beginBlock CPlainText currentLine state)
+
+                CEmpty ->
+                    Done []
+
+
+
+-- HANDLERS
+
+
+beginBlock : Classification -> Line -> State -> State
+beginBlock classifier line state =
+    let
+        level =
+            state.level + 1
+
+        newBlock =
+            blockFromLine line
+    in
+    { state
+        | firstBlockLine = line.lineNumber
+        , indent = line.indent
+        , level = level
+        , labelStack = ( classifier, level ) :: state.labelStack
+        , stack = newBlock :: state.stack
+    }
+
+
+endBlock : Classification -> Line -> State -> State
+endBlock classifier line state =
+    if Just ( classifier, state.level ) == List.head state.labelStack then
+        case List.Extra.uncons state.stack of
+            Nothing ->
+                state
+
+            -- TODO: error state!
+            Just ( block, stack_ ) ->
+                let
+                    newBlock =
+                        { block | content = slice state.firstBlockLine line.lineNumber state.lines }
+                in
+                { state
+                    | blocks = newBlock :: state.blocks
+                    , stack = List.drop 1 state.stack
+                    , labelStack = List.drop 1 state.labelStack
+                    , level = state.level - 1
+                }
+
+    else
+        state
+
+
+
+-- TODO: error recovery
+
+
+slice : Int -> Int -> List a -> List a
+slice a b list =
+    list |> List.take (b + 1) |> List.drop a
+
+
+addLine : Line -> State -> State
+addLine line state =
+    state
+
+
+handleBlank : State -> State
+handleBlank state =
+    state
+
+
+transfer : State -> State
+transfer state =
+    state
+
+
+
+--- STUFF
 
 
 advance : Int -> State -> State
@@ -188,7 +288,6 @@ addCurrentLine2 state currentLine =
                 , currentBlock =
                     Just (addCurrentLine_ currentLine block)
             }
-
 
 
 addCurrentLine_ : Line -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
@@ -263,7 +362,7 @@ createBlock state currentLine =
                         block :: state.blocks
 
         newBlock =
-             (blockFromLine currentLine)
+            blockFromLine currentLine
     in
     { state
         | lines = List.drop 1 state.lines
@@ -275,7 +374,11 @@ createBlock state currentLine =
         , inBlock = True
         , blocks = blocks
     }
+
+
+
 --- HELPERS
+
 
 type Step state a
     = Loop state
@@ -291,6 +394,12 @@ loop s f =
         Done b ->
             b
 
+
 dropLast : List a -> List a
 dropLast list =
     List.take (List.length list - 1) list
+
+
+isEmpty : Line -> Bool
+isEmpty line =
+    String.replace " " "" line.content == ""

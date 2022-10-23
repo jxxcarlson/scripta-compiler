@@ -95,7 +95,7 @@ updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunction
 updateFunctions lang =
     { chunker = chunker lang -- String -> List PrimitiveBlock
     , chunkEq = Parser.PrimitiveBlock.eq -- PrimitiveBlock -> PrimitiveBlock -> Bool
-    , chunkLevel = chunkLevel  -- PrimitiveBlock -> Bool
+    , chunkLevel = chunkLevel -- PrimitiveBlock -> Bool
     , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
@@ -105,7 +105,14 @@ updateFunctions lang =
 
 chunkLevel : PrimitiveBlock -> Int
 chunkLevel block =
-    block.indent + (if block.name == Just "item" || block.name == Just "numbered" then 1 else 0)
+    block.indent
+        + (if block.name == Just "item" || block.name == Just "numbered" then
+            1
+
+           else
+            0
+          )
+
 
 getMessages_ : List ExpressionBlock -> List String
 getMessages_ blocks =

@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.ClasslifyBlock exposing (Classification(..), classify)
+module MicroLaTeX.Parser.ClassifyBlock exposing (Classification(..), classify)
 
 import Parser exposing ((|.), (|=), Parser)
 

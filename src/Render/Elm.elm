@@ -210,12 +210,15 @@ href _ _ _ exprList =
         , label = el [ Font.color linkColor ] (Element.text label)
         }
 
+
 {-|
+
     An ilink element ("internal link") links to another scripta document.
 
     Usage: [ilink LINK TEXT USERNAME:SLUG]
 
     Example: [ilink Read more about it here. jxxcarlson:smart-folders]
+
 -}
 ilink _ _ _ exprList =
     case List.head <| ASTTools.exprListToStringList exprList of

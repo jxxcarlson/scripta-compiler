@@ -2,7 +2,7 @@ module TestStuff exposing (..)
 
 import Compiler.DifferEq
 import Markup
-import Parser.PrimitiveBlock exposing(PrimitiveBlock)
+import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Scripta.Language exposing (Language(..))
 
 
@@ -11,18 +11,24 @@ toPrimitiveBlocks =
 
 
 diff a b =
-    Compiler.DifferEq.diff Parser.PrimitiveBlock.eq (\block -> block.indent + (itemLevel block)) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+    Compiler.DifferEq.diff Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 
 diffc a b =
-    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq (\block -> block.indent + (itemLevel block)) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 
 itemLevel : PrimitiveBlock -> Int
 itemLevel block =
-    if block.name == Just "item" || block.name == Just "numbered" then 1 else 0
+    if block.name == Just "item" || block.name == Just "numbered" then
+        1
 
-y1 = """
+    else
+        0
+
+
+y1 =
+    """
 aaa
 
 bbb
@@ -34,7 +40,9 @@ bbb
 eee
 """
 
-y2 = """
+
+y2 =
+    """
 aaa
 
 bbb
@@ -45,6 +53,7 @@ bbb
 
 eee
 """
+
 
 x1 =
     """

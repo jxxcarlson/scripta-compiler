@@ -10,6 +10,7 @@ import Element.Background as Background
 import Element.Events as Events
 import Element.Font as Font
 import Element.Input
+import Html
 import Html.Attributes
 import List.Extra
 import Maybe.Extra
@@ -25,7 +26,7 @@ import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Utility
 import String.Extra
-import Html
+
 
 
 -- TOPLEVEL
@@ -39,39 +40,39 @@ render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 render count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
     case blockType of
         Paragraph ->
-           renderParagraph count acc settings block
+            renderParagraph count acc settings block
 
         OrdinaryBlock _ ->
-           renderOrdinaryBlock count acc settings block
+            renderOrdinaryBlock count acc settings block
 
         VerbatimBlock _ ->
-             renderVerbatimBlock count acc settings block
+            renderVerbatimBlock count acc settings block
 
 
-renderParagraph count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) ) =
+renderParagraph count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
     case content of
-                    Right exprs ->
-                        let
-                            color =
-                                if id == settings.selectedId then
-                                    Background.color (Element.rgb 0.9 0.9 1.0)
+        Right exprs ->
+            let
+                color =
+                    if id == settings.selectedId then
+                        Background.color (Element.rgb 0.9 0.9 1.0)
 
-                                else
-                                    Background.color settings.backgroundColor
-                        in
-                        List.map (Render.Elm.render count acc settings) exprs
-                            |> clickableParagraph id (selectedColor id settings)
-                            -- (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
-                            |> (\x ->
-                                    if indent > 0 then
-                                        Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                    else
+                        Background.color settings.backgroundColor
+            in
+            List.map (Render.Elm.render count acc settings) exprs
+                |> clickableParagraph id (selectedColor id settings)
+                -- (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
+                |> (\x ->
+                        if indent > 0 then
+                            Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
-                                    else
-                                        x
-                               )
+                        else
+                            x
+                   )
 
-                    Left _ ->
-                        Element.none
+        Left _ ->
+            Element.none
 
 
 selectedColor id settings =
@@ -82,60 +83,63 @@ selectedColor id settings =
         Background.color settings.backgroundColor
 
 
-clickableParagraph : String -> Element.Attribute MarkupMsg ->  List (Element MarkupMsg) -> Element MarkupMsg
-clickableParagraph  id color elements = Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
-
+clickableParagraph : String -> Element.Attribute MarkupMsg -> List (Element MarkupMsg) -> Element MarkupMsg
+clickableParagraph id color elements =
+    Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
 
 
 renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
     case content of
-                    Left _ ->
-                        Element.none
+        Left _ ->
+            Element.none
 
-                    Right _ ->
-                        case name of
-                            Nothing ->
-                                noSuchOrdinaryBlock count acc settings block
+        Right _ ->
+            case name of
+                Nothing ->
+                    noSuchOrdinaryBlock count acc settings block
 
-                            Just functionName ->
-                                case Dict.get functionName blockDict of
-                                    Nothing ->
-                                        env count acc settings block
-                                            |> (\x ->
-                                                    if indent > 0 then
-                                                        Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                Just functionName ->
+                    case Dict.get functionName blockDict of
+                        Nothing ->
+                            env count acc settings block
+                                |> (\x ->
+                                        if indent > 0 then
+                                            Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
-                                                    else
-                                                        x
-                                               )
+                                        else
+                                            x
+                                   )
 
-                                    Just f ->
-                                        f count acc settings block
-                                            |> (\x ->
-                                                    if indent > 0 then
-                                                        Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                        Just f ->
+                            f count acc settings block
+                                |> (\x ->
+                                        if indent > 0 then
+                                            Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
 
-                                                    else
-                                                        x
-                                               )
+                                        else
+                                            x
+                                   )
+
 
 renderVerbatimBlock count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
     case content of
-                    Right _ ->
-                        Element.none
+        Right _ ->
+            Element.none
 
-                    Left str ->
-                        case name of
-                            Nothing ->
-                                noSuchVerbatimBlock "name" str
+        Left str ->
+            case name of
+                Nothing ->
+                    noSuchVerbatimBlock "name" str
 
-                            Just functionName ->
-                                case Dict.get functionName verbatimDict of
-                                    Nothing ->
-                                        noSuchVerbatimBlock functionName str
+                Just functionName ->
+                    case Dict.get functionName verbatimDict of
+                        Nothing ->
+                            noSuchVerbatimBlock functionName str
 
-                                    Just f ->
-                                        Element.el [selectedColor id settings] (f count acc settings block)
+                        Just f ->
+                            Element.el [ selectedColor id settings ] (f count acc settings block)
+
+
 
 -- DICT OF BLOCKS
 
@@ -194,7 +198,7 @@ verbatimDict =
         , ( "tikz", Render.Graphics.tikz )
         , ( "load-files", renderNothing )
         , ( "include", renderNothing )
-        , ( "iframe", renderIFrame)
+        , ( "iframe", renderIFrame )
         ]
 
 
@@ -304,7 +308,9 @@ section count acc settings ((ExpressionBlock { id, args, properties }) as block)
 -- SCRIPTA
 -- Some blocks are signals to Scripta.  There is nothing to render
 
+
 {-|
+
     A block of the form "| collection" informs Scripta that the body
     of the document is a collection of links to other documents and
     that it should be interpreted as a kind of table of contents
@@ -332,7 +338,9 @@ collection : Int -> Accumulator -> Settings -> ExpressionBlock -> Element Markup
 collection _ _ _ _ =
     Element.none
 
+
 {-|
+
     Use a document block to include another document in a collection, e.g,
 
         | document jxxcarlson:wave-packets-schroedinger
@@ -391,6 +399,8 @@ document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
 
 
 -- DEPRECATE?? WE ARE USING THE ELEMENT VERSION
+
+
 ilink : String -> String -> Maybe String -> String -> Element MarkupMsg
 ilink docTitle selectedId selecteSlug docId =
     Element.Input.button []
@@ -430,6 +440,7 @@ question count acc settings ((ExpressionBlock { id, args, properties }) as block
             (renderWithDefault "..." count acc settings (getExprs block))
         ]
 
+
 answer : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 answer count acc settings ((ExpressionBlock { id, args }) as block) =
     let
@@ -462,7 +473,9 @@ answer count acc settings ((ExpressionBlock { id, args }) as block) =
 
 -- LATEXY STUFF
 
+
 {-|
+
     Used to render generic LaTeX environments
 
 -}
@@ -475,7 +488,9 @@ env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, conte
         Just _ ->
             env count acc settings block
 
+
 {-|
+
     Used to render generic LaTeX environments
 
 -}
@@ -492,8 +507,11 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
                     (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
                 ]
 
+
 {-|
+
     Used in function env (ender generic LaTeX environments)
+
 -}
 blockHeading : Maybe String -> List String -> Dict String String -> String
 blockHeading name args properties =
@@ -507,8 +525,11 @@ blockHeading name args properties =
             ++ " "
             ++ String.join " " args
 
+
 {-|
+
     Used in function env (ender generic LaTeX environments)
+
 -}
 blockLabel : Dict String String -> String
 blockLabel properties =
@@ -518,9 +539,8 @@ blockLabel properties =
 
 -- VARIOUS BLOCKS
 
-{-|
-   indented block
 
+{-| indented block
 -}
 indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 indented count acc settings ((ExpressionBlock { id }) as block) =
@@ -528,10 +548,7 @@ indented count acc settings ((ExpressionBlock { id }) as block) =
         (renderWithDefault "| indent" count acc settings (getExprs block))
 
 
-
-{-|
-
--}
+{-| -}
 comment count acc settings ((ExpressionBlock { id, args }) as block) =
     let
         author_ =
@@ -587,64 +604,89 @@ highlightAttrs id settings =
         [ Events.onClick (SendId id) ]
 
 
-
-
 renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderIFrame count acc settings ((ExpressionBlock { id, properties }) as block) =
-      case parseIFrame (getVerbatimContent block) of
-          Nothing -> Element.el [] (Element.text "Error parsing iframe or unregistered src")
-          Just iframeProperties ->
-              let
-                  w = String.toInt iframeProperties.width |> Maybe.withDefault 400
+    case parseIFrame (getVerbatimContent block) of
+        Nothing ->
+            Element.el [] (Element.text "Error parsing iframe or unregistered src")
 
-                  caption_ = Dict.get "caption" properties
-                  label_ = Dict.get "figure" properties
+        Just iframeProperties ->
+            let
+                w =
+                    String.toInt iframeProperties.width |> Maybe.withDefault 400
 
-                  figureLabel = case (label_, caption_) of
-                        (Just label, Just caption ) ->"Figure " ++ label ++ ". " ++ caption
-                        (Just label, Nothing)  -> "Figure " ++ label
-                        (Nothing, Just caption) -> caption
-                        (Nothing, Nothing) -> ""
-              in
-              Element.column
-                  [ Events.onClick (SendId id)
-                  , Render.Utility.elementAttribute "id" id
-                  , Element.width (Element.px w)
-                  ]
-                  [  Html.iframe [Html.Attributes.src <| iframeProperties.src
-                                , Html.Attributes.style "border" "none"
-                                 , Html.Attributes.style "width" (iframeProperties.width ++ "px")
-                                 , Html.Attributes.style "height" (iframeProperties.height ++ "px")
-                                 ] [] |> Element.html
-                    , Element.row [Element.centerX, Element.paddingXY 0 12] [Element.text figureLabel]]
+                caption_ =
+                    Dict.get "caption" properties
+
+                label_ =
+                    Dict.get "figure" properties
+
+                figureLabel =
+                    case ( label_, caption_ ) of
+                        ( Just label, Just caption ) ->
+                            "Figure " ++ label ++ ". " ++ caption
+
+                        ( Just label, Nothing ) ->
+                            "Figure " ++ label
+
+                        ( Nothing, Just caption ) ->
+                            caption
+
+                        ( Nothing, Nothing ) ->
+                            ""
+            in
+            Element.column
+                [ Events.onClick (SendId id)
+                , Render.Utility.elementAttribute "id" id
+                , Element.width (Element.px w)
+                ]
+                [ Html.iframe
+                    [ Html.Attributes.src <| iframeProperties.src
+                    , Html.Attributes.style "border" "none"
+                    , Html.Attributes.style "width" (iframeProperties.width ++ "px")
+                    , Html.Attributes.style "height" (iframeProperties.height ++ "px")
+                    ]
+                    []
+                    |> Element.html
+                , Element.row [ Element.centerX, Element.paddingXY 0 12 ] [ Element.text figureLabel ]
+                ]
 
 
-parseIFrame : String -> Maybe {width: String, height: String, src: String}
+parseIFrame : String -> Maybe { width : String, height : String, src : String }
 parseIFrame str =
     let
-        src_ = Parser.Utility.parseItem "src" str
-        width_ = Parser.Utility.parseItem "width" str
-        height_ = Parser.Utility.parseItem "height" str
+        src_ =
+            Parser.Utility.parseItem "src" str
+
+        width_ =
+            Parser.Utility.parseItem "width" str
+
+        height_ =
+            Parser.Utility.parseItem "height" str
     in
-    case (src_, width_, height_) of
-        (Just src, Just width, Just height) ->
+    case ( src_, width_, height_ ) of
+        ( Just src, Just width, Just height ) ->
             if validSrc src then
-              Just {width = width, height = height, src = src}
+                Just { width = width, height = height, src = src }
+
             else
-              Nothing
-        _ -> Nothing
+                Nothing
+
+        _ ->
+            Nothing
 
 
-allowedIFrameSrcList = ["https://www.desmos.com/calculator/", "https://q.uiver.app/"]
+allowedIFrameSrcList =
+    [ "https://www.desmos.com/calculator/", "https://q.uiver.app/" ]
+
 
 validSrc : String -> Bool
 validSrc src =
-   List.map (\src_ -> String.contains src_ src) allowedIFrameSrcList |> Bool.Extra.any
+    List.map (\src_ -> String.contains src_ src) allowedIFrameSrcList |> Bool.Extra.any
 
 
 
- -- <iframe src="https://www.desmos.com/calculator/ycaswggsgb?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
-
+-- <iframe src="https://www.desmos.com/calculator/ycaswggsgb?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
 -- VERBATIM
 
 
@@ -1006,6 +1048,7 @@ vspace =
 
 -- HELPERS
 
+
 getExprs : ExpressionBlock -> List Expr
 getExprs (ExpressionBlock { content }) =
     case content of
@@ -1014,7 +1057,6 @@ getExprs (ExpressionBlock { content }) =
 
         Right stuff ->
             stuff
-
 
 
 truncateString : Int -> String -> String
