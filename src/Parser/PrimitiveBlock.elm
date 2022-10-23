@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , eq, parse_
+    , eq, parse_, elaborate
     )
 
 {-| The main function is
