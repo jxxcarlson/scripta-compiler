@@ -180,13 +180,6 @@ getBlockTypeAndLabel str =
 nextStep : State -> Step State State
 nextStep state_ =
     let
-        _ =
-            Debug.log ("Step " ++ String.fromInt state_.lineNumber) state_.labelStack
-
-        _ =
-            Debug.log ("Step " ++ String.fromInt state_.lineNumber)
-                ( List.head state_.stack |> Maybe.andThen .name, List.head state_.stack |> Maybe.map .content )
-
         state =
             { state_ | lineNumber = state_.lineNumber + 1, count = state_.count + 1 }
     in
@@ -319,13 +312,6 @@ endBlock classifier line state =
             List.head state.labelStack
     in
     if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
-        let
-            _ =
-                Debug.log "END BLOCK!" labelHead
-
-            _ =
-                Debug.log "STACK TOP" (List.head state.stack)
-        in
         case List.Extra.uncons state.stack of
             Nothing ->
                 -- TODO: error state!
@@ -337,9 +323,6 @@ endBlock classifier line state =
 
                 else
                     let
-                        _ =
-                            Debug.log "endBlock" 1
-
                         content =
                             case classifier of
                                 CPlainText ->
@@ -349,7 +332,7 @@ endBlock classifier line state =
                                     slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
 
                         newBlock =
-                            { block | content = List.reverse content, status = Finished } |> Debug.log "endBlock 1, newBlock"
+                            { block | content = List.reverse content, status = Finished }
                     in
                     { state
                         | blocks = newBlock :: state.blocks
@@ -372,9 +355,6 @@ endBlock classifier line state =
 
                     Just ( label, _ ) ->
                         let
-                            _ =
-                                Debug.log "endBlock" 2
-
                             error =
                                 if label.classification == CPlainText then
                                     Nothing
@@ -400,7 +380,6 @@ endBlock classifier line state =
                                     , status = Finished
                                     , error = error
                                 }
-                                    |> Debug.log "endBlock 2, newBlock"
                         in
                         { state | blocks = newBlock :: state.blocks, stack = rest, labelStack = List.drop 1 state.labelStack }
                             |> finishBlock
