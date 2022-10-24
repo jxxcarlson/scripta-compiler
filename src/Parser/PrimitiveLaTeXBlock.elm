@@ -78,48 +78,6 @@ parse lines =
     loop (init lines) nextStep |> recover
 
 
-recover1 : State -> ParserOutput
-recover1 state =
-    { blocks = state.blocks, stack = state.stack }
-
-
-recover : State -> ParserOutput
-recover state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            { blocks = state.blocks, stack = state.stack }
-
-        Just ( block, rest ) ->
-            case List.Extra.uncons state.labelStack of
-                Nothing ->
-                    { blocks = state.blocks, stack = state.stack }
-
-                Just ( topLabel, remainingLabels ) ->
-                    let
-                        firstLine =
-                            topLabel.lineNumber
-
-                        lastLine =
-                            state.lineNumber
-
-                        content =
-                            case topLabel.status of
-                                Filled ->
-                                    block.content
-
-                                _ ->
-                                    slice (firstLine + 1) lastLine state.lines
-
-                        newBlock =
-                            { block
-                                | content = content
-                                , status = Finished
-                                , error = Just { error = "missing end tag (" ++ (block.name |> Maybe.withDefault "(anon)") ++ ")" }
-                            }
-                    in
-                    { blocks = newBlock :: state.blocks, stack = rest }
-
-
 {-|
 
     Recall: classify position lineNumber, where position
@@ -146,6 +104,11 @@ init lines =
     }
 
 
+{-| Construct a skeleton block given one line of text, .e.g.,
+
+        \begin{equation}
+
+-}
 blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
 blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
     let
@@ -165,16 +128,6 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     , status = Started
     , error = Nothing
     }
-
-
-getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
-getBlockTypeAndLabel str =
-    case ClassifyBlock.classify str of
-        CBeginBlock label ->
-            ( PBOrdinary, Just label )
-
-        _ ->
-            ( PBParagraph, Nothing )
 
 
 nextStep : State -> Step State State
@@ -216,7 +169,7 @@ nextStep state_ =
                     Done state
 
                 CMathBlockDelim ->
-                    Done state
+                    Loop (state |> handleMathBlock currentLine)
 
                 CVerbatimBlockDelim ->
                     Done state
@@ -403,6 +356,77 @@ finishBlock state =
             }
 
 
+handleMathBlock line state =
+    case List.head state.labelStack of
+        Nothing ->
+            { state
+                | lineNumber = line.lineNumber
+                , firstBlockLine = line.lineNumber
+                , indent = line.indent
+                , level = state.level + 1
+                , labelStack = { classification = CMathBlockDelim, level = state.level + 1, status = Started, lineNumber = line.lineNumber } :: state.labelStack
+                , stack = blockFromLine (state.level + 1) line :: state.stack
+            }
+
+        Just label ->
+            case List.Extra.uncons state.stack of
+                Nothing ->
+                    state
+
+                Just ( block, rest ) ->
+                    case List.Extra.uncons state.labelStack of
+                        Nothing ->
+                            state
+
+                        Just ( topLabel, otherLabels ) ->
+                            let
+                                newBlock =
+                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished }
+                            in
+                            { state | blocks = newBlock :: state.blocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
+
+
+
+-- ERROR RECOVERY
+
+
+recover : State -> ParserOutput
+recover state =
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            { blocks = state.blocks, stack = state.stack }
+
+        Just ( block, rest ) ->
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    { blocks = state.blocks, stack = state.stack }
+
+                Just ( topLabel, remainingLabels ) ->
+                    let
+                        firstLine =
+                            topLabel.lineNumber
+
+                        lastLine =
+                            state.lineNumber
+
+                        content =
+                            case topLabel.status of
+                                Filled ->
+                                    block.content
+
+                                _ ->
+                                    slice (firstLine + 1) lastLine state.lines
+
+                        newBlock =
+                            { block
+                                | content = content
+                                , status = Finished
+                                , error = Just { error = "missing end tag (" ++ (block.name |> Maybe.withDefault "(anon)") ++ ")" }
+                            }
+                    in
+                    { blocks = newBlock :: state.blocks, stack = rest }
+
+
 
 -- TODO: error recovery
 
@@ -473,6 +497,19 @@ showStatus status =
 
 
 --- HELPERS
+
+
+getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
+getBlockTypeAndLabel str =
+    case ClassifyBlock.classify str of
+        CBeginBlock label ->
+            ( PBOrdinary, Just label )
+
+        CMathBlockDelim ->
+            ( PBVerbatim, Just "math" )
+
+        _ ->
+            ( PBParagraph, Nothing )
 
 
 type Step state a
