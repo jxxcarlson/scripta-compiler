@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.ClassifyBlock exposing (Classification(..), classify)
+module MicroLaTeX.Parser.ClassifyBlock exposing (Classification(..), classificationString, classify)
 
 import Parser exposing ((|.), (|=), Parser)
 
@@ -11,6 +11,19 @@ type Classification
     | CVerbatimBlockDelim
     | CPlainText
     | CEmpty
+
+
+classificationString : Classification -> String
+classificationString classification =
+    case classification of
+        CBeginBlock name ->
+            name
+
+        CEndBlock name ->
+            name
+
+        _ ->
+            "??"
 
 
 type LXSpecial

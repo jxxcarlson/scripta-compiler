@@ -80,7 +80,31 @@ parse lines =
 
 recover : State -> ParserOutput
 recover state =
-    { blocks = state.blocks, stack = state.stack }
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            { blocks = state.blocks, stack = state.stack }
+
+        Just ( block, rest ) ->
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    { blocks = state.blocks, stack = state.stack }
+
+                Just ( topLabel, remainingLabels ) ->
+                    let
+                        firstLine =
+                            topLabel.lineNumber
+
+                        lastLine =
+                            state.lineNumber
+
+                        newBlock =
+                            { block
+                                | content = slice (firstLine + 1) lastLine state.lines
+                                , status = Finished
+                                , error = Just { error = "missing end tag (" ++ (block.name |> Maybe.withDefault "(anon)") ++ ")" }
+                            }
+                    in
+                    { blocks = newBlock :: state.blocks, stack = rest }
 
 
 {-|
@@ -275,10 +299,17 @@ endBlock classifier line state =
         case List.Extra.uncons state.stack of
             Nothing ->
                 -- TODO: error state!
+                let
+                    _ =
+                        Debug.log "endBlock" 1
+                in
                 state
 
             Just ( block, _ ) ->
                 let
+                    _ =
+                        Debug.log "endBlock" 2
+
                     content =
                         case classifier of
                             CPlainText ->
@@ -301,18 +332,42 @@ endBlock classifier line state =
         case List.Extra.uncons state.stack of
             Nothing ->
                 -- TODO: ???
+                let
+                    _ =
+                        Debug.log "endBlock" 3
+                in
                 state
 
             Just ( block, rest ) ->
                 case List.Extra.uncons state.labelStack of
                     Nothing ->
+                        let
+                            _ =
+                                Debug.log "endBlock" 4
+                        in
                         -- TODO: ???
                         state
 
                     Just ( label, _ ) ->
                         let
+                            _ =
+                                Debug.log "endBlock 5, label" label
+
+                            _ =
+                                Debug.log "endBlock 5, classifier" classifier
+
+                            classfication1 =
+                                "(" ++ ClassifyBlock.classificationString label.classification ++ ")"
+
+                            classification2 =
+                                "(" ++ ClassifyBlock.classificationString classifier ++ ")"
+
                             newBlock =
-                                { block | content = slice label.lineNumber (line.lineNumber - 1) state.lines, status = Finished }
+                                { block
+                                    | content = slice (label.lineNumber + 1) (line.lineNumber - 1) state.lines
+                                    , status = Finished
+                                    , error = Just { error = "Missmatched tags: begin" ++ classfication1 ++ " ≠ end" ++ classification2 }
+                                }
                         in
                         { state | blocks = newBlock :: state.blocks, stack = rest, labelStack = List.drop 1 state.labelStack }
                             |> finishBlock
@@ -363,11 +418,22 @@ print block =
     , "Name: " ++ showName block.name
     , "Level: " ++ String.fromInt block.level
     , "Status: " ++ showStatus block.status
+    , "Error: " ++ showError block.error
     , "Line number: " ++ String.fromInt block.lineNumber
     , "Content:"
     , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
     ]
         |> String.join "\n"
+
+
+showError : Maybe PrimitiveBlockError -> String
+showError mError =
+    case mError of
+        Nothing ->
+            "none"
+
+        Just { error } ->
+            error
 
 
 showName : Maybe String -> String
