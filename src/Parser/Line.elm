@@ -8,6 +8,7 @@ module Parser.Line exposing
     , isNonEmptyBlank
     , prefixLength
     , prefixLengths
+    , showBlockType
     )
 
 import L0.Parser.Line
@@ -34,6 +35,19 @@ type PrimitiveBlockType
     = PBVerbatim
     | PBOrdinary
     | PBParagraph
+
+
+showBlockType : PrimitiveBlockType -> String
+showBlockType blockType =
+    case blockType of
+        PBVerbatim ->
+            "Verbatim"
+
+        PBOrdinary ->
+            "Ordinary"
+
+        PBParagraph ->
+            "Paragraph"
 
 
 isEmpty : Line -> Bool

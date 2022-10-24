@@ -1,4 +1,4 @@
-module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_, print)
 
 import Dict exposing (Dict)
 import List.Extra
@@ -11,6 +11,7 @@ type alias PrimitiveLaTeXBlock =
     { indent : Int
     , lineNumber : Int
     , position : Int
+    , level : Int
     , content : List String
     , name : Maybe String
     , args : List String
@@ -21,9 +22,43 @@ type alias PrimitiveLaTeXBlock =
     }
 
 
+print : PrimitiveLaTeXBlock -> String
+print block =
+    [ "BLOCK:"
+    , "Type: " ++ Line.showBlockType block.blockType
+    , "Name: " ++ showName block.name
+    , "Level: " ++ String.fromInt block.level
+    , "Status: " ++ showStatus block.status
+    , "Line number: " ++ String.fromInt block.lineNumber
+    , "Content:"
+    , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
+    ]
+        |> String.join "\n"
+
+
+showName : Maybe String -> String
+showName mstr =
+    case mstr of
+        Nothing ->
+            "(anon)"
+
+        Just name ->
+            name
+
+
 type Status
     = Complete
     | Incomplete
+
+
+showStatus : Status -> String
+showStatus status =
+    case status of
+        Complete ->
+            "Complete"
+
+        Incomplete ->
+            "Incomplete"
 
 
 type alias State =
@@ -94,15 +129,9 @@ init isVerbatimLine lines =
     }
 
 
-blockFromLine : Line -> PrimitiveLaTeXBlock
-blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
+blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
+blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
     let
-        _ =
-            Debug.log "blockFromLine" line
-
-        _ =
-            Debug.log "blockType" (Line.getBlockType Scripta.Language.MicroLaTeXLang line.content)
-
         classifier =
             ClassifyBlock.classify line.content
 
@@ -113,6 +142,7 @@ blockFromLine ({ indent, lineNumber, position, prefix, content } as line) =
     , lineNumber = lineNumber
     , position = position
     , content = []
+    , level = level
     , name = label
     , args = []
     , properties = Dict.empty -- TODO complete this
@@ -172,7 +202,7 @@ nextStep state =
                 currentLine : Line
                 currentLine =
                     -- TODO: the below is wrong
-                    Line.classify state.position (state.lineNumber + 1) rawLine
+                    Line.classify newPosition state.lineNumber rawLine
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
@@ -180,9 +210,9 @@ nextStep state =
                         Loop (addLine currentLine state)
 
                     else
-                        -- Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
-                        Loop (state |> beginBlock (CBeginBlock label) currentLine)
+                        Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
 
+                -- Loop (state |> beginBlock (CBeginBlock label) currentLine)
                 CEndBlock label ->
                     if state.level > -1 then
                         Loop (state |> endBlock (CBeginBlock label) currentLine)
@@ -217,6 +247,10 @@ nextStep state =
                             Debug.log "CPLainText" ( state.level, state.count, currentLine )
                     in
                     if state.level > -1 then
+                        let
+                            _ =
+                                Debug.log "addLine" currentLine
+                        in
                         Loop (state |> addLine currentLine)
 
                     else if isEmpty currentLine then
@@ -228,7 +262,7 @@ nextStep state =
                 CEmpty ->
                     let
                         _ =
-                            Debug.log "CEmpty" state.count
+                            Debug.log "CEmpty" ( state.lineNumber, state.count )
                     in
                     Loop { state | lineNumber = state.lineNumber + 1 }
 
@@ -247,10 +281,10 @@ beginBlock classifier line state =
             state.level + 1
 
         newBlock =
-            blockFromLine line
+            blockFromLine level line
     in
     { state
-        | lineNumber = state.lineNumber + 1
+        | lineNumber = line.lineNumber --- state.lineNumber -- + 1
         , firstBlockLine = line.lineNumber
         , indent = line.indent
         , level = level
@@ -275,16 +309,17 @@ endBlock classifier line state =
             Just ( block, stack_ ) ->
                 let
                     content =
-                        slice state.firstBlockLine (line.lineNumber - 2) state.lines
+                        -- ignore \begin{foo} and \end{foo}:
+                        slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
 
                     newBlock =
-                        { block | content = content }
+                        { block | content = content, status = Complete }
 
                     _ =
                         Debug.log "endBlock, newBlock.content" content
                 in
                 { state
-                    | lineNumber = state.lineNumber + 1
+                    | lineNumber = line.lineNumber -- state.lineNumber + 1
                     , blocks = newBlock :: state.blocks |> Debug.log "endBlock, blocks"
                     , stack = List.drop 1 state.stack
                     , labelStack = List.drop 1 state.labelStack |> Debug.log "endBlock, labelStack"
@@ -395,7 +430,7 @@ commitBlock state currentLine =
                         ( Nothing, state.blocks )
 
                     else
-                        ( Just (blockFromLine currentLine), block :: state.blocks )
+                        ( Just (blockFromLine state.level currentLine), block :: state.blocks )
             in
             { state
                 | lines = List.drop 1 state.lines
@@ -427,7 +462,7 @@ createBlock state currentLine =
                         block :: state.blocks
 
         newBlock =
-            blockFromLine currentLine
+            blockFromLine state.level currentLine
     in
     { state
         | lines = List.drop 1 state.lines

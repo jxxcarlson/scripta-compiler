@@ -17,14 +17,14 @@ program process =
                 )
             <|
                 \content ->
-                    -- IO.do (Proc.print content) <|
                     let
                         parsed : List PrimitiveLaTeXBlock
                         parsed =
                             content |> String.lines |> parse_ (\_ -> False)
 
+                        out : String
                         out =
-                            Debug.toString parsed
+                            "\n----------------\n" ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed |> String.join "\n\n") ++ "\n----------------\n"
                     in
                     IO.do (Proc.print out) <|
                         \_ ->
