@@ -1,7 +1,7 @@
 module ReadFile exposing (program)
 
 import Dict exposing (Dict)
-import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
+import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
 import Posix.IO.Process as Proc
@@ -19,7 +19,7 @@ program process =
                 \content ->
                     let
                         parsed =
-                            content |> String.lines |> parse_ (\_ -> False)
+                            content |> String.lines |> parse (\_ -> False)
 
                         blockString =
                             "\n----------------\nBLOCKS\n----------------\n"

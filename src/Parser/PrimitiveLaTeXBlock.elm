@@ -1,10 +1,9 @@
-module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_, print)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, print)
 
 import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..))
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
-import Scripta.Language
 
 
 type alias PrimitiveLaTeXBlock =
@@ -45,75 +44,21 @@ type alias Label =
     { classification : ClassifyBlock.Classification, level : Int, status : Status, lineNumber : Int }
 
 
-print : PrimitiveLaTeXBlock -> String
-print block =
-    [ "BLOCK:"
-    , "Type: " ++ Line.showBlockType block.blockType
-    , "Name: " ++ showName block.name
-    , "Level: " ++ String.fromInt block.level
-    , "Status: " ++ showStatus block.status
-    , "Line number: " ++ String.fromInt block.lineNumber
-    , "Content:"
-    , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
-    ]
-        |> String.join "\n"
-
-
-showName : Maybe String -> String
-showName mstr =
-    case mstr of
-        Nothing ->
-            "(anon)"
-
-        Just name ->
-            name
-
-
 type Status
     = Finished
     | Started
     | Filled
 
 
-showStatus : Status -> String
-showStatus status =
-    case status of
-        Finished ->
-            "Finished"
-
-        Started ->
-            "Started"
-
-        Filled ->
-            "Filled"
-
-
-parse_ : (String -> Bool) -> List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
-parse_ isVerbatimLine lines =
+parse : (String -> Bool) -> List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+parse isVerbatimLine lines =
     loop (init isVerbatimLine lines) nextStep
-
-
-
--- |> List.map (\block -> finalize block)
--- TODO: think about the below
-
-
-finalize : PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
-finalize block =
-    let
-        content =
-            List.reverse block.content
-
-        sourceText =
-            String.join "\n" content
-    in
-    { block | content = content, sourceText = sourceText }
 
 
 {-|
 
     Recall: classify position lineNumber, where position
-    is the position of the first charabcter in the source
+    is the position of the first character in the source
     and lineNumber is the index of the current line in the source
 
 -}
@@ -140,9 +85,6 @@ init isVerbatimLine lines =
 blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
 blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
     let
-        classifier =
-            ClassifyBlock.classify line.content
-
         ( blockType, label ) =
             getBlockTypeAndLabel line.content
     in
@@ -168,10 +110,6 @@ getBlockTypeAndLabel str =
 
         _ ->
             ( PBParagraph, Nothing )
-
-
-
---  |> Parser.PrimitiveLaTeXBlock.elaborate line
 
 
 nextStep : State -> Step State { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
@@ -210,24 +148,12 @@ nextStep state_ =
                         Loop (state |> endBlock (CBeginBlock label) currentLine |> transfer)
 
                 CSpecialBlock label ->
-                    let
-                        _ =
-                            Debug.log "CSpecialBlock" state.count
-                    in
                     Done { blocks = [], stack = [] }
 
                 CMathBlockDelim ->
-                    let
-                        _ =
-                            Debug.log "CMathBlockDelim" state.count
-                    in
                     Done { blocks = [], stack = [] }
 
                 CVerbatimBlockDelim ->
-                    let
-                        _ =
-                            Debug.log "CVerbatimBlockDelim" state.count
-                    in
                     Done { blocks = [], stack = [] }
 
                 CPlainText ->
@@ -260,29 +186,6 @@ beginBlock classifier line state =
             beginBlock_ classifier line { state | stack = fillBlockOnStack state }
 
 
-{-| update stack
--}
-fillBlockOnStack : State -> List PrimitiveLaTeXBlock
-fillBlockOnStack state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            state.stack
-
-        Just ( block, rest ) ->
-            if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
-                state.stack
-
-            else
-                let
-                    firstBlockLine =
-                        List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
-
-                    newBlock =
-                        { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
-                in
-                newBlock :: rest
-
-
 beginBlock_ : Classification -> Line -> State -> State
 beginBlock_ classifier line state =
     let
@@ -310,6 +213,29 @@ beginBlock_ classifier line state =
     }
 
 
+{-| update stack
+-}
+fillBlockOnStack : State -> List PrimitiveLaTeXBlock
+fillBlockOnStack state =
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            state.stack
+
+        Just ( block, rest ) ->
+            if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
+                state.stack
+
+            else
+                let
+                    firstBlockLine =
+                        List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
+
+                    newBlock =
+                        { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
+                in
+                newBlock :: rest
+
+
 endBlock : Classification -> Line -> State -> State
 endBlock classifier line state =
     let
@@ -320,10 +246,10 @@ endBlock classifier line state =
     if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
         case List.Extra.uncons state.stack of
             Nothing ->
+                -- TODO: error state!
                 state
 
-            -- TODO: error state!
-            Just ( block, stack_ ) ->
+            Just ( block, _ ) ->
                 let
                     content =
                         case classifier of
@@ -346,15 +272,15 @@ endBlock classifier line state =
     else
         case List.Extra.uncons state.stack of
             Nothing ->
+                -- TODO: ???
                 state
 
-            -- TODO: ???
             Just ( block, rest ) ->
                 case List.Extra.uncons state.labelStack of
                     Nothing ->
+                        -- TODO: ???
                         state
 
-                    -- TODO: ???
                     Just ( label, _ ) ->
                         let
                             newBlock =
@@ -370,7 +296,7 @@ finishBlock state =
         Nothing ->
             state
 
-        Just ( block, rest ) ->
+        Just ( block, _ ) ->
             let
                 newBlock =
                     { block | status = Finished }
@@ -408,6 +334,49 @@ handleBlank state =
 transfer : State -> State
 transfer state =
     state
+
+
+
+--- PRINT
+
+
+{-| Used for debugging with CLI.ReadFile
+-}
+print : PrimitiveLaTeXBlock -> String
+print block =
+    [ "BLOCK:"
+    , "Type: " ++ Line.showBlockType block.blockType
+    , "Name: " ++ showName block.name
+    , "Level: " ++ String.fromInt block.level
+    , "Status: " ++ showStatus block.status
+    , "Line number: " ++ String.fromInt block.lineNumber
+    , "Content:"
+    , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
+    ]
+        |> String.join "\n"
+
+
+showName : Maybe String -> String
+showName mstr =
+    case mstr of
+        Nothing ->
+            "(anon)"
+
+        Just name ->
+            name
+
+
+showStatus : Status -> String
+showStatus status =
+    case status of
+        Finished ->
+            "Finished"
+
+        Started ->
+            "Started"
+
+        Filled ->
+            "Filled"
 
 
 
