@@ -1,5 +1,20 @@
 module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, print)
 
+{-|
+
+    The 'parser' function transforms a list of strings into a list of primitive blocks
+    for LaTeX, making use of an error recovery stategy in the case of syntax errors,
+    e.g., unterminated blocks.
+
+    The strategy is to examine each line in turn, building up a stack of blocks,
+    moving them from the stack to the block list as blocks are closed, i.e.,
+    are found to be properly terminated.  If the stack is nonempty after all
+    blocks have been consumed, we know that there is a syntax error, and
+    so an error recovery procedure is invoked.  Error recovery always
+    terminates and provides an indication of the nature of the error.
+
+-}
+
 import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..))
@@ -18,7 +33,12 @@ type alias PrimitiveLaTeXBlock =
     , sourceText : String
     , blockType : PrimitiveBlockType
     , status : Status
+    , error : Maybe PrimitiveBlockError
     }
+
+
+type alias PrimitiveBlockError =
+    { error : String }
 
 
 type alias State =
@@ -99,6 +119,7 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     , sourceText = ""
     , blockType = blockType
     , status = Started
+    , error = Nothing
     }
 
 
@@ -161,7 +182,7 @@ nextStep state_ =
                         Loop (beginBlock CPlainText currentLine state)
 
                     else
-                        Loop (state |> addLine currentLine)
+                        Loop state
 
                 CEmpty ->
                     case List.head state.labelStack |> Maybe.map .classification of
@@ -315,20 +336,6 @@ finishBlock state =
 slice : Int -> Int -> List a -> List a
 slice a b list =
     list |> List.take (b + 1) |> List.drop a
-
-
-addLine : Line -> State -> State
-addLine line state =
-    state
-
-
-handleBlank : State -> State
-handleBlank state =
-    let
-        _ =
-            Debug.log "handleBlank" ( state.level, state.count, state.lineNumber )
-    in
-    state
 
 
 transfer : State -> State

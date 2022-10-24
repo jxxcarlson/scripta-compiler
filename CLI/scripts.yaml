@@ -1,0 +1,2 @@
+scripts:
+  parse: elm-cli run --debug src/ReadFile.elm
