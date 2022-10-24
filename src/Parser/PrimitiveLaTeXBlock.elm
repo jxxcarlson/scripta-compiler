@@ -78,6 +78,11 @@ parse lines =
     loop (init lines) nextStep |> recover
 
 
+recover1 : State -> ParserOutput
+recover1 state =
+    { blocks = state.blocks, stack = state.stack }
+
+
 recover : State -> ParserOutput
 recover state =
     case List.Extra.uncons state.stack of
@@ -97,9 +102,17 @@ recover state =
                         lastLine =
                             state.lineNumber
 
+                        content =
+                            case topLabel.status of
+                                Filled ->
+                                    block.content
+
+                                _ ->
+                                    slice (firstLine + 1) lastLine state.lines
+
                         newBlock =
                             { block
-                                | content = slice (firstLine + 1) lastLine state.lines
+                                | content = content
                                 , status = Finished
                                 , error = Just { error = "missing end tag (" ++ (block.name |> Maybe.withDefault "(anon)") ++ ")" }
                             }
@@ -167,6 +180,13 @@ getBlockTypeAndLabel str =
 nextStep : State -> Step State State
 nextStep state_ =
     let
+        _ =
+            Debug.log ("Step " ++ String.fromInt state_.lineNumber) state_.labelStack
+
+        _ =
+            Debug.log ("Step " ++ String.fromInt state_.lineNumber)
+                ( List.head state_.stack |> Maybe.andThen .name, List.head state_.stack |> Maybe.map .content )
+
         state =
             { state_ | lineNumber = state_.lineNumber + 1, count = state_.count + 1 }
     in
@@ -234,7 +254,7 @@ beginBlock classifier line state =
         Nothing ->
             beginBlock_ classifier line state
 
-        Just ( _, _ ) ->
+        Just ( block, rest ) ->
             beginBlock_ classifier line { state | stack = fillBlockOnStack state }
 
 
@@ -277,7 +297,7 @@ fillBlockOnStack state =
             if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
                 state.stack
 
-            else
+            else if (List.head state.labelStack |> Maybe.map .status) == Just Started then
                 let
                     firstBlockLine =
                         List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
@@ -286,6 +306,9 @@ fillBlockOnStack state =
                         { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
                 in
                 newBlock :: rest
+
+            else
+                state.stack
 
 
 endBlock : Classification -> Line -> State -> State
@@ -296,78 +319,83 @@ endBlock classifier line state =
             List.head state.labelStack
     in
     if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
+        let
+            _ =
+                Debug.log "END BLOCK!" labelHead
+
+            _ =
+                Debug.log "STACK TOP" (List.head state.stack)
+        in
         case List.Extra.uncons state.stack of
             Nothing ->
                 -- TODO: error state!
-                let
-                    _ =
-                        Debug.log "endBlock" 1
-                in
                 state
 
-            Just ( block, _ ) ->
-                let
-                    _ =
-                        Debug.log "endBlock" 2
+            Just ( block, rest ) ->
+                if (labelHead |> Maybe.map .status) == Just Filled then
+                    { state | blocks = { block | status = Finished } :: state.blocks, stack = rest }
 
-                    content =
-                        case classifier of
-                            CPlainText ->
-                                slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
+                else
+                    let
+                        _ =
+                            Debug.log "endBlock" 1
 
-                            _ ->
-                                slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
+                        content =
+                            case classifier of
+                                CPlainText ->
+                                    slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
 
-                    newBlock =
-                        { block | content = List.reverse content, status = Finished }
-                in
-                { state
-                    | blocks = newBlock :: state.blocks
-                    , stack = List.drop 1 (fillBlockOnStack state)
-                    , labelStack = List.drop 1 state.labelStack
-                    , level = state.level - 1
-                }
+                                _ ->
+                                    slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
+
+                        newBlock =
+                            { block | content = List.reverse content, status = Finished } |> Debug.log "endBlock 1, newBlock"
+                    in
+                    { state
+                        | blocks = newBlock :: state.blocks
+                        , stack = List.drop 1 (fillBlockOnStack state)
+                        , labelStack = List.drop 1 state.labelStack
+                        , level = state.level - 1
+                    }
 
     else
         case List.Extra.uncons state.stack of
             Nothing ->
                 -- TODO: ???
-                let
-                    _ =
-                        Debug.log "endBlock" 3
-                in
                 state
 
             Just ( block, rest ) ->
                 case List.Extra.uncons state.labelStack of
                     Nothing ->
-                        let
-                            _ =
-                                Debug.log "endBlock" 4
-                        in
                         -- TODO: ???
                         state
 
                     Just ( label, _ ) ->
                         let
                             _ =
-                                Debug.log "endBlock 5, label" label
+                                Debug.log "endBlock" 2
 
-                            _ =
-                                Debug.log "endBlock 5, classifier" classifier
+                            error =
+                                if label.classification == CPlainText then
+                                    Nothing
 
-                            classfication1 =
-                                "(" ++ ClassifyBlock.classificationString label.classification ++ ")"
+                                else
+                                    let
+                                        classfication1 =
+                                            "(" ++ ClassifyBlock.classificationString label.classification ++ ")"
 
-                            classification2 =
-                                "(" ++ ClassifyBlock.classificationString classifier ++ ")"
+                                        classification2 =
+                                            "(" ++ ClassifyBlock.classificationString classifier ++ ")"
+                                    in
+                                    Just { error = "Missmatched tags: begin" ++ classfication1 ++ " ≠ end" ++ classification2 }
 
                             newBlock =
                                 { block
-                                    | content = slice (label.lineNumber + 1) (line.lineNumber - 1) state.lines
+                                    | content = slice label.lineNumber (line.lineNumber - 1) state.lines
                                     , status = Finished
-                                    , error = Just { error = "Missmatched tags: begin" ++ classfication1 ++ " ≠ end" ++ classification2 }
+                                    , error = error
                                 }
+                                    |> Debug.log "endBlock 2, newBlock"
                         in
                         { state | blocks = newBlock :: state.blocks, stack = rest, labelStack = List.drop 1 state.labelStack }
                             |> finishBlock

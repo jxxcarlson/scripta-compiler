@@ -1,5 +1,5 @@
 \begin{A}
-abc
+abc OK (except order)
 def
 
 \begin{B}
