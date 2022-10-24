@@ -1,0 +1,10 @@
+abc
+def
+
+\begin{A}
+pqr
+\end{A}
+
+ghi
+jkl
+

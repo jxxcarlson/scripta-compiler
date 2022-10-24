@@ -1,0 +1,9 @@
+\begin{A}
+abc
+def
+
+uvw
+pqr
+\end{A}
+
+

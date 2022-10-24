@@ -1,0 +1,9 @@
+\begin{A}
+abc
+def
+\end{A}
+
+\begin{B}
+xyz
+\end{B}
+

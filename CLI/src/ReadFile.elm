@@ -18,15 +18,19 @@ program process =
             <|
                 \content ->
                     let
-                        parsed : List PrimitiveLaTeXBlock
                         parsed =
                             content |> String.lines |> parse_ (\_ -> False)
 
-                        out : String
-                        out =
-                            "\n----------------\n" ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed |> String.join "\n\n") ++ "\n----------------\n"
+                        blockString =
+                            "\n----------------\nBLOCKS\n----------------\n"
+                                ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.blocks |> String.join "\n\n")
+
+                        stackString =
+                            "\n\n----------------\nSTACK\n----------------\n"
+                                ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.stack |> String.join "\n\n")
+                                ++ "\n----------------\n"
                     in
-                    IO.do (Proc.print out) <|
+                    IO.do (Proc.print (blockString ++ stackString)) <|
                         \_ ->
                             IO.return ()
 

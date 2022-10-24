@@ -1,0 +1,14 @@
+\begin{A}
+abc
+def
+
+\begin{B}
+hohoho
+hahaha
+\end{B}
+
+uvw
+pqr
+\end{A}
+
+

@@ -22,6 +22,29 @@ type alias PrimitiveLaTeXBlock =
     }
 
 
+type alias State =
+    { blocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
+    , labelStack : List Label
+    , currentBlock : Maybe PrimitiveLaTeXBlock
+    , lines : List String
+    , firstBlockLine : Int
+    , inBlock : Bool
+    , indent : Int
+    , level : Int
+    , lineNumber : Int
+    , position : Int
+    , inVerbatim : Bool
+    , isVerbatimLine : String -> Bool
+    , count : Int
+    , label : String
+    }
+
+
+type alias Label =
+    { classification : ClassifyBlock.Classification, level : Int, status : Status, lineNumber : Int }
+
+
 print : PrimitiveLaTeXBlock -> String
 print block =
     [ "BLOCK:"
@@ -47,46 +70,31 @@ showName mstr =
 
 
 type Status
-    = Complete
-    | Incomplete
+    = Finished
+    | Started
+    | Filled
 
 
 showStatus : Status -> String
 showStatus status =
     case status of
-        Complete ->
-            "Complete"
+        Finished ->
+            "Finished"
 
-        Incomplete ->
-            "Incomplete"
+        Started ->
+            "Started"
 
-
-type alias State =
-    { blocks : List PrimitiveLaTeXBlock
-    , stack : List PrimitiveLaTeXBlock
-    , labelStack : List ( ClassifyBlock.Classification, Int )
-    , currentBlock : Maybe PrimitiveLaTeXBlock
-    , lines : List String
-    , firstBlockLine : Int
-    , inBlock : Bool
-    , indent : Int
-    , level : Int
-    , lineNumber : Int
-    , position : Int
-    , inVerbatim : Bool
-    , isVerbatimLine : String -> Bool
-    , count : Int
-    , label : String
-    }
+        Filled ->
+            "Filled"
 
 
-parse_ : (String -> Bool) -> List String -> List PrimitiveLaTeXBlock
+parse_ : (String -> Bool) -> List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
 parse_ isVerbatimLine lines =
     loop (init isVerbatimLine lines) nextStep
-        |> List.map (\block -> finalize block)
 
 
 
+-- |> List.map (\block -> finalize block)
 -- TODO: think about the below
 
 
@@ -119,12 +127,12 @@ init isVerbatimLine lines =
     , firstBlockLine = 0
     , indent = 0
     , level = -1
-    , lineNumber = 0
+    , lineNumber = -1
     , inBlock = False
     , position = 0
     , inVerbatim = False
     , isVerbatimLine = isVerbatimLine
-    , count = 0
+    , count = -1
     , label = "0, START"
     }
 
@@ -148,7 +156,7 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     , properties = Dict.empty -- TODO complete this
     , sourceText = ""
     , blockType = blockType
-    , status = Incomplete
+    , status = Started
     }
 
 
@@ -166,29 +174,15 @@ getBlockTypeAndLabel str =
 --  |> Parser.PrimitiveLaTeXBlock.elaborate line
 
 
-nextStep : State -> Step State (List PrimitiveLaTeXBlock)
-nextStep state =
+nextStep : State -> Step State { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+nextStep state_ =
+    let
+        state =
+            { state_ | lineNumber = state_.lineNumber + 1, count = state_.count + 1 }
+    in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
-            case state.currentBlock of
-                Nothing ->
-                    Done (List.reverse state.blocks)
-
-                Just block_ ->
-                    let
-                        block =
-                            { block_ | content = dropLast block_.content }
-
-                        blocks =
-                            if block.content == [ "" ] then
-                                -- Debug.log (Tools.cyan "****, DONE" 13)
-                                List.reverse state.blocks
-
-                            else
-                                -- Debug.log (Tools.cyan "****, DONE" 13)
-                                List.reverse (block :: state.blocks)
-                    in
-                    Done blocks
+            Done { blocks = List.reverse state.blocks, stack = state.stack }
 
         Just rawLine ->
             let
@@ -206,13 +200,8 @@ nextStep state =
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
-                    if state.level > -1 then
-                        Loop (addLine currentLine state)
+                    Loop (state |> beginBlock (CBeginBlock label) currentLine)
 
-                    else
-                        Loop (state |> endBlock (CBeginBlock label) currentLine |> beginBlock (CBeginBlock label) currentLine)
-
-                -- Loop (state |> beginBlock (CBeginBlock label) currentLine)
                 CEndBlock label ->
                     if state.level > -1 then
                         Loop (state |> endBlock (CBeginBlock label) currentLine)
@@ -225,46 +214,40 @@ nextStep state =
                         _ =
                             Debug.log "CSpecialBlock" state.count
                     in
-                    Done []
+                    Done { blocks = [], stack = [] }
 
                 CMathBlockDelim ->
                     let
                         _ =
                             Debug.log "CMathBlockDelim" state.count
                     in
-                    Done []
+                    Done { blocks = [], stack = [] }
 
                 CVerbatimBlockDelim ->
                     let
                         _ =
                             Debug.log "CVerbatimBlockDelim" state.count
                     in
-                    Done []
+                    Done { blocks = [], stack = [] }
 
                 CPlainText ->
-                    let
-                        _ =
-                            Debug.log "CPLainText" ( state.level, state.count, currentLine )
-                    in
-                    if state.level > -1 then
-                        let
-                            _ =
-                                Debug.log "addLine" currentLine
-                        in
-                        Loop (state |> addLine currentLine)
-
-                    else if isEmpty currentLine then
-                        Loop (handleBlank state)
+                    if (List.head state.labelStack |> Maybe.map .status) == Just Filled || state.labelStack == [] then
+                        Loop (beginBlock CPlainText currentLine state)
 
                     else
-                        Loop (beginBlock CPlainText currentLine state)
+                        Loop (state |> addLine currentLine)
 
                 CEmpty ->
                     let
                         _ =
                             Debug.log "CEmpty" ( state.lineNumber, state.count )
                     in
-                    Loop { state | lineNumber = state.lineNumber + 1 }
+                    case List.head state.labelStack |> Maybe.map .classification of
+                        Just CPlainText ->
+                            Loop <| endBlock CPlainText currentLine state
+
+                        _ ->
+                            Loop state
 
 
 
@@ -273,25 +256,71 @@ nextStep state =
 
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            beginBlock_ classifier line state
+
+        Just ( block, rest ) ->
+            let
+                _ =
+                    Debug.log "!! LABEL STACK" state.labelStack
+
+                stack =
+                    if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
+                        state.stack
+
+                    else
+                        let
+                            firstBlockLine =
+                                List.head state.labelStack |> Maybe.map .lineNumber |> Debug.log "FIRSTLINE" |> Maybe.withDefault 0
+
+                            newBlock =
+                                { block | status = Filled, content = slice (firstBlockLine + 1 |> Debug.log "Slice (1)") (line.lineNumber - 1 |> Debug.log "Slice (2)") state.lines }
+                                    |> Debug.log "NEW BLOCK"
+                        in
+                        newBlock :: rest
+            in
+            beginBlock_ classifier line { state | stack = stack }
+
+
+beginBlock_ : Classification -> Line -> State -> State
+beginBlock_ classifier line state =
     let
         _ =
-            Debug.log "beginBlock" ( level, state.count, line )
+            Debug.log "beginBlock_" ( level, state.count, line )
 
         level =
             state.level + 1
 
         newBlock =
             blockFromLine level line
+
+        labelStack =
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state.labelStack
+
+                Just ( label, rest_ ) ->
+                    ({ label | status = Filled } |> Debug.log "LABEL") :: rest_
     in
     { state
-        | lineNumber = line.lineNumber --- state.lineNumber -- + 1
+        | lineNumber = line.lineNumber
         , firstBlockLine = line.lineNumber
         , indent = line.indent
         , level = level
-        , labelStack = ( classifier, level ) :: state.labelStack |> Debug.log "beginBlock, labelStack"
+        , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack |> Debug.log "beginBlock, labelStack"
         , stack = newBlock :: state.stack
-        , count = state.count + 1
     }
+
+
+firstTwo : ( a, b, c ) -> ( a, b )
+firstTwo ( a, b, _ ) =
+    ( a, b )
+
+
+third : ( a, b, c ) -> c
+third ( _, _, c ) =
+    c
 
 
 endBlock : Classification -> Line -> State -> State
@@ -299,36 +328,42 @@ endBlock classifier line state =
     let
         _ =
             Debug.log "endBlock" ( state.level, state.count, line )
+
+        labelHead : Maybe Label
+        labelHead =
+            List.head state.labelStack
     in
-    if Just ( classifier, state.level ) == List.head state.labelStack then
+    if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
         case List.Extra.uncons state.stack of
             Nothing ->
-                { state | lineNumber = state.lineNumber + 1 }
+                state
 
             -- TODO: error state!
             Just ( block, stack_ ) ->
                 let
                     content =
-                        -- ignore \begin{foo} and \end{foo}:
-                        slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
+                        case classifier of
+                            CPlainText ->
+                                slice (state.firstBlockLine |> Debug.log "endBlock slice (1)") (line.lineNumber - 1 |> Debug.log "endBlock slice (2)") state.lines |> List.reverse
+
+                            _ ->
+                                slice (state.firstBlockLine + 1 |> Debug.log "endBlock slice (1)") (line.lineNumber - 1 |> Debug.log "endBlock slice (2)") state.lines |> List.reverse
 
                     newBlock =
-                        { block | content = content, status = Complete }
+                        { block | content = content, status = Finished }
 
                     _ =
                         Debug.log "endBlock, newBlock.content" content
                 in
                 { state
-                    | lineNumber = line.lineNumber -- state.lineNumber + 1
-                    , blocks = newBlock :: state.blocks |> Debug.log "endBlock, blocks"
+                    | blocks = newBlock :: state.blocks |> Debug.log "endBlock, blocks"
                     , stack = List.drop 1 state.stack
                     , labelStack = List.drop 1 state.labelStack |> Debug.log "endBlock, labelStack"
                     , level = state.level - 1 |> Debug.log "endBlock, finalLevel"
-                    , count = state.count + 1
                 }
 
     else
-        { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
+        state
 
 
 
@@ -342,7 +377,11 @@ slice a b list =
 
 addLine : Line -> State -> State
 addLine line state =
-    { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
+    let
+        _ =
+            Debug.log "addLine" ( state.level, state.count, state.lineNumber )
+    in
+    state
 
 
 handleBlank : State -> State
@@ -351,129 +390,12 @@ handleBlank state =
         _ =
             Debug.log "handleBlank" ( state.level, state.count, state.lineNumber )
     in
-    { state | lineNumber = state.lineNumber + 1, count = state.count + 1 }
+    state
 
 
 transfer : State -> State
 transfer state =
     state
-
-
-
---- STUFF
-
-
-advance : Int -> State -> State
-advance newPosition state =
-    { state
-        | lines = List.drop 1 state.lines
-        , lineNumber = state.lineNumber + 1
-        , position = newPosition
-        , count = state.count + 1
-    }
-
-
-addCurrentLine2 : State -> Line -> State
-addCurrentLine2 state currentLine =
-    case state.currentBlock of
-        Nothing ->
-            { state | lines = List.drop 1 state.lines }
-
-        Just block ->
-            { state
-                | lines = List.drop 1 state.lines
-                , lineNumber = state.lineNumber + 1
-                , position = state.position + String.length currentLine.content
-                , count = state.count + 1
-                , currentBlock =
-                    Just (addCurrentLine_ currentLine block)
-            }
-
-
-addCurrentLine_ : Line -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
-addCurrentLine_ ({ prefix, content } as line) block =
-    if block.blockType == PBVerbatim then
-        if block.name == Just "math" then
-            { block | content = line.content :: block.content, sourceText = block.sourceText ++ "\n" ++ prefix ++ content }
-
-        else
-            { block | content = (line.prefix ++ line.content) :: block.content, sourceText = block.sourceText ++ "\n" ++ prefix ++ content }
-
-    else
-        { block | content = line.content :: block.content, sourceText = block.sourceText ++ "\n" ++ prefix ++ content }
-
-
-commitBlock : State -> Line -> State
-commitBlock state currentLine =
-    case state.currentBlock of
-        Nothing ->
-            { state
-                | lines = List.drop 1 state.lines
-                , indent = currentLine.indent
-            }
-
-        Just block_ ->
-            let
-                block =
-                    case block_.blockType of
-                        PBParagraph ->
-                            block_
-
-                        PBOrdinary ->
-                            { block_ | content = dropLast block_.content }
-
-                        PBVerbatim ->
-                            { block_ | content = dropLast block_.content }
-
-                ( currentBlock, newBlocks ) =
-                    if block.content == [ "" ] then
-                        ( Nothing, state.blocks )
-
-                    else
-                        ( Just (blockFromLine state.level currentLine), block :: state.blocks )
-            in
-            { state
-                | lines = List.drop 1 state.lines
-                , lineNumber = state.lineNumber + 1
-                , position = state.position + String.length currentLine.content
-                , count = state.count + 1
-                , blocks = newBlocks
-                , inBlock = False
-                , inVerbatim = state.isVerbatimLine currentLine.content
-                , currentBlock = currentBlock
-            }
-
-
-createBlock : State -> Line -> State
-createBlock state currentLine =
-    let
-        blocks =
-            case state.currentBlock of
-                Nothing ->
-                    state.blocks
-
-                -- When creating a new block push the current block onto state.blocks
-                -- only if its content is nontrivial (not == [""])
-                Just block ->
-                    if block.content == [ "" ] then
-                        state.blocks
-
-                    else
-                        block :: state.blocks
-
-        newBlock =
-            blockFromLine state.level currentLine
-    in
-    { state
-        | lines = List.drop 1 state.lines
-        , stack = newBlock :: state.stack
-        , lineNumber = state.lineNumber + 1
-        , position = state.position + String.length currentLine.content
-        , count = state.count + 1
-        , indent = currentLine.indent
-        , inBlock = True
-        , blocks = blocks
-    }
 
 
 
