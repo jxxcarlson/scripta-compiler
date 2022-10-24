@@ -391,7 +391,12 @@ endBlock classifier line state =
 
                             newBlock =
                                 { block
-                                    | content = slice label.lineNumber (line.lineNumber - 1) state.lines
+                                    | content =
+                                        if label.classification == CPlainText then
+                                            slice label.lineNumber (line.lineNumber - 1) state.lines
+
+                                        else
+                                            slice (label.lineNumber + 1) (line.lineNumber - 1) state.lines
                                     , status = Finished
                                     , error = error
                                 }
