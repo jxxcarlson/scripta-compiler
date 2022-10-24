@@ -1,0 +1,10 @@
+\begin{A}
+abc
+def
+
+\begin{C}
+pqr
+stu
+\end{C}
+
+\end{A}

@@ -1,0 +1,11 @@
+\begin{A}
+abc OK
+def
+
+\begin{C}
+pqr
+stu
+\end{C}
+
+xyz
+\end{A}
