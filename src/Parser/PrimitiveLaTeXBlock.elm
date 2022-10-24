@@ -69,9 +69,18 @@ type Status
     | Filled
 
 
-parse : List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+type alias ParserOutput =
+    { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+
+
+parse : List String -> ParserOutput
 parse lines =
-    loop (init lines) nextStep
+    loop (init lines) nextStep |> recover
+
+
+recover : State -> ParserOutput
+recover state =
+    { blocks = state.blocks, stack = state.stack }
 
 
 {-|
@@ -131,7 +140,7 @@ getBlockTypeAndLabel str =
             ( PBParagraph, Nothing )
 
 
-nextStep : State -> Step State { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+nextStep : State -> Step State State
 nextStep state_ =
     let
         state =
@@ -139,7 +148,7 @@ nextStep state_ =
     in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
-            Done { blocks = List.reverse state.blocks, stack = state.stack }
+            Done state
 
         Just rawLine ->
             let
@@ -167,13 +176,13 @@ nextStep state_ =
                         Loop (state |> endBlock (CBeginBlock label) currentLine |> transfer)
 
                 CSpecialBlock label ->
-                    Done { blocks = [], stack = [] }
+                    Done state
 
                 CMathBlockDelim ->
-                    Done { blocks = [], stack = [] }
+                    Done state
 
                 CVerbatimBlockDelim ->
-                    Done { blocks = [], stack = [] }
+                    Done state
 
                 CPlainText ->
                     if (List.head state.labelStack |> Maybe.map .status) == Just Filled || state.labelStack == [] then
@@ -273,13 +282,13 @@ endBlock classifier line state =
                     content =
                         case classifier of
                             CPlainText ->
-                                slice state.firstBlockLine (line.lineNumber - 1) state.lines
+                                slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
 
                             _ ->
                                 slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
 
                     newBlock =
-                        { block | content = content, status = Finished }
+                        { block | content = List.reverse content, status = Finished }
                 in
                 { state
                     | blocks = newBlock :: state.blocks

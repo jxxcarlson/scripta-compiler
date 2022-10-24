@@ -1,6 +1,5 @@
 module ReadFile exposing (program)
 
-import Dict exposing (Dict)
 import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
@@ -22,11 +21,11 @@ program process =
                             content |> String.lines |> parse
 
                         blockString =
-                            "\n----------------\nBLOCKS\n----------------\n"
+                            "\n----------------\nBLOCKS\n----------------\n\n"
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.blocks |> String.join "\n\n")
 
                         stackString =
-                            "\n\n----------------\nSTACK\n----------------\n"
+                            "\n\n----------------\nSTACK\n----------------\n\n"
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.stack |> String.join "\n\n")
                                 ++ "\n----------------\n"
                     in
