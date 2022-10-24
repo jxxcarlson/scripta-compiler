@@ -54,7 +54,6 @@ type alias State =
     , lineNumber : Int
     , position : Int
     , inVerbatim : Bool
-    , isVerbatimLine : String -> Bool
     , count : Int
     , label : String
     }
@@ -70,9 +69,9 @@ type Status
     | Filled
 
 
-parse : (String -> Bool) -> List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
-parse isVerbatimLine lines =
-    loop (init isVerbatimLine lines) nextStep
+parse : List String -> { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+parse lines =
+    loop (init lines) nextStep
 
 
 {-|
@@ -82,8 +81,8 @@ parse isVerbatimLine lines =
     and lineNumber is the index of the current line in the source
 
 -}
-init : (String -> Bool) -> List String -> State
-init isVerbatimLine lines =
+init : List String -> State
+init lines =
     { blocks = []
     , stack = []
     , labelStack = []
@@ -96,7 +95,6 @@ init isVerbatimLine lines =
     , inBlock = False
     , position = 0
     , inVerbatim = False
-    , isVerbatimLine = isVerbatimLine
     , count = -1
     , label = "0, START"
     }

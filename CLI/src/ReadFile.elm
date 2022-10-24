@@ -19,7 +19,7 @@ program process =
                 \content ->
                     let
                         parsed =
-                            content |> String.lines |> parse (\_ -> False)
+                            content |> String.lines |> parse
 
                         blockString =
                             "\n----------------\nBLOCKS\n----------------\n"
