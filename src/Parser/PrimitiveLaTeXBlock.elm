@@ -236,6 +236,12 @@ handleSpecial_ classifier line state =
                         , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
                     }
 
+                CSpecialBlock LXNumbered ->
+                    { newBlock_
+                        | name = Just "numbered"
+                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
+                    }
+
                 _ ->
                     newBlock_
 
@@ -420,6 +426,12 @@ emptyLine currentLine state =
         Just CMathBlockDelim ->
             Loop <| endBlock_ CMathBlockDelim currentLine state
 
+        Just (CSpecialBlock LXItem) ->
+            Loop <| endBlock_ (CSpecialBlock LXItem) currentLine state
+
+        Just (CSpecialBlock LXNumbered) ->
+            Loop <| endBlock_ (CSpecialBlock LXNumbered) currentLine state
+
         _ ->
             Loop state
 
@@ -547,6 +559,9 @@ missingTagError : { a | name : Maybe String } -> Maybe { error : String }
 missingTagError block =
     case block.name of
         Just "item" ->
+            Nothing
+
+        Nothing ->
             Nothing
 
         _ ->
