@@ -1,0 +1,10 @@
+abc
+def
+
+$$
+\alpha + \beta + \gamma = \pi
+
+\begin{A}
+ghi
+jkl
+\end{A}
