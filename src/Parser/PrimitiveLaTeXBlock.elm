@@ -17,7 +17,7 @@ module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, print)
 
 import Dict exposing (Dict)
 import List.Extra
-import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..))
+import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
 
 
@@ -153,13 +153,13 @@ nextStep state_ =
                     endBlock label currentLine state
 
                 CSpecialBlock label ->
-                    Done state
+                    Loop <| handleSpecial (CSpecialBlock label) currentLine state
 
                 CMathBlockDelim ->
                     Loop (state |> handleMathBlock currentLine)
 
                 CVerbatimBlockDelim ->
-                    Loop (state |> handleVerbatimBlock currentLine |> Debug.log "VERBATIM")
+                    Loop (state |> handleVerbatimBlock currentLine)
 
                 CPlainText ->
                     plainText state currentLine
@@ -190,6 +190,54 @@ beginBlock_ classifier line state =
 
         newBlock =
             blockFromLine level line
+
+        labelStack =
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state.labelStack
+
+                Just ( label, rest_ ) ->
+                    { label | status = Filled } :: rest_
+    in
+    { state
+        | lineNumber = line.lineNumber
+        , firstBlockLine = line.lineNumber
+        , indent = line.indent
+        , level = level
+        , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack
+        , stack = newBlock :: state.stack
+    }
+
+
+handleSpecial : Classification -> Line -> State -> State
+handleSpecial classifier line state =
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            handleSpecial_ classifier line state
+
+        Just ( block, rest ) ->
+            handleSpecial_ classifier line { state | stack = fillBlockOnStack state }
+
+
+handleSpecial_ : Classification -> Line -> State -> State
+handleSpecial_ classifier line state =
+    let
+        level =
+            state.level + 1
+
+        newBlock_ =
+            blockFromLine level line
+
+        newBlock =
+            case classifier of
+                CSpecialBlock LXItem ->
+                    { newBlock_
+                        | name = Just "item"
+                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
+                    }
+
+                _ ->
+                    newBlock_
 
         labelStack =
             case List.Extra.uncons state.labelStack of
@@ -255,10 +303,6 @@ endBlock_ classifier line state =
 
     else
         endBlockOnMismatch classifier line state
-
-
-
--- endBlockOnMismatch : Maybe Label -> Classification -> Line -> State -> State
 
 
 endBlockOnMismatch : Classification -> Line -> State -> State
@@ -501,22 +545,27 @@ recover state =
 
 missingTagError : { a | name : Maybe String } -> Maybe { error : String }
 missingTagError block =
-    let
-        name =
-            case block.name of
-                Nothing ->
-                    "(anon)"
+    case block.name of
+        Just "item" ->
+            Nothing
 
-                Just "math" ->
-                    "$$"
+        _ ->
+            let
+                name =
+                    case block.name of
+                        Nothing ->
+                            "(anon)"
 
-                Just "code" ->
-                    "```"
+                        Just "math" ->
+                            "$$"
 
-                _ ->
-                    block.name |> Maybe.withDefault "(anon)"
-    in
-    Just { error = "missing end tag (" ++ name ++ ")" }
+                        Just "code" ->
+                            "```"
+
+                        _ ->
+                            block.name |> Maybe.withDefault "(anon)"
+            in
+            Just { error = "missing end tag (" ++ name ++ ")" }
 
 
 
@@ -546,12 +595,18 @@ print block =
     , "Name: " ++ showName block.name
     , "Level: " ++ String.fromInt block.level
     , "Status: " ++ showStatus block.status
+    , "Properties: " ++ showProperties block.properties
     , "Error: " ++ showError block.error
     , "Line number: " ++ String.fromInt block.lineNumber
     , "Content:"
     , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
     ]
         |> String.join "\n"
+
+
+showProperties : Dict String String -> String
+showProperties dict =
+    dict |> Dict.toList |> List.map (\( k, v ) -> k ++ ": " ++ v) |> String.join ", "
 
 
 showError : Maybe PrimitiveBlockError -> String
