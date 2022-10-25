@@ -328,8 +328,42 @@ endBlockOnMismatch classifier line state =
                                 , error = error
                             }
                     in
-                    { state | blocks = newBlock :: state.blocks, stack = rest, labelStack = List.drop 1 state.labelStack }
+                    { state
+                        | holdingStack = newBlock :: state.holdingStack
+
+                        -- blocks = newBlock :: state.blocks
+                        , stack = rest
+                        , labelStack = List.drop 1 state.labelStack
+                    }
                         |> finishBlock
+                        |> resolveIfStackEmpty
+
+
+resolveIfStackEmpty : State -> State
+resolveIfStackEmpty state =
+    if state.stack == [] then
+        { state | blocks = state.holdingStack ++ state.blocks, holdingStack = [] }
+
+    else
+        state
+
+
+finishBlock : State -> State
+finishBlock state =
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            state
+
+        Just ( block, _ ) ->
+            let
+                updatedBlock =
+                    { block | status = Finished }
+            in
+            { state
+                | blocks = updatedBlock :: state.blocks
+                , stack = List.drop 1 state.stack
+                , labelStack = List.drop 1 state.labelStack
+            }
 
 
 endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
@@ -353,11 +387,14 @@ endBlockOMatch labelHead classifier line state =
                         newBlockWithError classifier (getContent classifier line state) block
                 in
                 { state
-                    | blocks = newBlock :: state.blocks
+                    | holdingStack = newBlock :: state.holdingStack
+
+                    -- blocks = newBlock :: state.blocks
                     , stack = List.drop 1 (fillBlockOnStack state)
                     , labelStack = List.drop 1 state.labelStack
                     , level = state.level - 1
                 }
+                    |> resolveIfStackEmpty
 
 
 getError label classifier =
@@ -436,24 +473,6 @@ emptyLine currentLine state =
 
         _ ->
             Loop state
-
-
-finishBlock : State -> State
-finishBlock state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            state
-
-        Just ( block, _ ) ->
-            let
-                newBlock =
-                    { block | status = Finished }
-            in
-            { state
-                | blocks = newBlock :: state.blocks
-                , stack = List.drop 1 state.stack
-                , labelStack = List.drop 1 state.labelStack
-            }
 
 
 handleMathBlock line state =
