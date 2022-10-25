@@ -44,6 +44,7 @@ type alias PrimitiveBlockError =
 type alias State =
     { blocks : List PrimitiveLaTeXBlock
     , stack : List PrimitiveLaTeXBlock
+    , holdingStack : List PrimitiveLaTeXBlock
     , labelStack : List Label
     , currentBlock : Maybe PrimitiveLaTeXBlock
     , lines : List String
@@ -89,6 +90,7 @@ init : List String -> State
 init lines =
     { blocks = []
     , stack = []
+    , holdingStack = []
     , labelStack = []
     , currentBlock = Nothing
     , lines = lines
@@ -101,32 +103,6 @@ init lines =
     , inVerbatim = False
     , count = -1
     , label = "0, START"
-    }
-
-
-{-| Construct a skeleton block given one line of text, .e.g.,
-
-        \begin{equation}
-
--}
-blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
-blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
-    let
-        ( blockType, label ) =
-            getBlockTypeAndLabel line.content
-    in
-    { indent = indent
-    , lineNumber = lineNumber
-    , position = position
-    , content = []
-    , level = level
-    , name = label
-    , args = []
-    , properties = Dict.empty -- TODO complete this
-    , sourceText = ""
-    , blockType = blockType
-    , status = Started
-    , error = Nothing
     }
 
 
@@ -178,7 +154,7 @@ beginBlock classifier line state =
         Nothing ->
             beginBlock_ classifier line state
 
-        Just ( block, rest ) ->
+        Just _ ->
             beginBlock_ classifier line { state | stack = fillBlockOnStack state }
 
 
@@ -215,7 +191,7 @@ handleSpecial classifier line state =
         Nothing ->
             handleSpecial_ classifier line state
 
-        Just ( block, rest ) ->
+        Just _ ->
             handleSpecial_ classifier line { state | stack = fillBlockOnStack state }
 
 
@@ -548,7 +524,7 @@ recover : State -> ParserOutput
 recover state =
     case List.Extra.uncons state.stack of
         Nothing ->
-            { blocks = state.blocks, stack = state.stack }
+            { blocks = List.reverse state.blocks, stack = state.stack }
 
         Just ( block, rest ) ->
             case List.Extra.uncons state.labelStack of
@@ -682,6 +658,32 @@ showStatus status =
 
 
 --- HELPERS
+
+
+{-| Construct a skeleton block given one line of text, .e.g.,
+
+        \begin{equation}
+
+-}
+blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
+blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
+    let
+        ( blockType, label ) =
+            getBlockTypeAndLabel line.content
+    in
+    { indent = indent
+    , lineNumber = lineNumber
+    , position = position
+    , content = []
+    , level = level
+    , name = label
+    , args = []
+    , properties = Dict.empty -- TODO complete this
+    , sourceText = ""
+    , blockType = blockType
+    , status = Started
+    , error = Nothing
+    }
 
 
 getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
