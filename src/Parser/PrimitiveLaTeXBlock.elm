@@ -242,6 +242,18 @@ handleSpecial_ classifier line state =
                         , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
                     }
 
+                CSpecialBlock (LXOrdinaryBlock name) ->
+                    { newBlock_
+                        | name = Just name
+                        , blockType = PBOrdinary
+                    }
+
+                CSpecialBlock (LXVerbatimBlock name) ->
+                    { newBlock_
+                        | name = Just name
+                        , blockType = PBVerbatim
+                    }
+
                 _ ->
                     newBlock_
 
@@ -313,6 +325,10 @@ endBlock_ classifier line state =
 
 endBlockOnMismatch : Classification -> Line -> State -> State
 endBlockOnMismatch classifier line state =
+    let
+        _ =
+            Debug.log "endBlockOnMismatch" ( classifier, line )
+    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: ???
@@ -342,6 +358,10 @@ endBlockOnMismatch classifier line state =
 
 endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOMatch labelHead classifier line state =
+    let
+        _ =
+            Debug.log "endBlockOnMismatch" ( classifier, line )
+    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: error state!
@@ -431,6 +451,12 @@ emptyLine currentLine state =
 
         Just (CSpecialBlock LXNumbered) ->
             Loop <| endBlock_ (CSpecialBlock LXNumbered) currentLine state
+
+        Just (CSpecialBlock (LXOrdinaryBlock name)) ->
+            Loop <| endBlock_ (CSpecialBlock (LXOrdinaryBlock name)) currentLine state
+
+        Just (CSpecialBlock (LXVerbatimBlock name)) ->
+            Loop <| endBlock_ (CSpecialBlock (LXVerbatimBlock name)) currentLine state
 
         _ ->
             Loop state
@@ -568,9 +594,6 @@ missingTagError block =
             let
                 name =
                     case block.name of
-                        Nothing ->
-                            "(anon)"
-
                         Just "math" ->
                             "$$"
 

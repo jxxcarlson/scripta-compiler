@@ -1,4 +1,5 @@
-\numbered abc
+| theorem
+abc
 def
 
 pqr
