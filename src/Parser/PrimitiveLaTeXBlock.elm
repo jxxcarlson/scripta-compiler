@@ -186,6 +186,9 @@ nextStep state_ =
                         Just CPlainText ->
                             Loop <| endBlock CPlainText currentLine state
 
+                        Just CMathBlockDelim ->
+                            Loop <| endBlock CMathBlockDelim currentLine state
+
                         _ ->
                             Loop state
 
