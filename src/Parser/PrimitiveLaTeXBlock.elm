@@ -370,7 +370,7 @@ endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOMatch labelHead classifier line state =
     let
         _ =
-            Debug.log "endBlockOnMismatch" ( classifier, line )
+            Debug.log "endBlockOnMatch" ( classifier, line )
     in
     case List.Extra.uncons state.stack of
         Nothing ->
@@ -379,7 +379,7 @@ endBlockOMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = { block | status = Finished } :: state.blocks, stack = rest }
+                { state | blocks = { block | status = Finished } :: state.blocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
@@ -387,11 +387,11 @@ endBlockOMatch labelHead classifier line state =
                         newBlockWithError classifier (getContent classifier line state) block
                 in
                 { state
-                    | holdingStack = newBlock :: state.holdingStack
+                    | holdingStack = newBlock :: state.holdingStack |> Debug.log "endBlockOnMatch, holdingStack"
 
                     -- blocks = newBlock :: state.blocks
                     , stack = List.drop 1 (fillBlockOnStack state)
-                    , labelStack = List.drop 1 state.labelStack
+                    , labelStack = List.drop 1 state.labelStack |> Debug.log "endBlockOnMatch, stack"
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
