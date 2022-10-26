@@ -652,6 +652,7 @@ print block =
     , "Line number: " ++ String.fromInt block.lineNumber
     , "Content:"
     , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
+    , "Source text:\n" ++ block.sourceText
     ]
         |> String.join "\n"
 
