@@ -224,7 +224,7 @@ handleSpecial_ classifier line state =
                 CSpecialBlock LXNumbered ->
                     { newBlock_
                         | name = Just "numbered"
-                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
+                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\numbered " "" line.content ) ]
                     }
 
                 CSpecialBlock (LXOrdinaryBlock name) ->
@@ -296,26 +296,27 @@ endBlock label currentLine state =
 
 endBlock_ : Classification -> Line -> State -> State
 endBlock_ classifier line state =
+    case List.head state.labelStack of
+        Nothing ->
+            state
+
+        Just label ->
+            let
+                _ =
+                    Debug.log ((state.count |> String.fromInt) ++ ": (c1, c2)") ( classifier, label.classification )
+            in
+            if classifier == label.classification && state.level == label.level then
+                endBlockOMatch (Just label) classifier line state
+
+            else
+                endBlockOnMismatch label classifier line state
+
+
+endBlockOnMismatch : Label -> Classification -> Line -> State -> State
+endBlockOnMismatch label_ classifier line state =
     let
-        labelHead : Maybe Label
-        labelHead =
-            List.head state.labelStack
-
         _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": (c1, c2)") ( classifier, Maybe.map .classification labelHead )
-    in
-    if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
-        endBlockOMatch labelHead classifier line state
-
-    else
-        endBlockOnMismatch labelHead classifier line state
-
-
-endBlockOnMismatch : Maybe Label -> Classification -> Line -> State -> State
-endBlockOnMismatch mlabel classifier line state =
-    let
-        _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch") ( classifier, line )
+            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch (ml, cl, li)") ( label_, classifier, line )
     in
     case List.Extra.uncons state.stack of
         Nothing ->
@@ -335,7 +336,7 @@ endBlockOnMismatch mlabel classifier line state =
 
                         newBlock =
                             { block
-                                | content = getContent classifier line state
+                                | content = getContent label_.classification line state
                                 , status = Finished
                                 , error = error
                             }
