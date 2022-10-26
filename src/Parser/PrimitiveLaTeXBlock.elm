@@ -155,6 +155,10 @@ nextStep state_ =
 
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
+    let
+        _ =
+            Debug.log ((state.count |> String.fromInt) ++ ": beginBlock, classifier") classifier
+    in
     case List.Extra.uncons state.stack of
         Nothing ->
             beginBlock_ classifier line state
@@ -296,19 +300,22 @@ endBlock_ classifier line state =
         labelHead : Maybe Label
         labelHead =
             List.head state.labelStack
+
+        _ =
+            Debug.log ((state.count |> String.fromInt) ++ ": (c1, c2)") ( classifier, Maybe.map .classification labelHead )
     in
     if Just classifier == Maybe.map .classification labelHead && Just state.level == Maybe.map .level labelHead then
         endBlockOMatch labelHead classifier line state
 
     else
-        endBlockOnMismatch classifier line state
+        endBlockOnMismatch labelHead classifier line state
 
 
-endBlockOnMismatch : Classification -> Line -> State -> State
-endBlockOnMismatch classifier line state =
+endBlockOnMismatch : Maybe Label -> Classification -> Line -> State -> State
+endBlockOnMismatch mlabel classifier line state =
     let
         _ =
-            Debug.log "endBlockOnMismatch" ( classifier, line )
+            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch") ( classifier, line )
     in
     case List.Extra.uncons state.stack of
         Nothing ->
@@ -376,7 +383,7 @@ endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOMatch labelHead classifier line state =
     let
         _ =
-            Debug.log "endBlockOnMatch" ( classifier, line )
+            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch") ( classifier, line )
     in
     case List.Extra.uncons state.stack of
         Nothing ->
@@ -420,6 +427,10 @@ getError label classifier =
 
 getContent : Classification -> Line -> State -> List String
 getContent classifier line state =
+    let
+        _ =
+            Debug.log ((state.count |> String.fromInt) ++ ": getContent") ( classifier, line )
+    in
     case classifier of
         CPlainText ->
             slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
