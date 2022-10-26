@@ -744,7 +744,7 @@ getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
 getBlockTypeAndLabel str =
     case ClassifyBlock.classify str of
         CBeginBlock label ->
-            if List.member label [ "equation", "aligned" ] then
+            if List.member label [ "equation", "aligned", "math" ] then
                 ( PBVerbatim, Just label )
 
             else
