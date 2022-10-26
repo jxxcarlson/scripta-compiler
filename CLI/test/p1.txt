@@ -1,4 +1,4 @@
-abc OK
+abc
 def
 
 \begin{A}

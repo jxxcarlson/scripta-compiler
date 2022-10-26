@@ -1,5 +1,5 @@
 \begin{A}
-abc
+abc NotOK (sourceText for block A)
 def
 
 \begin{C}

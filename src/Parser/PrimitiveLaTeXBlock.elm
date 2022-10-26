@@ -28,6 +28,7 @@ type alias PrimitiveLaTeXBlock =
     , position : Int
     , level : Int
     , content : List String
+    , firstLine : String
     , name : Maybe String
     , args : List String
     , properties : Dict String String
@@ -322,7 +323,7 @@ endBlock_ classifier line state =
 
         Just label ->
             if classifier == label.classification && state.level == label.level then
-                endBlockOMatch (Just label) classifier line state
+                endBlockOnMatch (Just label) classifier line state
 
             else
                 endBlockOnMismatch label classifier line state
@@ -352,6 +353,7 @@ endBlockOnMismatch label_ classifier line state =
                                 , status = Finished
                                 , error = error
                             }
+                                |> addSource line.content
                     in
                     { state
                         | holdingStack = newBlock :: state.holdingStack
@@ -360,7 +362,7 @@ endBlockOnMismatch label_ classifier line state =
                         , stack = rest
                         , labelStack = List.drop 1 state.labelStack
                     }
-                        |> finishBlock
+                        |> finishBlock line.content
                         |> resolveIfStackEmpty
 
 
@@ -373,8 +375,8 @@ resolveIfStackEmpty state =
         state
 
 
-finishBlock : State -> State
-finishBlock state =
+finishBlock : String -> State -> State
+finishBlock lastLine state =
     case List.Extra.uncons state.stack of
         Nothing ->
             state
@@ -382,7 +384,7 @@ finishBlock state =
         Just ( block, _ ) ->
             let
                 updatedBlock =
-                    { block | status = Finished }
+                    { block | status = Finished } |> addSource lastLine
             in
             { state
                 | blocks = updatedBlock :: state.blocks
@@ -391,12 +393,8 @@ finishBlock state =
             }
 
 
-endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
-endBlockOMatch labelHead classifier line state =
-    let
-        _ =
-            Debug.log "endBlockOMatch" ( classifier, line )
-    in
+endBlockOnMatch : Maybe Label -> Classification -> Line -> State -> State
+endBlockOnMatch labelHead classifier line state =
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: error state!
@@ -404,12 +402,12 @@ endBlockOMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = ({ block | status = Finished } |> Debug.log "endBlockOMatch (1)") :: state.blocks, stack = rest } |> resolveIfStackEmpty
+                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
                     newBlock =
-                        newBlockWithError classifier (getContent classifier line state) block |> Debug.log "endBlockOMatch (2)"
+                        newBlockWithError classifier (getContent classifier line state) block |> addSource line.content
                 in
                 { state
                     | holdingStack = newBlock :: state.holdingStack
@@ -420,6 +418,16 @@ endBlockOMatch labelHead classifier line state =
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
+
+
+addSource : String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
+addSource lastLine block =
+    case block.name of
+        Nothing ->
+            { block | sourceText = String.join "\n" block.content }
+
+        _ ->
+            { block | sourceText = block.firstLine ++ "\n" ++ String.join "\n" block.content ++ "\n" ++ lastLine }
 
 
 getError label classifier =
@@ -539,7 +547,7 @@ handleMathBlock line state =
                         Just ( topLabel, otherLabels ) ->
                             let
                                 newBlock =
-                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished }
+                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished } |> addSource "$$"
                             in
                             { state | blocks = newBlock :: state.blocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 
@@ -569,7 +577,7 @@ handleVerbatimBlock line state =
                         Just ( topLabel, otherLabels ) ->
                             let
                                 newBlock =
-                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished }
+                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished } |> addSource line.content
                             in
                             { state | blocks = newBlock :: state.blocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 
@@ -611,6 +619,7 @@ recover state =
                                 , status = Finished
                                 , error = missingTagError block
                             }
+                                |> addSource ""
                     in
                     { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
 
@@ -734,6 +743,7 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     , lineNumber = lineNumber
     , position = position
     , content = []
+    , firstLine = line.content
     , level = level
     , name = label
     , args = []
