@@ -46,6 +46,7 @@ type alias PrimitiveBlock =
     , properties : Dict String String
     , sourceText : String
     , blockType : PrimitiveBlockType
+    , error : Maybe { error : String }
     }
 
 
@@ -60,6 +61,7 @@ empty =
     , properties = Dict.empty
     , sourceText = "???"
     , blockType = PBParagraph
+    , error = Nothing
     }
 
 
@@ -112,6 +114,7 @@ toPrimitiveBlock block =
     , properties = block.properties
     , sourceText = block.sourceText
     , blockType = block.blockType
+    , error = block.error
     }
 
 
@@ -155,6 +158,7 @@ parsePlainText_ lines =
       , properties = Dict.empty
       , sourceText = String.join "\n" lines
       , blockType = PBVerbatim
+      , error = Nothing
       }
     ]
 
@@ -216,6 +220,7 @@ blockFromLine lang ({ indent, lineNumber, position, prefix, content } as line) =
     , properties = Dict.empty -- TODO complete this
     , sourceText = ""
     , blockType = Line.getBlockType lang line.content
+    , error = Nothing
     }
         |> elaborate line
 

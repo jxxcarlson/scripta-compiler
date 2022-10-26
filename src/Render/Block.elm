@@ -121,7 +121,7 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                    )
 
 
-renderVerbatimBlock count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
+renderVerbatimBlock count acc settings ((ExpressionBlock { name, error, indent, args, blockType, content, id }) as block) =
     case content of
         Right _ ->
             Element.none

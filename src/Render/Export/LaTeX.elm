@@ -275,6 +275,7 @@ beginItemizedBlock =
         , name = Just "beginBlock"
         , numberOfLines = 2
         , sourceText = "| beginBlock\nitemize"
+        , error = Nothing
         }
 
 
@@ -293,6 +294,7 @@ endItemizedBlock =
         , name = Just "endBlock"
         , numberOfLines = 2
         , sourceText = "| endBlock\nitemize"
+        , error = Nothing
         }
 
 
@@ -311,6 +313,7 @@ beginNumberedBlock =
         , name = Just "beginNumberedBlock"
         , numberOfLines = 2
         , sourceText = "| beginBlock\nitemize"
+        , error = Nothing
         }
 
 
@@ -329,6 +332,7 @@ endNumberedBlock =
         , name = Just "endNumberedBlock"
         , numberOfLines = 2
         , sourceText = "| endBlock\nitemize"
+        , error = Nothing
         }
 
 
@@ -347,6 +351,7 @@ beginDescriptionBlock =
         , name = Just "beginDescriptionBlock"
         , numberOfLines = 2
         , sourceText = "| beginBlock\ndescription"
+        , error = Nothing
         }
 
 
@@ -365,6 +370,7 @@ endDescriptionBlock =
         , name = Just "endDescriptionBlock"
         , numberOfLines = 2
         , sourceText = "| endBlock\ndescription"
+        , error = Nothing
         }
 
 

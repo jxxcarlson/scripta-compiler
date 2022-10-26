@@ -70,8 +70,11 @@ getContent (ExpressionBlock { content }) =
 
 
 equation : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-equation count acc settings ((ExpressionBlock { id, args, properties }) as block) =
+equation count acc settings ((ExpressionBlock { id, args, error, properties }) as block) =
     let
+        _ =
+            Debug.log "!!! ERROR" error
+
         w =
             String.fromInt settings.width ++ "px"
 
@@ -118,6 +121,7 @@ equation count acc settings ((ExpressionBlock { id, args, properties }) as block
     in
     Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
         [ Element.el attrs2 (mathText count w id DisplayMathMode content)
+        , showError error
         , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
         ]
 
@@ -133,11 +137,22 @@ getLabel label dict =
 
 
 aligned : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-aligned count acc settings ((ExpressionBlock { id, args, properties }) as block) =
+aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as block) =
     Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
         [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
+        , showError error
         , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
         ]
+
+
+showError : Maybe { error : String } -> Element MarkupMsg
+showError error_ =
+    case error_ of
+        Nothing ->
+            Element.none
+
+        Just { error } ->
+            Element.el [ Font.color (Element.rgb 0.8 0 0) ] (Element.text error)
 
 
 aligned_ count acc settings _ id str =

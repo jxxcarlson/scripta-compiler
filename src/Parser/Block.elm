@@ -43,6 +43,7 @@ type alias ExpressionBlockData =
     , content : Either String (List Expr)
     , messages : List String
     , sourceText : String
+    , error : Maybe { error : String }
     }
 
 
@@ -61,6 +62,7 @@ type ExpressionBlock
         , content : Either String (List Expr)
         , messages : List String
         , sourceText : String
+        , error : Maybe { error : String }
         }
 
 
@@ -81,6 +83,7 @@ empty_ =
     , content = Either.Left "-"
     , messages = []
     , sourceText = "-"
+    , error = Nothing
     }
 
 
