@@ -1,4 +1,4 @@
-module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, print)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, print)
 
 {-|
 
@@ -74,8 +74,13 @@ type alias ParserOutput =
     { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
 
 
-parse : List String -> ParserOutput
+parse : List String -> List PrimitiveLaTeXBlock
 parse lines =
+    lines |> parse_ |> .blocks
+
+
+parse_ : List String -> ParserOutput
+parse_ lines =
     loop (init lines) nextStep |> recover |> finalize
 
 
@@ -155,10 +160,6 @@ nextStep state_ =
 
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
-    let
-        _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": beginBlock, classifier") classifier
-    in
     case List.Extra.uncons state.stack of
         Nothing ->
             beginBlock_ classifier line state
@@ -301,10 +302,6 @@ endBlock_ classifier line state =
             state
 
         Just label ->
-            let
-                _ =
-                    Debug.log ((state.count |> String.fromInt) ++ ": (c1, c2)") ( classifier, label.classification )
-            in
             if classifier == label.classification && state.level == label.level then
                 endBlockOMatch (Just label) classifier line state
 
@@ -314,10 +311,6 @@ endBlock_ classifier line state =
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
 endBlockOnMismatch label_ classifier line state =
-    let
-        _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch (ml, cl, li)") ( label_, classifier, line )
-    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: ???
@@ -340,10 +333,9 @@ endBlockOnMismatch label_ classifier line state =
                                 , status = Finished
                                 , error = error
                             }
-                                |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch, newBlock")
                     in
                     { state
-                        | holdingStack = newBlock :: state.holdingStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch, holdingStack")
+                        | holdingStack = newBlock :: state.holdingStack
 
                         -- blocks = newBlock :: state.blocks
                         , stack = rest
@@ -382,10 +374,6 @@ finishBlock state =
 
 endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOMatch labelHead classifier line state =
-    let
-        _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch") ( classifier, line )
-    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: error state!
@@ -401,11 +389,11 @@ endBlockOMatch labelHead classifier line state =
                         newBlockWithError classifier (getContent classifier line state) block
                 in
                 { state
-                    | holdingStack = newBlock :: state.holdingStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch, holdingStack")
+                    | holdingStack = newBlock :: state.holdingStack
 
                     -- blocks = newBlock :: state.blocks
                     , stack = List.drop 1 (fillBlockOnStack state)
-                    , labelStack = List.drop 1 state.labelStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch, stack")
+                    , labelStack = List.drop 1 state.labelStack
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
@@ -428,10 +416,6 @@ getError label classifier =
 
 getContent : Classification -> Line -> State -> List String
 getContent classifier line state =
-    let
-        _ =
-            Debug.log ((state.count |> String.fromInt) ++ ": getContent") ( classifier, line )
-    in
     case classifier of
         CPlainText ->
             slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
@@ -591,7 +575,7 @@ recover state =
                                 , error = missingTagError block
                             }
                     in
-                    { state | holdingStack = newBlock :: state.holdingStack, stack = rest } |> resolveIfStackEmpty
+                    { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
 
 
 missingTagError : { a | name : Maybe String } -> Maybe { error : String }

@@ -1,13 +1,13 @@
 module PrimitiveLaTeXBlockTests exposing (..)
 
 import Expect exposing (equal)
-import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, print)
+import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_, print)
 import Test exposing (Test, describe, test)
 
 
 blockTest : String -> String -> String -> Test
 blockTest label sourceText printedResult =
-    test label <| \_ -> equal (parse (String.lines sourceText) |> .blocks |> List.map print |> String.join "\n\n") printedResult
+    test label <| \_ -> equal (parse_ (String.lines sourceText) |> .blocks |> List.map print |> String.join "\n\n") printedResult
 
 
 suite : Test
