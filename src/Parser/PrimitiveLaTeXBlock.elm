@@ -76,7 +76,12 @@ type alias ParserOutput =
 
 parse : List String -> ParserOutput
 parse lines =
-    loop (init lines) nextStep |> recover
+    loop (init lines) nextStep |> recover |> finalize
+
+
+finalize : State -> ParserOutput
+finalize state =
+    { blocks = state.blocks |> List.reverse, stack = state.stack }
 
 
 {-|
@@ -327,9 +332,10 @@ endBlockOnMismatch classifier line state =
                                 , status = Finished
                                 , error = error
                             }
+                                |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch, newBlock")
                     in
                     { state
-                        | holdingStack = newBlock :: state.holdingStack
+                        | holdingStack = newBlock :: state.holdingStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMismatch, holdingStack")
 
                         -- blocks = newBlock :: state.blocks
                         , stack = rest
@@ -387,11 +393,11 @@ endBlockOMatch labelHead classifier line state =
                         newBlockWithError classifier (getContent classifier line state) block
                 in
                 { state
-                    | holdingStack = newBlock :: state.holdingStack |> Debug.log "endBlockOnMatch, holdingStack"
+                    | holdingStack = newBlock :: state.holdingStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch, holdingStack")
 
                     -- blocks = newBlock :: state.blocks
                     , stack = List.drop 1 (fillBlockOnStack state)
-                    , labelStack = List.drop 1 state.labelStack |> Debug.log "endBlockOnMatch, stack"
+                    , labelStack = List.drop 1 state.labelStack |> Debug.log ((state.count |> String.fromInt) ++ ": endBlockOnMatch, stack")
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
@@ -539,16 +545,16 @@ handleVerbatimBlock line state =
 -- ERROR RECOVERY
 
 
-recover : State -> ParserOutput
+recover : State -> State
 recover state =
     case List.Extra.uncons state.stack of
         Nothing ->
-            { blocks = List.reverse state.blocks, stack = state.stack }
+            state
 
         Just ( block, rest ) ->
             case List.Extra.uncons state.labelStack of
                 Nothing ->
-                    { blocks = state.blocks, stack = state.stack }
+                    state
 
                 Just ( topLabel, remainingLabels ) ->
                     let
@@ -573,7 +579,7 @@ recover state =
                                 , error = missingTagError block
                             }
                     in
-                    { blocks = newBlock :: state.blocks, stack = rest }
+                    { state | holdingStack = newBlock :: state.holdingStack, stack = rest } |> resolveIfStackEmpty
 
 
 missingTagError : { a | name : Maybe String } -> Maybe { error : String }

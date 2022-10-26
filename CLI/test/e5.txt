@@ -1,5 +1,5 @@
 \begin{A}
-abc NotOK (order ok, but xyz missing)
+abc NotOK
 def
 
 \begin{C}
