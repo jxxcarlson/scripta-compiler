@@ -236,12 +236,14 @@ handleSpecial_ classifier line state =
                 CSpecialBlock LXItem ->
                     { newBlock_
                         | name = Just "item"
+                        , blockType = PBOrdinary
                         , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
                     }
 
                 CSpecialBlock LXNumbered ->
                     { newBlock_
                         | name = Just "numbered"
+                        , blockType = PBOrdinary
                         , properties = Dict.fromList [ ( "firstLine", String.replace "\\numbered " "" line.content ) ]
                     }
 
@@ -391,6 +393,10 @@ finishBlock state =
 
 endBlockOMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOMatch labelHead classifier line state =
+    let
+        _ =
+            Debug.log "endBlockOMatch" ( classifier, line )
+    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: error state!
@@ -398,12 +404,12 @@ endBlockOMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = { block | status = Finished } :: state.blocks, stack = rest } |> resolveIfStackEmpty
+                { state | blocks = ({ block | status = Finished } |> Debug.log "endBlockOMatch (1)") :: state.blocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
                     newBlock =
-                        newBlockWithError classifier (getContent classifier line state) block
+                        newBlockWithError classifier (getContent classifier line state) block |> Debug.log "endBlockOMatch (2)"
                 in
                 { state
                     | holdingStack = newBlock :: state.holdingStack
@@ -456,6 +462,20 @@ newBlockWithError classifier content block =
                 | content = List.reverse content
                 , status = Finished
                 , error = Just { error = "Missing ``` at end" }
+            }
+
+        CSpecialBlock LXItem ->
+            { block
+                | content = (Dict.get "firstLine" block.properties |> Maybe.withDefault "") :: List.reverse content
+                , properties = Dict.empty
+                , status = Finished
+            }
+
+        CSpecialBlock LXNumbered ->
+            { block
+                | content = (Dict.get "firstLine" block.properties |> Maybe.withDefault "") :: List.reverse content
+                , properties = Dict.empty
+                , status = Finished
             }
 
         _ ->
