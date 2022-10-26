@@ -11,10 +11,12 @@ module Parser.PrimitiveBlock exposing
 
 -}
 
+-- import MicroLaTeX.Parser.TransformLaTeX
+
 import Dict exposing (Dict)
 import List.Extra
-import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..), isEmpty, isNonEmptyBlank)
+import Parser.PrimitiveLaTeXBlock
 import Scripta.Language exposing (Language(..))
 
 
@@ -88,7 +90,8 @@ parse lang isVerbatimLine lines =
             lines |> parse_ lang isVerbatimLine
 
         MicroLaTeXLang ->
-            lines |> MicroLaTeX.Parser.TransformLaTeX.toL0 |> parse_ lang isVerbatimLine
+            -- lines |> MicroLaTeX.Parser.TransformLaTeX.toL0 |> parse_ lang isVerbatimLine
+            lines |> Parser.PrimitiveLaTeXBlock.parse |> List.map toPrimitiveBlock
 
         PlainTextLang ->
             parsePlainText lines
@@ -96,6 +99,20 @@ parse lang isVerbatimLine lines =
         XMarkdownLang ->
             -- lines |> MicroLaTeX.Parser.TransformLaTeX.toL0 |> parse_ isVerbatimLine
             lines |> parse_ lang isVerbatimLine
+
+
+toPrimitiveBlock : Parser.PrimitiveLaTeXBlock.PrimitiveLaTeXBlock -> PrimitiveBlock
+toPrimitiveBlock block =
+    { indent = block.indent
+    , lineNumber = block.lineNumber
+    , position = block.position
+    , content = block.content
+    , name = block.name
+    , args = block.args
+    , properties = block.properties
+    , sourceText = block.sourceText
+    , blockType = block.blockType
+    }
 
 
 parsePlainText : List String -> List PrimitiveBlock

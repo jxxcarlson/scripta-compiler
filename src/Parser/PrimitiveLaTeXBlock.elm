@@ -19,7 +19,6 @@ import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
-import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 
 
 type alias PrimitiveLaTeXBlock =
@@ -36,20 +35,6 @@ type alias PrimitiveLaTeXBlock =
     , blockType : PrimitiveBlockType
     , status : Status
     , error : Maybe PrimitiveBlockError
-    }
-
-
-toPrimitiveBlock : PrimitiveLaTeXBlock -> PrimitiveBlock
-toPrimitiveBlock block =
-    { indent = block.indent
-    , lineNumber = block.lineNumber
-    , position = block.position
-    , content = block.content
-    , name = block.name
-    , args = block.args
-    , properties = block.properties
-    , sourceText = block.sourceText
-    , blockType = block.blockType
     }
 
 
@@ -91,9 +76,9 @@ type alias ParserOutput =
     { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
 
 
-parse : List String -> List PrimitiveBlock
+parse : List String -> List PrimitiveLaTeXBlock
 parse lines =
-    lines |> parse_ |> .blocks |> List.map toPrimitiveBlock
+    lines |> parse_ |> .blocks
 
 
 parse_ : List String -> ParserOutput
@@ -759,7 +744,11 @@ getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
 getBlockTypeAndLabel str =
     case ClassifyBlock.classify str of
         CBeginBlock label ->
-            ( PBOrdinary, Just label )
+            if List.member label [ "equation", "aligned" ] then
+                ( PBVerbatim, Just label )
+
+            else
+                ( PBOrdinary, Just label )
 
         CMathBlockDelim ->
             ( PBVerbatim, Just "math" )
