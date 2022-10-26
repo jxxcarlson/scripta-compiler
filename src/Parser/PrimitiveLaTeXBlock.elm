@@ -19,6 +19,7 @@ import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
+import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 
 
 type alias PrimitiveLaTeXBlock =
@@ -37,6 +38,20 @@ type alias PrimitiveLaTeXBlock =
     }
 
 
+toPrimitiveBlock : PrimitiveLaTeXBlock -> PrimitiveBlock
+toPrimitiveBlock block =
+    { indent = block.indent
+    , lineNumber = block.lineNumber
+    , position = block.position
+    , content = block.content
+    , name = block.name
+    , args = block.args
+    , properties = block.properties
+    , sourceText = block.sourceText
+    , blockType = block.blockType
+    }
+
+
 type alias PrimitiveBlockError =
     { error : String }
 
@@ -48,6 +63,7 @@ type alias State =
     , labelStack : List Label
     , currentBlock : Maybe PrimitiveLaTeXBlock
     , lines : List String
+    , sourceText : String
     , firstBlockLine : Int
     , inBlock : Bool
     , indent : Int
@@ -74,9 +90,9 @@ type alias ParserOutput =
     { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
 
 
-parse : List String -> List PrimitiveLaTeXBlock
+parse : List String -> List PrimitiveBlock
 parse lines =
-    lines |> parse_ |> .blocks
+    lines |> parse_ |> .blocks |> List.map toPrimitiveBlock
 
 
 parse_ : List String -> ParserOutput
@@ -104,6 +120,7 @@ init lines =
     , labelStack = []
     , currentBlock = Nothing
     , lines = lines
+    , sourceText = ""
     , firstBlockLine = 0
     , indent = 0
     , level = -1
