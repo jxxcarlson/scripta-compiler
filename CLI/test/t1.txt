@@ -1,0 +1,14 @@
+\begin{theorem}
+foo
+bar
+
+\begin{aligned}
+a &= p + q \\
+b &= p - q
+\end{aligned}
+
+This is a test.
+
+ABC DEF
+\end{theorem}
+
