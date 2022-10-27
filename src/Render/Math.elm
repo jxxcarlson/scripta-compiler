@@ -140,10 +140,12 @@ getLabel label dict =
 
 aligned : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as block) =
-    Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
-        [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
+    Element.column []
+        [ Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
+            [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
+            , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
+            ]
         , showError error
-        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
         ]
 
 
