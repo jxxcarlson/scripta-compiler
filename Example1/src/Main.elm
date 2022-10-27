@@ -60,6 +60,24 @@ displaySettings counter =
 
 initialText =
     """
+\\begin{equation}
+a^2 + b^2 = c^2
+\\end{equation}
+
+
+\\begin{theorem}
+foo
+
+
+aaa
+
+$x^2$
+
+"""
+
+
+initialText2 =
+    """
 
 Pythagoras says: $a^2 + b^2 = c^2$
 

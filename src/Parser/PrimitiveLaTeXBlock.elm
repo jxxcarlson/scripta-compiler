@@ -73,7 +73,7 @@ type Status
 
 
 type alias ParserOutput =
-    { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock }
+    { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock, holdingStack : List PrimitiveLaTeXBlock }
 
 
 parse : List String -> List PrimitiveLaTeXBlock
@@ -83,12 +83,12 @@ parse lines =
 
 parse_ : List String -> ParserOutput
 parse_ lines =
-    loop (init lines) nextStep |> recover |> finalize
+    loop (init lines) nextStep |> recover3 |> finalize
 
 
 finalize : State -> ParserOutput
 finalize state =
-    { blocks = state.blocks |> List.reverse, stack = state.stack }
+    { blocks = state.blocks |> List.reverse, stack = state.stack, holdingStack = state.holdingStack }
 
 
 {-|
@@ -491,6 +491,13 @@ emptyLine currentLine state =
         Just CMathBlockDelim ->
             Loop <| endBlock_ CMathBlockDelim currentLine state
 
+        Just (CBeginBlock name) ->
+            if List.member name [ "equation", "aligned" ] then
+                Loop <| endBlock_ (CBeginBlock name) currentLine state
+
+            else
+                Loop state
+
         Just (CSpecialBlock LXItem) ->
             Loop <| endBlock_ (CSpecialBlock LXItem) currentLine state
 
@@ -607,6 +614,48 @@ recover state =
                                 |> addSource ""
                     in
                     { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
+
+
+recover3 : State -> State
+recover3 state =
+    let
+        _ =
+            Debug.log "recover3" ( List.length state.stack, List.length state.holdingStack )
+    in
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            state
+
+        Just ( block, rest ) ->
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state
+
+                Just ( topLabel, remainingLabels ) ->
+                    let
+                        firstLine =
+                            topLabel.lineNumber
+
+                        lastLine =
+                            state.lineNumber
+
+                        content =
+                            case topLabel.status of
+                                Filled ->
+                                    block.content
+
+                                _ ->
+                                    slice (firstLine + 1) lastLine state.lines
+
+                        newBlock =
+                            { block
+                                | content = content
+                                , status = Finished
+                                , error = missingTagError block
+                            }
+                                |> addSource ""
+                    in
+                    recover3 { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
 
 
 missingTagError : { a | name : Maybe String } -> Maybe { error : String }

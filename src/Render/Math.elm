@@ -119,10 +119,12 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
             else
                 [ Element.centerX ]
     in
-    Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
-        [ Element.el attrs2 (mathText count w id DisplayMathMode content)
+    Element.column []
+        [ Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
+            [ Element.el attrs2 (mathText count w id DisplayMathMode content)
+            , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
+            ]
         , showError error
-        , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
         ]
 
 
@@ -152,7 +154,7 @@ showError error_ =
             Element.none
 
         Just { error } ->
-            Element.el [ Font.color (Element.rgb 0.8 0 0) ] (Element.text error)
+            Element.el [ Font.color (Element.rgb 0.8 0 0), Element.centerX ] (Element.text error)
 
 
 aligned_ count acc settings _ id str =

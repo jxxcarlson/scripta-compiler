@@ -24,12 +24,16 @@ program process =
                             "\n----------------\nBLOCKS\n----------------\n\n"
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.blocks |> String.join "\n\n")
 
+                        holdingStackString =
+                            "\n\n----------------\nHOLDING STACK\n----------------\n\n"
+                                ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.holdingStack |> String.join "\n\n")
+
                         stackString =
                             "\n\n----------------\nSTACK\n----------------\n\n"
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.stack |> String.join "\n\n")
                                 ++ "\n----------------\n"
                     in
-                    IO.do (Proc.print (blockString ++ stackString)) <|
+                    IO.do (Proc.print (blockString ++ holdingStackString ++ stackString)) <|
                         \_ ->
                             IO.return ()
 
