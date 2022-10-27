@@ -634,12 +634,16 @@ fixAndRewind state =
         _ =
             Debug.log "fixAndRewind" ( List.length state.stack, List.length state.holdingStack )
     in
-    case List.Extra.uncons state.stack of
+    case List.Extra.unconsLast state.stack of
         Nothing ->
             state
 
         Just ( block, rest ) ->
-            case List.Extra.uncons state.labelStack of
+            let
+                _ =
+                    Debug.log "BLOCK" block
+            in
+            case List.Extra.unconsLast state.labelStack of
                 Nothing ->
                     state
 
@@ -675,6 +679,7 @@ fixAndRewind state =
                                 , error = missingTagError block
                             }
                                 |> addSource ""
+                                |> Debug.log "newBlock"
                     in
                     { state
                         | blocks = newBlock :: state.blocks

@@ -1,11 +1,6 @@
-\begin{equation}
-a^2 + b^2 = c^2
-
-
 \begin{theorem}
 foo
 
+\begin{lemma}
+bar
 
-aaa
-
-$x^2$
