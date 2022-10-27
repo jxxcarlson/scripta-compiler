@@ -83,7 +83,7 @@ parse lines =
 
 parse_ : List String -> ParserOutput
 parse_ lines =
-    loop (init lines) nextStep |> recover3 |> finalize
+    loop (init lines) nextStep |> finalize
 
 
 finalize : State -> ParserOutput
@@ -127,7 +127,11 @@ nextStep state_ =
     in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
-            Done state
+            if List.isEmpty state.stack then
+                Done state
+
+            else
+                Loop (fixAndRewind state)
 
         Just rawLine ->
             let
@@ -521,6 +525,7 @@ emptyLine currentLine state =
             Loop state
 
 
+handleMathBlock : Line -> State -> State
 handleMathBlock line state =
     case List.head state.labelStack of
         Nothing ->
@@ -621,6 +626,62 @@ recover state =
                                 |> addSource ""
                     in
                     { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
+
+
+fixAndRewind : State -> State
+fixAndRewind state =
+    let
+        _ =
+            Debug.log "fixAndRewind" ( List.length state.stack, List.length state.holdingStack )
+    in
+    case List.Extra.uncons state.stack of
+        Nothing ->
+            state
+
+        Just ( block, rest ) ->
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state
+
+                Just ( topLabel, remainingLabels ) ->
+                    let
+                        firstLine =
+                            topLabel.lineNumber
+
+                        lastLine =
+                            state.lineNumber
+
+                        provisionalContent =
+                            case topLabel.status of
+                                Filled ->
+                                    block.content
+
+                                _ ->
+                                    slice (firstLine + 1) lastLine state.lines
+
+                        content =
+                            List.Extra.takeWhile (\item -> item /= "") provisionalContent
+
+                        lineNumber =
+                            firstLine + List.length content + 1 |> Debug.log "NEW LINE NUMBER"
+
+                        _ =
+                            Debug.log "(a,b)" ( List.length provisionalContent, List.length content )
+
+                        newBlock =
+                            { block
+                                | content = content
+                                , status = Finished
+                                , error = missingTagError block
+                            }
+                                |> addSource ""
+                    in
+                    { state
+                        | holdingStack = newBlock :: state.holdingStack |> List.reverse
+                        , stack = rest
+                        , lineNumber = lineNumber
+                    }
+                        |> resolveIfStackEmpty
 
 
 recover3 : State -> State
