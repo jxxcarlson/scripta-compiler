@@ -311,15 +311,11 @@ endBlock_ classifier line state =
             state
 
         Just label ->
-            let
-                _ =
-                    Debug.log "ENDBLOCK_" ( classifier, label.classification, line )
-            in
             if classifier == label.classification && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line state |> Debug.log "endBlock_ (1)"
+                endBlockOnMatch (Just label) classifier line state
 
             else
-                endBlockOnMismatch label classifier line state |> Debug.log "endBlock_ (2)"
+                endBlockOnMismatch label classifier line state
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
@@ -598,59 +594,13 @@ handleVerbatimBlock line state =
 -- ERROR RECOVERY
 
 
-recover : State -> State
-recover state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            state
-
-        Just ( block, rest ) ->
-            case List.Extra.uncons state.labelStack of
-                Nothing ->
-                    state
-
-                Just ( topLabel, remainingLabels ) ->
-                    let
-                        firstLine =
-                            topLabel.lineNumber
-
-                        lastLine =
-                            state.lineNumber
-
-                        content =
-                            case topLabel.status of
-                                Filled ->
-                                    block.content
-
-                                _ ->
-                                    slice (firstLine + 1) lastLine state.lines
-
-                        newBlock =
-                            { block
-                                | content = content
-                                , status = Finished
-                                , error = missingTagError block
-                            }
-                                |> addSource ""
-                    in
-                    { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
-
-
 fixAndRewind : State -> State
 fixAndRewind state =
-    let
-        _ =
-            Debug.log "fixAndRewind" ( List.length state.stack, List.length state.holdingStack )
-    in
     case List.Extra.unconsLast state.stack of
         Nothing ->
             state
 
-        Just ( block, rest ) ->
-            let
-                _ =
-                    Debug.log "BLOCK" block
-            in
+        Just ( block, _ ) ->
             case List.Extra.unconsLast state.labelStack of
                 Nothing ->
                     state
@@ -675,10 +625,7 @@ fixAndRewind state =
                             List.Extra.takeWhile (\item -> item /= "") provisionalContent
 
                         lineNumber =
-                            firstLine + List.length content + 1 |> Debug.log "NEW LINE NUMBER"
-
-                        _ =
-                            Debug.log "(a,b)" ( List.length provisionalContent, List.length content )
+                            firstLine + List.length content + 1
 
                         newBlock =
                             { block
@@ -687,7 +634,6 @@ fixAndRewind state =
                                 , error = missingTagError block
                             }
                                 |> addSource ""
-                                |> Debug.log "newBlock"
                     in
                     { state
                         | blocks = newBlock :: state.blocks
@@ -696,52 +642,6 @@ fixAndRewind state =
                         , labelStack = []
                         , lineNumber = lineNumber
                     }
-
-
-
---|> resolveIfStackEmpty
-
-
-recover3 : State -> State
-recover3 state =
-    let
-        _ =
-            Debug.log "recover3" ( List.length state.stack, List.length state.holdingStack )
-    in
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            state
-
-        Just ( block, rest ) ->
-            case List.Extra.uncons state.labelStack of
-                Nothing ->
-                    state
-
-                Just ( topLabel, remainingLabels ) ->
-                    let
-                        firstLine =
-                            topLabel.lineNumber
-
-                        lastLine =
-                            state.lineNumber
-
-                        content =
-                            case topLabel.status of
-                                Filled ->
-                                    block.content
-
-                                _ ->
-                                    slice (firstLine + 1) lastLine state.lines
-
-                        newBlock =
-                            { block
-                                | content = content
-                                , status = Finished
-                                , error = missingTagError block
-                            }
-                                |> addSource ""
-                    in
-                    recover3 { state | holdingStack = newBlock :: state.holdingStack |> List.reverse, stack = rest } |> resolveIfStackEmpty
 
 
 missingTagError : { a | name : Maybe String } -> Maybe { error : String }
@@ -767,10 +667,6 @@ missingTagError block =
                             block.name |> Maybe.withDefault "(anon)"
             in
             Just { error = "missing end tag (" ++ name ++ ")" }
-
-
-
--- TODO: error recovery
 
 
 slice : Int -> Int -> List a -> List a
