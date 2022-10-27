@@ -307,11 +307,15 @@ endBlock_ classifier line state =
             state
 
         Just label ->
+            let
+                _ =
+                    Debug.log "ENDBLOCK_" ( classifier, label.classification, line )
+            in
             if classifier == label.classification && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line state
+                endBlockOnMatch (Just label) classifier line state |> Debug.log "endBlock_ (1)"
 
             else
-                endBlockOnMismatch label classifier line state
+                endBlockOnMismatch label classifier line state |> Debug.log "endBlock_ (2)"
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
@@ -419,6 +423,9 @@ getError label classifier =
     if label.classification == CPlainText then
         Nothing
 
+    else if ClassifyBlock.classificationString classifier == "missing" then
+        Just { error = "Missing end tag (" ++ ClassifyBlock.classificationString label.classification ++ ")" }
+
     else
         let
             classfication1 =
@@ -493,7 +500,7 @@ emptyLine currentLine state =
 
         Just (CBeginBlock name) ->
             if List.member name [ "equation", "aligned" ] then
-                Loop <| endBlock_ (CBeginBlock name) currentLine state
+                Loop <| endBlock_ (CEndBlock "missing") currentLine state
 
             else
                 Loop state

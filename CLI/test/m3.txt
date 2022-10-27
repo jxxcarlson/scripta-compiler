@@ -1,4 +1,11 @@
 \begin{equation}
 a^2 + b^2 = c^2
 
-AAA
+
+\begin{theorem}
+foo
+
+
+aaa
+
+$x^2$
