@@ -677,11 +677,16 @@ fixAndRewind state =
                                 |> addSource ""
                     in
                     { state
-                        | holdingStack = newBlock :: state.holdingStack |> List.reverse
-                        , stack = rest
+                        | blocks = newBlock :: state.blocks
+                        , stack = []
+                        , holdingStack = []
+                        , labelStack = []
                         , lineNumber = lineNumber
                     }
-                        |> resolveIfStackEmpty
+
+
+
+--|> resolveIfStackEmpty
 
 
 recover3 : State -> State
