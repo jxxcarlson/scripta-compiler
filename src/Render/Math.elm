@@ -72,9 +72,6 @@ getContent (ExpressionBlock { content }) =
 equation : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 equation count acc settings ((ExpressionBlock { id, args, error, properties }) as block) =
     let
-        _ =
-            Debug.log "!!! ERROR" error
-
         w =
             String.fromInt settings.width ++ "px"
 
