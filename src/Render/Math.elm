@@ -35,7 +35,7 @@ type DisplayMode
 
 
 displayedMath : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-displayedMath count acc settings ((ExpressionBlock { id }) as block) =
+displayedMath count acc settings ((ExpressionBlock { id, error }) as block) =
     let
         w =
             String.fromInt settings.width ++ "px"
@@ -124,7 +124,6 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
             [ Element.el attrs2 (mathText count w id DisplayMathMode content)
             , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
             ]
-        , showError error
         ]
 
 
@@ -145,18 +144,7 @@ aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as
             [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
             , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
             ]
-        , showError error
         ]
-
-
-showError : Maybe { error : String } -> Element MarkupMsg
-showError error_ =
-    case error_ of
-        Nothing ->
-            Element.none
-
-        Just { error } ->
-            Element.el [ Font.color (Element.rgb 0.8 0 0), Element.centerX ] (Element.text error)
 
 
 aligned_ count acc settings _ id str =

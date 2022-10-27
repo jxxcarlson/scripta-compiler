@@ -37,16 +37,16 @@ topPaddingForIndentedElements =
 
 
 render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-render count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
+render count acc settings ((ExpressionBlock { name, indent, args, error, blockType, content, id }) as block) =
     case blockType of
         Paragraph ->
             renderParagraph count acc settings block
 
         OrdinaryBlock _ ->
-            renderOrdinaryBlock count acc settings block
+            renderOrdinaryBlock count acc settings block |> showError error
 
         VerbatimBlock _ ->
-            renderVerbatimBlock count acc settings block
+            renderVerbatimBlock count acc settings block |> showError error
 
 
 renderParagraph count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
@@ -109,8 +109,8 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, error, 
                                         else
                                             x
                                    )
-                                |> showError error
 
+                        --  |> showError error
                         Just f ->
                             f count acc settings block
                                 |> (\x ->
@@ -120,9 +120,13 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, error, 
                                         else
                                             x
                                    )
-                                |> showError error
 
 
+
+-- |> showError error
+
+
+showError : Maybe { a | error : String } -> Element msg -> Element msg
 showError error_ x =
     case error_ of
         Nothing ->
