@@ -88,7 +88,7 @@ clickableParagraph id color elements =
     Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
 
 
-renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id }) as block) =
+renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, error, args, blockType, content, id }) as block) =
     case content of
         Left _ ->
             Element.none
@@ -109,6 +109,7 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                         else
                                             x
                                    )
+                                |> showError error
 
                         Just f ->
                             f count acc settings block
@@ -119,6 +120,19 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, args, b
                                         else
                                             x
                                    )
+                                |> showError error
+
+
+showError error_ x =
+    case error_ of
+        Nothing ->
+            x
+
+        Just error ->
+            Element.column []
+                [ x
+                , Element.el [ Font.color (Element.rgb 0.7 0 0) ] (Element.text error.error)
+                ]
 
 
 renderVerbatimBlock count acc settings ((ExpressionBlock { name, error, indent, args, blockType, content, id }) as block) =
