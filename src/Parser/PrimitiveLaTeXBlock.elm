@@ -340,9 +340,17 @@ endBlockOnMismatch label_ classifier line state =
                         error =
                             getError label classifier
 
+                        name =
+                            block.name |> Maybe.withDefault "--"
+
                         newBlock =
                             { block
-                                | content = getContent label_.classification line state
+                                | content =
+                                    if List.member name [ "equation", "aligned" ] then
+                                        getContent label_.classification line state |> List.reverse
+
+                                    else
+                                        getContent label_.classification line state
                                 , status = Finished
                                 , error = error
                             }

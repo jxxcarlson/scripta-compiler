@@ -1,6 +1,6 @@
-\begin{theorem}
-foo
+\begin{equation}
+a =
+b =
+c
 
-\begin{lemma}
-bar
 
