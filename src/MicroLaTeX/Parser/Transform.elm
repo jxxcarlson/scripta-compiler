@@ -8,7 +8,7 @@ import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 
 
 pseudoBlockNamesWithContent =
-    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter" ]
+    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter", "contents" ]
 
 
 sectionDict : Dict String String
@@ -57,28 +57,26 @@ transform block =
                 |> normalize
     in
     case normalizedContent of
-        name_ :: _ ->
+        firstLine :: _ ->
             let
                 name =
-                    (if String.left 1 name_ == "\\" then
-                        String.dropLeft 1 name_ |> String.split "{" |> List.head |> Maybe.withDefault "---"
+                    if String.left 1 firstLine == "\\" then
+                        String.dropLeft 1 firstLine |> String.split "{" |> List.head |> Maybe.withDefault "---"
 
-                     else
-                        name_
-                    )
-                        |> String.trimRight
+                    else
+                        firstLine
 
-                macroExpr : Maybe String
-                macroExpr =
-                    case P.run (Compiler.Util.macroValParser name) name_ of
+                arg : Maybe String
+                arg =
+                    case P.run (Compiler.Util.macroValParserX name) firstLine of
                         Ok result ->
-                            Just result
+                            Just (result |> String.dropRight 1)
 
                         Err _ ->
                             Nothing
             in
             if List.member name pseudoBlockNamesWithContent then
-                handlePseudoBlockWithContent block name (macroArg name name_ |> Just)
+                handlePseudoBlockWithContent block name arg
 
             else
                 block
@@ -93,24 +91,29 @@ macroArg macroName str =
 
 
 handlePseudoBlockWithContent : PrimitiveBlock -> String -> Maybe String -> PrimitiveBlock
-handlePseudoBlockWithContent block macroName macroExpr =
-    case macroExpr of
+handlePseudoBlockWithContent block name maybeArg =
+    case maybeArg of
         Nothing ->
-            block
+            { block
+                | content = [] -- ("| section " ++ val) :: [ str ]
+                , args = []
+                , name = Just name
+                , blockType = PBOrdinary
+            }
 
-        Just str ->
-            case Dict.get macroName sectionDict of
+        Just arg ->
+            case Dict.get name sectionDict of
                 Nothing ->
                     { block
-                        | content = [ str ] --("| " ++ macroName) :: [ str ]
-                        , name = Just macroName
-                        , args = []
+                        | content = [ arg ] --("| " ++ macroName) :: [ str ]
+                        , name = Just name
+                        , args = [ arg ]
                         , blockType = PBOrdinary
                     }
 
                 Just val ->
                     { block
-                        | content = [ str ] -- ("| section " ++ val) :: [ str ]
+                        | content = [ arg ] -- ("| section " ++ val) :: [ str ]
                         , args = val :: []
                         , name = Just "section"
                         , blockType = PBOrdinary

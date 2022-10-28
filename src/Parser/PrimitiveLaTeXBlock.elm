@@ -227,14 +227,14 @@ handleSpecial_ classifier line state =
                     { newBlock_
                         | name = Just "item"
                         , blockType = PBOrdinary
-                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\item " "" line.content ) ]
+                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\item" "" line.content ) ]
                     }
 
                 CSpecialBlock LXNumbered ->
                     { newBlock_
                         | name = Just "numbered"
                         , blockType = PBOrdinary
-                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\numbered " "" line.content ) ]
+                        , properties = Dict.fromList [ ( "firstLine", String.replace "\\numbered" "" line.content ) ]
                     }
 
                 CSpecialBlock (LXOrdinaryBlock name) ->
@@ -347,6 +347,12 @@ endBlockOnMismatch label_ classifier line state =
 
                                     else
                                         getContent label_.classification line state
+                                , args =
+                                    if List.member name [ "item", "numbered" ] then
+                                        block.content
+
+                                    else
+                                        block.args
                                 , status = Finished
                                 , error = error
                             }
@@ -451,6 +457,16 @@ getContent classifier line state =
         CPlainText ->
             slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
 
+        CSpecialBlock LXItem ->
+            slice state.firstBlockLine line.lineNumber state.lines
+                |> List.reverse
+                |> List.map (\line_ -> String.replace "\\item" "" line_ |> String.trim)
+
+        CSpecialBlock LXNumbered ->
+            slice state.firstBlockLine line.lineNumber state.lines
+                |> List.reverse
+                |> List.map (\line_ -> String.replace "\\numbered" "" line_ |> String.trim)
+
         _ ->
             slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
 
@@ -474,14 +490,14 @@ newBlockWithError classifier content block =
 
         CSpecialBlock LXItem ->
             { block
-                | content = (Dict.get "firstLine" block.properties |> Maybe.withDefault "") :: List.reverse content
+                | content = List.reverse content |> List.filter (\line_ -> line_ /= "")
                 , properties = Dict.empty
                 , status = Finished
             }
 
         CSpecialBlock LXNumbered ->
             { block
-                | content = (Dict.get "firstLine" block.properties |> Maybe.withDefault "") :: List.reverse content
+                | content = List.reverse content |> List.filter (\line_ -> line_ /= "")
                 , properties = Dict.empty
                 , status = Finished
             }

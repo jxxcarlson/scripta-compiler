@@ -25,6 +25,7 @@ suite =
         , test_ "item" (toL0 [ "\\item\nAAA" ]) [ "| item\nAAA" ]
         , test_ "numbered" (toL0 [ "\\numbered\nAAA" ]) [ "| numbered\nAAA" ]
         , test_ "contents" (toL0 [ "\\contents{Intro}" ]) [ "| contents Intro " ]
+        , test_ "contents" (toL0 [ "\\contents" ]) [ "| contents" ]
         , test_ "bibitem" (toL0 [ "\\bibitem{AA}\nAA, a story about the alphabet" ]) [ "| bibitem AA \nAA, a story about the alphabet" ]
         , test_ "desc" (toL0 [ "\\desc{AA}\nBBB" ]) [ "| desc AA \nBBB" ]
         ]

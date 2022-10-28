@@ -9,6 +9,7 @@ module Compiler.Util exposing
     , getMarkdownImageArgs
     , getMicroLaTeXItem
     , macroValParser
+    , macroValParserX
     , many
     , middle
     , normalizedWord
@@ -245,7 +246,21 @@ macroValParser macroName =
         |. Parser.symbol ("\\" ++ macroName ++ "{")
         |. Parser.spaces
         |= Parser.getOffset
-        |. Parser.chompUntil "}"
+        |. Parser.chompUntilEndOr "}"
+        |= Parser.getOffset
+        |= Parser.getSource
+    )
+        |> Parser.map String.trim
+
+
+macroValParserX : String -> Parser String
+macroValParserX macroName =
+    (Parser.succeed String.slice
+        |. Parser.chompUntil ("\\" ++ macroName ++ "{")
+        |. Parser.symbol ("\\" ++ macroName ++ "{")
+        |. Parser.spaces
+        |= Parser.getOffset
+        |. Parser.chompUntilEndOr "!!!!"
         |= Parser.getOffset
         |= Parser.getSource
     )
