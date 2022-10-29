@@ -7,6 +7,7 @@ module Main exposing (main)
 -}
 
 import Browser
+import Data
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -59,6 +60,10 @@ displaySettings counter =
 
 
 initialText =
+    Data.initialText
+
+
+initialText0 =
     """
 \\begin{equation}
 a^2 + b^2 = c^2

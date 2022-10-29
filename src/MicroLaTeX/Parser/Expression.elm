@@ -644,7 +644,7 @@ bracketError k =
             brackets =
                 List.repeat k "[" |> String.join ""
         in
-        errorMessage <| " " ++ brackets ++ " << Too many left brackets (" ++ String.fromInt k ++ ")"
+        errorMessage <| " " ++ brackets ++ "\\?"
 
 
 bracketErrorAsString : Int -> String
