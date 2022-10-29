@@ -499,7 +499,7 @@ recoverFromError state =
         (LB _) :: [] ->
             Done
                 { state
-                    | committed = errorMessage "[...?" :: state.committed
+                    | committed = errorMessage "..extra{?" :: state.committed
                     , stack = []
                     , tokenIndex = 0
                     , numberOfTokens = 0
@@ -510,10 +510,10 @@ recoverFromError state =
         (RB meta) :: _ ->
             Loop
                 { state
-                    | committed = errorMessage " extra ]?" :: state.committed
+                    | committed = errorMessage " extra }?" :: state.committed
                     , stack = []
                     , tokenIndex = meta.index + 1
-                    , messages = Helpers.prependMessage state.lineNumber "Extra right bracket(s)" state.messages
+                    , messages = Helpers.prependMessage state.lineNumber "Extra right braces(s)" state.messages
                 }
 
         -- dollar sign with no closing dollar sign
@@ -614,7 +614,7 @@ recoverFromError1 state =
                         | stack = newStack
                         , tokenIndex = 0
                         , numberOfTokens = List.length newStack
-                        , committed = errorMessage "[" :: state.committed
+                        , committed = errorMessage "{" :: state.committed
 
                         -- TODO: the below supresses spurious error messages. But it might supress others as well.
                         --, messages = Helpers.prependMessage state.lineNumber ("Unmatched brackets: added " ++ String.fromInt k ++ " right brackets") state.messages
@@ -626,7 +626,7 @@ recoverFromError1 state =
                 | committed =
                     bracketError k
                         :: state.committed
-                , messages = Helpers.prependMessage state.lineNumber (bracketErrorAsString k) state.messages
+                , messages = Helpers.prependMessage state.lineNumber (braceErrorAsString k) state.messages
             }
 
 
@@ -634,26 +634,26 @@ bracketError : Int -> Expr
 bracketError k =
     if k < 0 then
         let
-            brackets =
+            braces =
                 List.repeat -k "]" |> String.join ""
         in
-        errorMessage <| " " ++ brackets ++ " << !!Too many right brackets (" ++ String.fromInt -k ++ ")"
+        errorMessage <| " " ++ braces ++ " << !!Too many right brackets (" ++ String.fromInt -k ++ ")"
 
     else
         let
-            brackets =
-                List.repeat k "[" |> String.join ""
+            braces =
+                List.repeat k "{" |> String.join ""
         in
-        errorMessage <| " " ++ brackets ++ "\\?"
+        errorMessage <| " " ++ "\\" ++ braces ++ "?"
 
 
-bracketErrorAsString : Int -> String
-bracketErrorAsString k =
+braceErrorAsString : Int -> String
+braceErrorAsString k =
     if k < 0 then
-        "Too many right brackets (" ++ String.fromInt -k ++ ")"
+        "Too many right braces (" ++ String.fromInt -k ++ ")"
 
     else
-        "Too many left brackets (" ++ String.fromInt k ++ ")"
+        "Too many left braces (" ++ String.fromInt k ++ ")"
 
 
 
