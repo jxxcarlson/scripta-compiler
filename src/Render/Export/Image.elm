@@ -3,6 +3,7 @@ module Render.Export.Image exposing (export, exportBlock)
 import Compiler.ASTTools
 import Dict
 import Either exposing (Either(..))
+import List.Extra
 import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Render.Export.Util
@@ -19,7 +20,16 @@ exportBlock settings ((ExpressionBlock { content, args }) as block) =
         options =
             [ params.fractionalWidth, ",keepaspectratio" ] |> String.join ""
     in
-    exportCenteredFigure params.url options params.caption
+    exportCenteredFigure (normalizeUrl params.url) options params.caption
+
+
+fixWidth : String -> String
+fixWidth w =
+    if w == "" || w == "fill" then
+        "500"
+
+    else
+        w
 
 
 export : Settings -> List Expr -> String
@@ -32,18 +42,28 @@ export s exprs =
             imageParameters s exprs
 
         options =
-            [ params.width, ",keepaspectratio" ] |> String.join ""
+            [ params.width |> fixWidth, ",keepaspectratio" ] |> String.join ""
     in
     case List.head args of
         Nothing ->
             "ERROR IN IMAGE"
 
-        Just url ->
+        Just url_ ->
             if params.placement == "C" then
-                exportCenteredFigure url options params.caption
+                exportCenteredFigure (normalizeUrl url_) options params.caption
 
             else
-                exportWrappedFigure params.placement url params.fractionalWidth params.caption
+                exportWrappedFigure params.placement (normalizeUrl url_) params.fractionalWidth params.caption
+
+
+normalizeUrl : String -> String
+normalizeUrl url_ =
+    case url_ |> String.split "/" |> List.Extra.last of
+        Nothing ->
+            url_
+
+        Just url ->
+            url
 
 
 exportCenteredFigure url options caption =
@@ -260,7 +280,7 @@ imageParameters2 settings (ExpressionBlock { content, args }) =
 
 rescale : Int -> Int -> String
 rescale displayWidth k =
-    (toFloat k * (8.0 / toFloat displayWidth) |> String.fromFloat) ++ "truein"
+    (toFloat k * (6.0 / toFloat displayWidth) |> String.fromFloat) ++ "truein"
 
 
 fractionaRescale : Int -> String
