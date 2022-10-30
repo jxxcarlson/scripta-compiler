@@ -921,13 +921,19 @@ exportExpr settings expr =
                         f settings exps_
 
                     Nothing ->
-                        macro1 name (List.map (exportExpr settings) exps_ |> String.join " ")
+                        "\\" ++ name ++ (List.map (encloseWithBraces << exportExpr settings) exps_ |> String.join "")
 
+        --   macro1 name (List.map (exportExpr settings) exps_ |> Debug.log "!! EXPRS (1)" |> String.join " " |> Debug.log "!! EXPRS (2)")
         Text str _ ->
             mapChars2 str
 
         Verbatim name body _ ->
             renderVerbatim name body
+
+
+encloseWithBraces : String -> String
+encloseWithBraces str_ =
+    "{" ++ String.trim str_ ++ "}"
 
 
 renderVerbatim : String -> String -> String
