@@ -1,2 +1,3 @@
 scripts:
   parse: elm-cli run --debug src/ReadFile.elm
+  bench: elm-cli run src/Benchmark.elm
