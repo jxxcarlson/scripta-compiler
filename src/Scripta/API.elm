@@ -208,7 +208,9 @@ render displaySettings editRecord =
         settings =
             renderSettings displaySettings
     in
-    banner displaySettings editRecord :: Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.tree :: renderBody displaySettings.counter settings editRecord
+    banner displaySettings editRecord
+        :: Scripta.TOC.view displaySettings.counter editRecord.accumulator (renderSettings displaySettings) editRecord.tree
+        :: renderBody displaySettings.counter settings editRecord
 
 
 renderBody : Int -> Render.Settings.Settings -> Compiler.DifferentialParser.EditRecord -> List (Element Render.Msg.MarkupMsg)

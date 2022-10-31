@@ -923,7 +923,6 @@ exportExpr settings expr =
                     Nothing ->
                         "\\" ++ name ++ (List.map (encloseWithBraces << exportExpr settings) exps_ |> String.join "")
 
-        --   macro1 name (List.map (exportExpr settings) exps_ |> Debug.log "!! EXPRS (1)" |> String.join " " |> Debug.log "!! EXPRS (2)")
         Text str _ ->
             mapChars2 str
 

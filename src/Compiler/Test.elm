@@ -1,65 +1,53 @@
-module Compiler.Test exposing (a2, a3, a4, bll, blm, blmt, blx, blxt, dpl, dpm, e2, pl, plt, pm, pmt, pxt, tol0, ww, xx)
-
---( bll
---, blm
---, blmt
---, blx
---, blxt
---, dpl
---, dpm
---, ex1
---, ex2
---, ex3
---, ibl
---, ibm
---, ibx
---, l1
---, pl
---, plt
---, pm
---, pmt
---, pxt
---)
+module Compiler.Test exposing
+    ( a2
+    , a3
+    , a4
+    , bll
+    , bllt
+    , blm
+    , blmt
+    , blx
+    , blxt
+    , doc
+    , dpl
+    , dpm
+    , e2
+    , initl
+    , pl
+    , plt
+    , pm
+    , pmt
+    , pxt
+    , tol0
+    )
 
 import Compiler.Acc
 import Compiler.DifferentialParser
 import Compiler.Transform
+import Dict
 import L0.Parser.Classify
 import Markup
 import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Block exposing (ExpressionBlock)
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock as PrimitiveBlock exposing (PrimitiveBlock)
+import Scripta.API
 import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
 
 
-ww =
-    """
-|| code
-aaa
-  bbb
-    ccc
-"""
-
-
-xx =
-    """
-| theorem
-
-  There are infinitely many primes
-
-  $$
-  p \\equiv 1\\ mod\\ 4
-  $$
-
-  Isn't that nice?
-
-
-"""
+doc =
+    "| title\n[Test Folder2]\n\n| collection\n\n| document id-0504ef8f-cd80-4276-a335-e1da76d115e9\nAnharmonic Oscillator\n\n| document id-413a3868-08bb-4972-8af1-18b62cd18087\nLaTeX Test 3\n"
 
 
 
+-- 1. bll (OK) -- to List PrimitiveBlock
+-- 2. bllt (OK) -- to List PrimitiveBlock followed  Compiler.Transform.transform (identity for L0)
+-- 3. plt (OK) -- to Forest ExpressionBloc followed  Compiler.Transform.transform (identity for L0)
+-- 4. pl (OK) -- to Forest ExpressionBlo
+-- 5. dpl (OK) -- Differential parser (Dict is empty)
+--
+--
 -- TEST formation of primitive blocks
 
 
@@ -70,7 +58,7 @@ tol0 str =
 
 bll : String -> List PrimitiveBlock
 bll str =
-    PrimitiveBlock.parse_ L0.Parser.Classify.isVerbatimLine (String.lines str)
+    PrimitiveBlock.parse_ L0Lang L0.Parser.Classify.isVerbatimLine (String.lines str)
 
 
 blm : String -> List PrimitiveBlock
@@ -87,6 +75,11 @@ blx str =
 -- TEST formation of primitive blocks with transform
 
 
+bllt : String -> List PrimitiveBlock
+bllt str =
+    bll str |> List.map (Compiler.Transform.transform L0Lang)
+
+
 blmt : String -> List PrimitiveBlock
 blmt str =
     blm str |> List.map (Compiler.Transform.transform MicroLaTeXLang)
@@ -97,19 +90,31 @@ blxt str =
     blx str |> List.map (Compiler.Transform.transform XMarkdownLang)
 
 
+
+-- FOREST EXPRESSIONBLOCK
+
+
 plt : String -> Forest ExpressionBlock
 plt str =
-    Markup.parse L0Lang str |> Compiler.Acc.transformST L0Lang
+    Markup.parse L0Lang str |> Compiler.Acc.transformST (initialAccumulatorData L0Lang)
 
 
 pmt : String -> Forest ExpressionBlock
 pmt str =
-    Markup.parse MicroLaTeXLang str |> Compiler.Acc.transformST MicroLaTeXLang
+    Markup.parse MicroLaTeXLang str |> Compiler.Acc.transformST (initialAccumulatorData MicroLaTeXLang)
 
 
 pxt : String -> Forest ExpressionBlock
 pxt str =
-    Markup.parse XMarkdownLang str |> Compiler.Acc.transformST XMarkdownLang
+    Markup.parse XMarkdownLang str |> Compiler.Acc.transformST (initialAccumulatorData XMarkdownLang)
+
+
+initialAccumulatorData lang =
+    { language = lang
+    , mathMacros = ""
+    , textMacros = ""
+    , vectorSize = 4
+    }
 
 
 
@@ -130,14 +135,22 @@ pm str =
 -- TEST differential parser
 
 
-dpl : String -> List (Tree ExpressionBlock)
+dpl : String -> List ExpressionBlock
 dpl str =
-    Compiler.DifferentialParser.init L0Lang str |> .parsed
+    Compiler.DifferentialParser.init Dict.empty L0Lang str |> .parsed
 
 
-dpm : String -> List (Tree ExpressionBlock)
+dpm : String -> List ExpressionBlock
 dpm str =
-    Compiler.DifferentialParser.init MicroLaTeXLang str |> .parsed
+    Compiler.DifferentialParser.init Dict.empty MicroLaTeXLang str |> .parsed
+
+
+
+--- TEST API
+
+
+initl str =
+    Scripta.API.init Dict.empty L0Lang str |> .parsed
 
 
 
