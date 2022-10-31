@@ -788,7 +788,26 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
 
 
 verbatimBlockNames =
-    [ "equation", "aligned", "math", "code", "verbatim", "verse", "mathmacros", "textmacros" ]
+    [ "equation"
+    , "aligned"
+    , "math"
+    , "code"
+    , "verbatim"
+    , "verse"
+    , "mathmacros"
+    , "textmacros"
+    , "hide"
+    , "docinfo"
+    , "datatable"
+    , "chart"
+    , "svg"
+    , "quiver"
+    , "image"
+    , "tikz"
+    , "load-files"
+    , "include"
+    , "iframe"
+    ]
 
 
 getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
