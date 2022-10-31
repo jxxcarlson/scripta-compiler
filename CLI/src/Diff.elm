@@ -1,5 +1,7 @@
 module Diff exposing (program)
 
+import Compiler.Differ
+import Compiler.DifferentialParser
 import Dict
 import Element exposing (Element)
 import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
@@ -19,15 +21,18 @@ import Scripta.Language
 program : Process -> IO ()
 program process =
     case process.argv of
-        [ _, testName, repetitions, filename ] ->
+        [ _, testName, repetitions, filename1, filename2 ] ->
             IO.do
-                (File.contentsOf filename
-                    |> IO.exitOnError identity
-                )
+                (IO.combine [ File.contentsOf filename1 |> IO.exitOnError identity, File.contentsOf filename2 |> IO.exitOnError identity ])
             <|
-                \content ->
-                    IO.do (Proc.print (bench testName repetitions content)) <|
-                        \_ ->
+                \result ->
+                    case result of
+                        [ content1, content2 ] ->
+                            IO.do (Proc.print (bench testName repetitions content1 content2)) <|
+                                \_ ->
+                                    IO.return ()
+
+                        _ ->
                             IO.return ()
 
         _ ->
@@ -36,30 +41,27 @@ program process =
 
 errText =
     """
-Usage: elm-cli run src/Benchmark.elm OPTION N PATH, where
+Usage: elm-cli run src/Benchmark.elm OPTION N PATH1 PATH2, where
 
-       OPTION = [pb, expr, compiile]
+       OPTION = [diff, diffp]
        N = number of repetitions
-       PATH = path to file e.g., bench/harmonic.tex
+       PATH* = path to file e.g., bench/harmonic.tex
 """
 
 
-bench : String -> String -> String -> String
-bench testName repetitions_ content =
+bench : String -> String -> String -> String -> String
+bench testName repetitions_ content1 content2 =
     let
         testFunction =
             case testName of
-                "pb" ->
-                    bench1a
+                "diff" ->
+                    diff
 
-                "expr" ->
-                    bench2
-
-                "compile" ->
-                    bench3
+                "diffp" ->
+                    diffp
 
                 _ ->
-                    \a b -> ()
+                    \a b c -> ()
     in
     case String.toInt repetitions_ of
         Nothing ->
@@ -68,7 +70,7 @@ bench testName repetitions_ content =
         Just repetitions ->
             let
                 _ =
-                    testFunction repetitions content
+                    testFunction repetitions content1 content2
             in
             "Done"
 
@@ -86,24 +88,44 @@ repeat n input transform =
         repeat (n - 1) input transform
 
 
-bench1 repetitions content =
+repeat2 : Int -> a -> a -> (a -> a -> b) -> ()
+repeat2 n input1 input2 transform =
+    if n == 0 then
+        ()
+
+    else
+        let
+            _ =
+                transform input1 input2
+        in
+        repeat2 (n - 1) input1 input2 transform
+
+
+diff : Int -> String -> String -> ()
+diff repetitions content1 content2 =
     let
-        input =
-            String.lines content
+        input1 =
+            String.lines content1
+
+        input2 =
+            String.lines content2
+
+        pb1 =
+            parse_ input1 |> .blocks
+
+        pb2 =
+            parse_ input2 |> .blocks
     in
-    repeat repetitions input parse_
+    repeat2 repetitions pb1 pb2 Compiler.Differ.diff
 
 
-bench1a repetitions content =
-    repeat repetitions (String.lines content) parse_
-
-
-bench3 repetitions content =
-    repeat repetitions content compile
-
-
-bench2 repetitions content =
-    repeat repetitions content (Scripta.API.init Dict.empty Scripta.Language.MicroLaTeXLang)
+diffp : Int -> String -> String -> ()
+diffp repetitions content1 content2 =
+    let
+        editRecord1 =
+            Compiler.DifferentialParser.init Dict.empty Scripta.Language.MicroLaTeXLang content1
+    in
+    repeat repetitions content2 (\c -> Compiler.DifferentialParser.update editRecord1 c)
 
 
 compile : String -> List (Element Render.Msg.MarkupMsg)

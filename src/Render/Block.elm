@@ -227,7 +227,7 @@ verbatimDict =
 noSuchVerbatimBlock : String -> String -> Element MarkupMsg
 noSuchVerbatimBlock functionName content =
     Element.column [ Element.spacing 4 ]
-        [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "|| " ++ functionName ++ " ??(8)" ]
+        [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "|| " ++ functionName ++ " (8!!)" ]
         , Element.column [ Element.spacing 4 ] (List.map (\t -> Element.el [] (Element.text t)) (String.lines content))
         ]
 

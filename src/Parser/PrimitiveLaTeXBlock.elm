@@ -787,11 +787,15 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     }
 
 
+verbatimBlockNames =
+    [ "equation", "aligned", "math", "code", "verbatim", "verse" ]
+
+
 getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
 getBlockTypeAndLabel str =
     case ClassifyBlock.classify str of
         CBeginBlock label ->
-            if List.member label [ "equation", "aligned", "math" ] then
+            if List.member label verbatimBlockNames then
                 ( PBVerbatim, Just label )
 
             else
