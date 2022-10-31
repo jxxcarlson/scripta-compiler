@@ -788,7 +788,7 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
 
 
 verbatimBlockNames =
-    [ "equation", "aligned", "math", "code", "verbatim", "verse" ]
+    [ "equation", "aligned", "math", "code", "verbatim", "verse", "mathmacros", "textmacros" ]
 
 
 getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
