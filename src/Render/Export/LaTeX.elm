@@ -122,10 +122,12 @@ oneOrTwo : Maybe Int -> Int
 oneOrTwo mInt =
     case mInt of
         Nothing ->
+            -- 1
             1
 
         Just _ ->
-            2
+            -- 2
+            1
 
 
 shiftSection : Int -> ExpressionBlock -> ExpressionBlock
@@ -632,7 +634,13 @@ macroDict =
         , ( "rb", \_ -> rb )
         , ( "bt", \_ -> bt )
         , ( "underscore", \_ -> underscore )
+        , ( "tags", dontRender )
         ]
+
+
+dontRender : Settings -> List Expr -> String
+dontRender _ _ =
+    ""
 
 
 
