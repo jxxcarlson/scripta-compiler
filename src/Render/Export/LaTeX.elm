@@ -122,14 +122,22 @@ oneOrTwo : Maybe Int -> Int
 oneOrTwo mInt =
     case mInt of
         Nothing ->
-            -- 1
             1
 
         Just _ ->
-            -- 2
-            1
+            2
 
 
+{-| In a standalone MicroLaTeX document, sections correspond to sections in the
+exported document.
+
+If a document is part of a collection or "notebook", where we have
+set the section number using \\setcounter{N}, sections correspond
+to subsections IF the document is exported as a standalone document.
+
+Function shiftSection makes the adjustments needed for export.
+
+-}
 shiftSection : Int -> ExpressionBlock -> ExpressionBlock
 shiftSection delta ((ExpressionBlock data) as block) =
     if data.name == Just "section" then
@@ -188,34 +196,13 @@ exportTree settings tree =
 
 rawExport : Settings -> List (Tree ExpressionBlock) -> String
 rawExport settings ast =
-    let
-        deltaShift =
-            counterValue ast
-    in
     ast
         |> ASTTools.filterForestOnLabelNames (\name -> not (name == Just "runninghead"))
         |> Parser.Forest.map Parser.Block.condenseUrls
         |> encloseLists
-        |> Parser.Forest.map (deltaShift |> oneOrTwo |> shiftSection)
+        |> Parser.Forest.map (counterValue ast |> oneOrTwo |> shiftSection)
         |> List.map (exportTree settings)
         |> String.join "\n\n"
-
-
-
--- rawExport1 : Settings -> Forest ExpressionBlock -> Forest ExpressionBlock
-
-
-rawExport1 : a -> Forest ExpressionBlock -> Forest ExpressionBlock
-rawExport1 settings ast =
-    let
-        deltaShift =
-            counterValue ast
-    in
-    ast
-        |> ASTTools.filterForestOnLabelNames (\name -> not (name == Just "runninghead"))
-        |> Parser.Forest.map Parser.Block.condenseUrls
-        |> encloseLists
-        |> Parser.Forest.map (deltaShift |> oneOrTwo |> shiftSection)
 
 
 
