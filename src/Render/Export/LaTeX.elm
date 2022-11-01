@@ -489,6 +489,9 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                         Just "mathmacros" ->
                             str
 
+                        Just "texComment" ->
+                            str |> String.lines |> texComment
+
                         Just "textmacros" ->
                             Compiler.TextMacro.exportTexMacros str
 
@@ -656,6 +659,7 @@ blockDict =
         , ( "date", \_ _ _ -> "" )
         , ( "contents", \_ _ _ -> "" )
         , ( "hide", \_ _ _ -> "" )
+        , ( "texComment", \_ lines _ -> texComment lines )
         , ( "tags", \_ _ _ -> "" )
         , ( "docinfo", \_ _ _ -> "" )
         , ( "banner", \_ _ _ -> "" )
@@ -686,6 +690,18 @@ verbatimExprDict =
         [ ( "code", inlineCode )
         , ( "math", inlineMath )
         ]
+
+
+texComment lines =
+    lines |> List.map putPercent |> String.join "\n"
+
+
+putPercent str =
+    if String.left 1 str == "%" then
+        str
+
+    else
+        "% " ++ str
 
 
 

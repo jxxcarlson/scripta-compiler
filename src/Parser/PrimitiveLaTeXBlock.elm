@@ -410,7 +410,11 @@ endBlockOnMatch labelHead classifier line state =
             else
                 let
                     newBlock =
-                        newBlockWithError classifier (getContent classifier line state) block |> addSource line.content
+                        if classifier == CSpecialBlock (LXVerbatimBlock "texComment") then
+                            newBlockWithError classifier (getContent classifier line state ++ [ block.firstLine ]) block |> addSource line.content
+
+                        else
+                            newBlockWithError classifier (getContent classifier line state) block |> addSource line.content
                 in
                 { state
                     | holdingStack = newBlock :: state.holdingStack
@@ -508,10 +512,37 @@ newBlockWithError classifier content block =
 
 plainText state currentLine =
     if (List.head state.labelStack |> Maybe.map .status) == Just Filled || state.labelStack == [] then
-        Loop (beginBlock CPlainText currentLine state)
+        if String.left 1 currentLine.content == "%" then
+            Loop (handleComment currentLine state)
+
+        else
+            Loop (beginBlock CPlainText currentLine state)
 
     else
         Loop state
+
+
+handleComment line state =
+    let
+        newBlock =
+            blockFromLine 0 line |> (\b -> { b | name = Just "texComment", blockType = PBVerbatim })
+
+        labelStack =
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state.labelStack
+
+                Just ( label, rest_ ) ->
+                    { label | status = Filled } :: rest_
+    in
+    { state
+        | lineNumber = line.lineNumber
+        , firstBlockLine = line.lineNumber
+        , indent = line.indent
+        , level = 0
+        , labelStack = { classification = CSpecialBlock (LXVerbatimBlock "texComment"), level = 0, status = Started, lineNumber = line.lineNumber } :: labelStack
+        , stack = newBlock :: state.stack
+    }
 
 
 emptyLine currentLine state =

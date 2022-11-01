@@ -205,6 +205,7 @@ verbatimDict =
         , ( "verse", renderVerse )
         , ( "verbatim", renderVerbatim )
         , ( "hide", renderNothing )
+        , ( "texComment", renderNothing )
         , ( "docinfo", renderNothing )
         , ( "mathmacros", renderNothing )
         , ( "textmacros", renderNothing )
