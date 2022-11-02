@@ -1,6 +1,7 @@
-\begin{poetry}
+\begin{verse}
 Roses are red
    Violet are blue
 
       And I love you
-\end{poetry}
+\end{verse}
+
