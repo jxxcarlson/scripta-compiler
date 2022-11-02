@@ -544,7 +544,7 @@ table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
                     List.sum widths_ + 0
             in
             if rowNumber == 0 then
-                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text <| String.replace "_" "" cell)) cells_ widths_)
+                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width), Font.underline ] (Element.text <| String.replace "_" "" cell)) cells_ widths_)
 
             else
                 Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
