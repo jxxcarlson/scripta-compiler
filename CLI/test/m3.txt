@@ -1,7 +1,5 @@
 \begin{equation}
-a =
-b =
-c
+{\bf r}(t) = (x,y,z)(t)
 \end{equation}
 
 
