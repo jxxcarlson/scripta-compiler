@@ -15,7 +15,7 @@ exportBlock : Settings -> ExpressionBlock -> String
 exportBlock settings ((ExpressionBlock { content, args }) as block) =
     let
         params =
-            imageParameters2 settings block
+            imageParameters3 settings block
 
         options =
             [ params.fractionalWidth, ",keepaspectratio" ] |> String.join ""
@@ -179,8 +179,8 @@ imageParameters settings body =
     { caption = caption, description = description, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
 
 
-imageParameters2 : Render.Settings.Settings -> ExpressionBlock -> ImageParameters
-imageParameters2 settings (ExpressionBlock { content, args }) =
+imageParameters3 : Render.Settings.Settings -> ExpressionBlock -> ImageParameters
+imageParameters3 settings (ExpressionBlock { content, args, properties }) =
     let
         arguments : List String
         arguments =
@@ -197,36 +197,15 @@ imageParameters2 settings (ExpressionBlock { content, args }) =
         _ =
             url
 
-        remainingArguments =
-            List.drop 1 arguments
-
-        keyValueStrings_ =
-            List.filter (\s -> String.contains ":" s) remainingArguments
-
-        keyValueStrings : List String
-        keyValueStrings =
-            List.filter (\s -> not (String.contains "caption" s)) keyValueStrings_
-
-        captionLeadString =
-            List.filter (\s -> String.contains "caption" s) keyValueStrings_
-                |> String.join ""
-                |> String.replace "caption:" ""
-
         caption =
-            (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) remainingArguments) |> String.join " "
-
-        dict =
-            Render.Utility.keyValueDict keyValueStrings
-
-        description =
-            Dict.get "caption" dict |> Maybe.withDefault ""
+            Dict.get "caption" properties |> Maybe.withDefault ""
 
         displayWidth =
             settings.width
 
         width : String
         width =
-            case Dict.get "width" dict of
+            case Dict.get "width" properties of
                 Nothing ->
                     rescale displayWidth displayWidth
 
@@ -243,7 +222,7 @@ imageParameters2 settings (ExpressionBlock { content, args }) =
 
         fractionalWidth : String
         fractionalWidth =
-            case Dict.get "width" dict of
+            case Dict.get "width" properties of
                 Nothing ->
                     "0.51\\textwidth"
 
@@ -259,7 +238,7 @@ imageParameters2 settings (ExpressionBlock { content, args }) =
                             fractionaRescale w
 
         placement =
-            case Dict.get "placement" dict of
+            case Dict.get "placement" properties of
                 Nothing ->
                     "C"
 
@@ -275,7 +254,7 @@ imageParameters2 settings (ExpressionBlock { content, args }) =
                 _ ->
                     "C"
     in
-    { caption = caption, description = description, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
+    { caption = caption, description = caption, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
 
 
 rescale : Int -> Int -> String

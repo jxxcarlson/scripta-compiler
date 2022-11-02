@@ -625,7 +625,7 @@ getKVData mstr =
         Just str ->
             let
                 strs =
-                    String.split "," str |> List.map String.trim
+                    String.split ", " str |> List.map String.trim
             in
             List.filter (\t -> String.contains ":" t) strs
 
@@ -639,7 +639,7 @@ getArgs mstr =
         Just str ->
             let
                 strs =
-                    String.split "," str |> List.map String.trim
+                    String.split ", " str |> List.map String.trim
             in
             List.filter (\t -> not <| String.contains ":" t) strs
 
@@ -947,7 +947,7 @@ transfer state =
 --- PRINT
 
 
-{-| Used for debugging with CLI.ReadFile
+{-| Used for debugging with CLI.LXPB
 -}
 print : PrimitiveLaTeXBlock -> String
 print block =

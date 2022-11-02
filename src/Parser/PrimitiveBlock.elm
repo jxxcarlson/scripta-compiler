@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , elaborate, eq, parse_
+    , elaborate, eq, parse_, print
     )
 
 {-| The main function is
@@ -570,3 +570,52 @@ loop s f =
 
         Done b ->
             b
+
+
+{-| Used for debugging with CLI.LOPB
+-}
+print : PrimitiveBlock -> String
+print block =
+    [ "BLOCK:"
+    , "Type: " ++ Line.showBlockType block.blockType
+    , "Name: " ++ showName block.name
+    , "Indent: " ++ String.fromInt block.indent
+    , "Args: " ++ showArgs block.args
+    , "Properties: " ++ showProperties block.properties
+    , "Error: " ++ showError block.error
+    , "Line number: " ++ String.fromInt block.lineNumber
+    , "Content:"
+    , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
+    , "Source text:\n" ++ block.sourceText
+    ]
+        |> String.join "\n"
+
+
+showProperties : Dict String String -> String
+showProperties dict =
+    dict |> Dict.toList |> List.map (\( k, v ) -> k ++ ": " ++ v) |> String.join ", "
+
+
+showArgs : List String -> String
+showArgs args =
+    args |> String.join ", "
+
+
+showError : Maybe { error : String } -> String
+showError mError =
+    case mError of
+        Nothing ->
+            "none"
+
+        Just { error } ->
+            error
+
+
+showName : Maybe String -> String
+showName mstr =
+    case mstr of
+        Nothing ->
+            "(anon)"
+
+        Just name ->
+            name

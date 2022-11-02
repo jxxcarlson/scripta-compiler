@@ -1,4 +1,4 @@
-module ReadFile exposing (program)
+module LXPB exposing (program)
 
 import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
 import Posix.IO as IO exposing (IO, Process)

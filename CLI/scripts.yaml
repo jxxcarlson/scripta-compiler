@@ -1,3 +1,6 @@
 scripts:
-  parse: elm-cli run --debug src/ReadFile.elm
+  lxparse: elm-cli run --debug src/LXPB.elm
+
+  l0parse: elm-cli run --debug src/L0PB.elm
+
   bench: elm-cli run src/Benchmark.elm

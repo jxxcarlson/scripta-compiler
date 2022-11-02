@@ -150,6 +150,10 @@ transformBlock acc (ExpressionBlock block) =
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
 
+        ( Just "chart", _ ) ->
+            ExpressionBlock
+                { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
+
         ( Just "image", _ ) ->
             ExpressionBlock
                 { block | properties = Dict.insert "figure" (getCounterAsString "figure" acc.counter) block.properties }
@@ -178,7 +182,6 @@ transformBlock acc (ExpressionBlock block) =
                     else
                         Vector.toString acc.headingIndex ++ "." ++ getCounterAsString "equation" acc.counter
             in
-            -- Insert the numerical counter, e.g,, equation number, in the arg list of the block
             ExpressionBlock
                 { block | properties = Dict.insert "equation" equationProp block.properties }
 
@@ -252,12 +255,17 @@ vectorPrefix headingIndex =
         Vector.toString headingIndex ++ "."
 
 
+{-| Map name to name of counter
+-}
 reduceName : String -> String
 reduceName str =
     if List.member str [ "equation", "aligned" ] then
         "equation"
 
-    else if List.member str [ "quiver", "image", "iframe" ] then
+    else if str == "code" then
+        "listing"
+
+    else if List.member str [ "quiver", "image", "iframe", "chart", "datatable", "svg", "tikz", "iframe" ] then
         "figure"
 
     else

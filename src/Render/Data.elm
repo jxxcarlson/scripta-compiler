@@ -51,13 +51,12 @@ chart count acc settings ((ExpressionBlock { id, args, properties }) as block) =
             , columns = Dict.get "columns" properties |> Maybe.map (String.split "," >> List.map String.trim >> List.map String.toInt >> Maybe.Extra.values)
             , lowest = Dict.get "lowest" properties |> Maybe.andThen String.toFloat
             , caption = Dict.get "caption" properties
-            , label = Dict.get "label" properties
+            , label = Dict.get "figure" properties
             , kind = Dict.get "kind" properties
             , domain = Dict.get "domain" properties |> Maybe.andThen getRange
             , range = Dict.get "range" properties |> Maybe.andThen getRange
             }
 
-        -- || chart timeseries reverse columns:1 lowest:3700 label:S&P  Index, 06/14/2021 to 06/10/2022
         data : Maybe ChartData
         data =
             csvToChartData options (getVerbatimContent block)
@@ -479,19 +478,10 @@ getVerbatimContent (ExpressionBlock { content }) =
 
 
 table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-table count acc settings ((ExpressionBlock { id, args }) as block) =
+table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     let
-        argString =
-            String.join " " args
-
-        newArgs =
-            argString |> String.split ";" |> List.map String.trim
-
-        argDict =
-            Render.Utility.keyValueDict newArgs
-
         title =
-            case Dict.get "title" argDict of
+            case Dict.get "title" properties of
                 Nothing ->
                     Element.none
 
@@ -500,7 +490,7 @@ table count acc settings ((ExpressionBlock { id, args }) as block) =
 
         columnsToDisplay : List Int
         columnsToDisplay =
-            Dict.get "columns" argDict
+            Dict.get "columns" properties
                 |> Maybe.map (String.split ",")
                 |> Maybe.withDefault []
                 |> List.map (String.trim >> String.toInt)
@@ -547,12 +537,17 @@ table count acc settings ((ExpressionBlock { id, args }) as block) =
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
                 |> List.map (\w -> fontWidth * w)
 
-        renderRow : List Int -> List String -> Element MarkupMsg
-        renderRow widths_ cells_ =
+        renderRow : Int -> List Int -> List String -> Element MarkupMsg
+        renderRow rowNumber widths_ cells_ =
             let
                 totalWidth =
                     List.sum widths_ + 0
             in
-            Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
+            if rowNumber == 0 then
+                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text <| String.replace "_" "" cell)) cells_ widths_)
+
+            else
+                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
     in
-    Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.map (renderRow columnWidths) selectedCells)
+    -- Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.map (renderRow 1 columnWidths) selectedCells)
+    Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.indexedMap (\k row -> renderRow k columnWidths row) selectedCells)
