@@ -18,7 +18,9 @@ module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, 
 import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
+import MicroLaTeX.Parser.Line
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
+import Scripta.Language exposing (Language(..))
 
 
 type alias PrimitiveLaTeXBlock =
@@ -200,7 +202,7 @@ beginBlock2 classifier line state =
             state.level + 1
 
         newBlock =
-            blockFromLine level line
+            blockFromLine level line |> elaborate line
 
         labelStack =
             case List.Extra.uncons state.labelStack of
@@ -238,7 +240,7 @@ handleSpecial_ classifier line state =
             state.level + 1
 
         newBlock_ =
-            blockFromLine level line
+            blockFromLine level line |> elaborate line
 
         newBlock =
             case classifier of
@@ -582,6 +584,184 @@ handleComment line state =
     }
 
 
+elaborate : Line -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
+elaborate line pb =
+    if pb.content == [ "" ] then
+        pb
+
+    else
+        let
+            ( name, args_ ) =
+                MicroLaTeX.Parser.Line.getNameAndArgs2 line
+
+            namedArgs =
+                getKVData args_
+
+            args =
+                getArgs args_
+
+            properties =
+                namedArgs |> prepareList |> prepareKVData
+
+            content =
+                if pb.blockType == PBVerbatim then
+                    List.map String.trimLeft pb.content
+
+                else
+                    pb.content
+        in
+        { pb | content = content, name = name, args = args, properties = properties }
+
+
+{-| return all the elements in the list 'strs' up to the first element contaiing ':'
+This functio is used to return the positional arguments but not the named ones.
+-}
+getKVData : Maybe String -> List String
+getKVData mstr =
+    case mstr of
+        Nothing ->
+            []
+
+        Just str ->
+            let
+                strs =
+                    String.split "," str |> List.map String.trim
+            in
+            List.filter (\t -> String.contains ":" t) strs
+
+
+getArgs : Maybe String -> List String
+getArgs mstr =
+    case mstr of
+        Nothing ->
+            []
+
+        Just str ->
+            let
+                strs =
+                    String.split "," str |> List.map String.trim
+            in
+            List.filter (\t -> not <| String.contains ":" t) strs
+
+
+
+--case List.Extra.findIndex (\t -> String.contains ":" t) strs of
+--    Nothing ->
+--        strs
+--
+--    Just k ->
+--        List.take k strs
+
+
+explode : List String -> List (List String)
+explode txt =
+    List.map (String.split ":") txt
+
+
+prepareList : List String -> List String
+prepareList strs =
+    strs |> explode |> List.map fix |> List.concat
+
+
+fix : List String -> List String
+fix strs =
+    case strs of
+        a :: b :: _ ->
+            (a ++ ":") :: b :: []
+
+        a :: [] ->
+            a :: []
+
+        [] ->
+            []
+
+
+prepareKVData : List String -> Dict String String
+prepareKVData data_ =
+    let
+        initialState =
+            { input = data_, kvList = [], currentKey = Nothing, currentValue = [], kvStatus = KVInKey }
+    in
+    loop initialState nextKVStep
+
+
+type alias KVState =
+    { input : List String
+    , kvList : List ( String, List String )
+    , currentKey : Maybe String
+    , currentValue : List String
+    , kvStatus : KVStatus
+    }
+
+
+type KVStatus
+    = KVInKey
+    | KVInValue
+
+
+nextKVStep : KVState -> Step KVState (Dict String String)
+nextKVStep state =
+    case List.Extra.uncons <| state.input of
+        Nothing ->
+            let
+                kvList_ =
+                    case state.currentKey of
+                        Nothing ->
+                            state.kvList
+
+                        Just key ->
+                            ( key, state.currentValue )
+                                :: state.kvList
+                                |> List.map (\( k, v ) -> ( k, List.reverse v ))
+            in
+            Done (Dict.fromList (List.map (\( k, v ) -> ( k, String.join " " v )) kvList_))
+
+        Just ( item, rest ) ->
+            case state.kvStatus of
+                KVInKey ->
+                    if String.contains ":" item then
+                        case state.currentKey of
+                            Nothing ->
+                                Loop { state | input = rest, currentKey = Just (String.dropRight 1 item), kvStatus = KVInValue }
+
+                            Just key ->
+                                Loop
+                                    { input = rest
+                                    , currentKey = Just (String.dropRight 1 item)
+                                    , kvStatus = KVInValue
+                                    , kvList = ( key, state.currentValue ) :: state.kvList
+                                    , currentValue = []
+                                    }
+
+                    else
+                        Loop { state | input = rest }
+
+                KVInValue ->
+                    if String.contains ":" item then
+                        case state.currentKey of
+                            Nothing ->
+                                Loop
+                                    { state
+                                        | input = rest
+                                        , currentKey = Just (String.dropRight 1 item)
+                                        , currentValue = []
+                                        , kvStatus = KVInValue
+                                    }
+
+                            Just key ->
+                                Loop
+                                    { state
+                                        | input = rest
+                                        , currentKey = Just (String.dropRight 1 item)
+                                        , kvStatus = KVInValue
+                                        , kvList = ( key, state.currentValue ) :: state.kvList
+                                        , currentValue = []
+                                    }
+
+                    else
+                        Loop { state | input = rest, currentValue = item :: state.currentValue }
+
+
 emptyLine currentLine state =
     case List.head state.labelStack |> Maybe.map .classification of
         Just CPlainText ->
@@ -653,7 +833,7 @@ handleVerbatimBlock line state =
                 , indent = line.indent
                 , level = state.level + 1
                 , labelStack = { classification = CVerbatimBlockDelim, level = state.level + 1, status = Started, lineNumber = line.lineNumber } :: state.labelStack
-                , stack = blockFromLine (state.level + 1) line :: state.stack
+                , stack = (blockFromLine (state.level + 1) line |> elaborate line) :: state.stack
             }
 
         Just label ->
@@ -776,6 +956,7 @@ print block =
     , "Name: " ++ showName block.name
     , "Level: " ++ String.fromInt block.level
     , "Status: " ++ showStatus block.status
+    , "Args: " ++ showArgs block.args
     , "Properties: " ++ showProperties block.properties
     , "Error: " ++ showError block.error
     , "Line number: " ++ String.fromInt block.lineNumber
@@ -789,6 +970,11 @@ print block =
 showProperties : Dict String String -> String
 showProperties dict =
     dict |> Dict.toList |> List.map (\( k, v ) -> k ++ ": " ++ v) |> String.join ", "
+
+
+showArgs : List String -> String
+showArgs args =
+    args |> String.join ", "
 
 
 showError : Maybe PrimitiveBlockError -> String

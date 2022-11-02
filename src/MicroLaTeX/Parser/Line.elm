@@ -2,6 +2,7 @@ module MicroLaTeX.Parser.Line exposing
     ( Line
     , classify
     , getNameAndArgs
+    , getNameAndArgs2
     , isEmpty
     , isNonEmptyBlank
     , prefixLength
@@ -89,3 +90,23 @@ getNameAndArgs line =
                         Nothing
     in
     ( name, Compiler.Util.getBracketedItems normalizedLine )
+
+
+getNameAndArgs2 line =
+    let
+        normalizedLine =
+            String.trim line.content
+
+        name =
+            case Compiler.Util.getMicroLaTeXItem "begin" normalizedLine of
+                Just str ->
+                    Just str
+
+                Nothing ->
+                    if normalizedLine == "$$" then
+                        Just "math"
+
+                    else
+                        Nothing
+    in
+    ( name, Compiler.Util.getBracketedItem normalizedLine )

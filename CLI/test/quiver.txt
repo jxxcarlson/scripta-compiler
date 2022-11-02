@@ -1,5 +1,5 @@
-\begin{quiver}
-https://i.ibb.co/YkrzsWV/image.png width:300
+\begin{quiver}[23, width:300, 55, caption:Delta diagram]
+https://i.ibb.co/YkrzsWV/image.png
 ---
 % https://q.uiver.app/?q=WzAsNCxbMCwwLCJBIl0sWzIsMCwiQiJdLFswLDIsIlhfayJdLFsyLDIsIllfayJdLFsxLDMsImciXSxbMCwxXSxbMCwyLCJmIiwyXSxbMiwzXSxbMCwzLCJcXERlbHRhIiwxXV0=
 \[
@@ -14,4 +14,3 @@ https://i.ibb.co/YkrzsWV/image.png width:300
 	\arrow["\Delta"{description}, from=1-1, to=3-3]
 \end{tikzcd}\]
 \end{quiver}
-
