@@ -47,7 +47,6 @@ type alias State =
     , stack : List PrimitiveLaTeXBlock
     , holdingStack : List PrimitiveLaTeXBlock
     , labelStack : List Label
-    , currentBlock : Maybe PrimitiveLaTeXBlock
     , lines : List String
     , sourceText : String
     , firstBlockLine : Int
@@ -104,7 +103,6 @@ init lines =
     , stack = []
     , holdingStack = []
     , labelStack = []
-    , currentBlock = Nothing
     , lines = lines
     , sourceText = ""
     , firstBlockLine = 0
