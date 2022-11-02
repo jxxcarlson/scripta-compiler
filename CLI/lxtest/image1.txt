@@ -1,0 +1,4 @@
+\begin{image}[width:400, caption:Cone flower!]
+https://www.provenwinners.com/sites/provenwinners.com/files/ifa_upload/echinacea_orange_you_awesome_apj16_6.jpg
+\end{image}
+
