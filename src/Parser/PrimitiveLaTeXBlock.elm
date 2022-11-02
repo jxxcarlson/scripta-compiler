@@ -331,7 +331,7 @@ endBlock1 label currentLine state =
         Just verbatimClassifier_ ->
             case verbatimClassifier_ of
                 CBeginBlock verbatimLabel_ ->
-                    if (label |> Debug.log "LABEL") == CBeginBlock verbatimLabel_ then
+                    if label == CBeginBlock verbatimLabel_ then
                         endBlock2 label currentLine state
 
                     else
