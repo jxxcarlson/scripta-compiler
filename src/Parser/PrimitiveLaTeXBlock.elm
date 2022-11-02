@@ -50,12 +50,11 @@ type alias State =
     , lines : List String
     , sourceText : String
     , firstBlockLine : Int
-    , inBlock : Bool
     , indent : Int
     , level : Int
     , lineNumber : Int
     , position : Int
-    , inVerbatim : Bool
+    , verbatimClassifier : Maybe Classification
     , count : Int
     , label : String
     }
@@ -109,9 +108,8 @@ init lines =
     , indent = 0
     , level = -1
     , lineNumber = -1
-    , inBlock = False
     , position = 0
-    , inVerbatim = False
+    , verbatimClassifier = Nothing
     , count = -1
     , label = "0, START"
     }
@@ -167,15 +165,37 @@ beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
     case List.Extra.uncons state.stack of
         Nothing ->
-            beginBlock_ classifier line state
+            beginBlock1 classifier line state
 
         Just _ ->
-            beginBlock_ classifier line { state | stack = fillBlockOnStack state }
+            beginBlock1 classifier line { state | stack = fillBlockOnStack state }
 
 
-beginBlock_ : Classification -> Line -> State -> State
-beginBlock_ classifier line state =
+beginBlock1 : Classification -> Line -> State -> State
+beginBlock1 classifier line state =
+    case state.verbatimClassifier of
+        Nothing ->
+            beginBlock2 classifier line state
+
+        Just _ ->
+            state
+
+
+beginBlock2 : Classification -> Line -> State -> State
+beginBlock2 classifier line state =
     let
+        newVerbatimClassifier =
+            case classifier of
+                CBeginBlock name ->
+                    if List.member name verbatimBlockNames then
+                        Just classifier
+
+                    else
+                        Nothing
+
+                _ ->
+                    Nothing
+
         level =
             state.level + 1
 
@@ -192,6 +212,7 @@ beginBlock_ classifier line state =
     in
     { state
         | lineNumber = line.lineNumber
+        , verbatimClassifier = newVerbatimClassifier
         , firstBlockLine = line.lineNumber
         , indent = line.indent
         , level = level
@@ -296,24 +317,42 @@ fillBlockOnStack state =
 
 endBlock label currentLine state =
     if state.level > -1 then
-        Loop (state |> endBlock_ (CBeginBlock label) currentLine)
+        Loop (state |> endBlock1 (CBeginBlock label) currentLine)
 
     else
-        Loop (state |> endBlock_ (CBeginBlock label) currentLine |> transfer)
+        Loop (state |> endBlock1 (CBeginBlock label) currentLine |> transfer)
 
 
-endBlock_ : Classification -> Line -> State -> State
-endBlock_ classifier line state =
+endBlock1 label currentLine state =
+    case state.verbatimClassifier of
+        Nothing ->
+            endBlock2 label currentLine state
+
+        Just verbatimClassifier_ ->
+            case verbatimClassifier_ of
+                CBeginBlock verbatimLabel_ ->
+                    if (label |> Debug.log "LABEL") == CBeginBlock verbatimLabel_ then
+                        endBlock2 label currentLine state
+
+                    else
+                        state
+
+                _ ->
+                    state
+
+
+endBlock2 : Classification -> Line -> State -> State
+endBlock2 classifier line state =
     case List.head state.labelStack of
         Nothing ->
-            state
+            { state | verbatimClassifier = Nothing }
 
         Just label ->
             if classifier == label.classification && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line state
+                endBlockOnMatch (Just label) classifier line { state | verbatimClassifier = Nothing }
 
             else
-                endBlockOnMismatch label classifier line state
+                endBlockOnMismatch label classifier line { state | verbatimClassifier = Nothing }
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
@@ -546,29 +585,29 @@ handleComment line state =
 emptyLine currentLine state =
     case List.head state.labelStack |> Maybe.map .classification of
         Just CPlainText ->
-            Loop <| endBlock_ CPlainText currentLine state
+            Loop <| endBlock2 CPlainText currentLine state
 
         Just CMathBlockDelim ->
-            Loop <| endBlock_ CMathBlockDelim currentLine state
+            Loop <| endBlock2 CMathBlockDelim currentLine state
 
         Just (CBeginBlock name) ->
             if List.member name [ "equation", "aligned" ] then
-                Loop <| endBlock_ (CEndBlock "missing") currentLine state
+                Loop <| endBlock2 (CEndBlock "missing") currentLine state
 
             else
                 Loop state
 
         Just (CSpecialBlock LXItem) ->
-            Loop <| endBlock_ (CSpecialBlock LXItem) currentLine state
+            Loop <| endBlock2 (CSpecialBlock LXItem) currentLine state
 
         Just (CSpecialBlock LXNumbered) ->
-            Loop <| endBlock_ (CSpecialBlock LXNumbered) currentLine state
+            Loop <| endBlock2 (CSpecialBlock LXNumbered) currentLine state
 
         Just (CSpecialBlock (LXOrdinaryBlock name)) ->
-            Loop <| endBlock_ (CSpecialBlock (LXOrdinaryBlock name)) currentLine state
+            Loop <| endBlock2 (CSpecialBlock (LXOrdinaryBlock name)) currentLine state
 
         Just (CSpecialBlock (LXVerbatimBlock name)) ->
-            Loop <| endBlock_ (CSpecialBlock (LXVerbatimBlock name)) currentLine state
+            Loop <| endBlock2 (CSpecialBlock (LXVerbatimBlock name)) currentLine state
 
         _ ->
             Loop state
