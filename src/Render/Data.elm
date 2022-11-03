@@ -1,4 +1,4 @@
-module Render.Data exposing (chart, table)
+module Render.Data exposing (chart, prepareTable, table)
 
 import Chart
 import Chart.Attributes as CA
@@ -477,16 +477,15 @@ getVerbatimContent (ExpressionBlock { content }) =
             ""
 
 
-table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
+type alias TableData =
+    { title : Maybe String, columnWidths : List Int, selectedCells : List (List String) }
+
+
+prepareTable : Int -> ExpressionBlock -> TableData
+prepareTable fontWidth_ ((ExpressionBlock { id, args, properties }) as block) =
     let
         title =
-            case Dict.get "title" properties of
-                Nothing ->
-                    Element.none
-
-                Just title_ ->
-                    Element.el [ Font.bold ] (Element.text title_)
+            Dict.get "title" properties
 
         columnsToDisplay : List Int
         columnsToDisplay =
@@ -535,7 +534,7 @@ table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
             List.map (List.map String.length) selectedCells
                 |> List.Extra.transpose
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
-                |> List.map (\w -> fontWidth * w)
+                |> List.map (\w -> fontWidth_ * w)
 
         renderRow : Int -> List Int -> List String -> Element MarkupMsg
         renderRow rowNumber widths_ cells_ =
@@ -549,5 +548,33 @@ table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
             else
                 Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
     in
-    -- Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.map (renderRow 1 columnWidths) selectedCells)
-    Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.indexedMap (\k row -> renderRow k columnWidths row) selectedCells)
+    { title = title, columnWidths = columnWidths, selectedCells = selectedCells }
+
+
+table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+table count acc settings ((ExpressionBlock { id, args, properties }) as block) =
+    let
+        data =
+            prepareTable fontWidth block
+
+        title =
+            case data.title of
+                Nothing ->
+                    Element.none
+
+                Just title_ ->
+                    Element.el [ Font.bold ] (Element.text title_)
+
+        renderRow : Int -> List Int -> List String -> Element MarkupMsg
+        renderRow rowNumber widths_ cells_ =
+            let
+                totalWidth =
+                    List.sum widths_ + 0
+            in
+            if rowNumber == 0 then
+                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width), Font.underline ] (Element.text <| String.replace "_" "" cell)) cells_ widths_)
+
+            else
+                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
+    in
+    Element.column [ Element.spacing 12, Element.paddingEach { left = 36, right = 0, top = 18, bottom = 18 } ] (title :: List.indexedMap (\k row -> renderRow k data.columnWidths row) data.selectedCells)

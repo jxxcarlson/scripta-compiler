@@ -11,6 +11,7 @@ import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr(..))
 import Parser.Forest exposing (Forest)
 import Parser.Helpers exposing (Step(..), loop)
+import Render.Data
 import Render.Export.Image
 import Render.Export.Preamble
 import Render.Export.Util
@@ -451,6 +452,35 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                             in
                             -- TODO: This should be fixed upstream
                             [ "$$", fix_ str, "$$" ] |> String.join "\n"
+
+                        Just "datatable" ->
+                            let
+                                data =
+                                    Render.Data.prepareTable 1 block
+
+                                renderRow : Int -> List Int -> List String -> String
+                                renderRow rowNumber widths_ rowOfCells =
+                                    if rowNumber == 0 then
+                                        List.map2 (\cell width -> String.padRight width ' ' cell) rowOfCells widths_
+                                            |> String.join " "
+                                            |> String.replace "_" " "
+
+                                    else
+                                        List.map2 (\cell width -> String.padRight width ' ' cell) rowOfCells widths_ |> String.join " "
+
+                                renderedRows =
+                                    List.indexedMap (\rowNumber -> renderRow rowNumber data.columnWidths) data.selectedCells |> String.join "\n"
+                            in
+                            case data.title of
+                                Nothing ->
+                                    [ "\\begin{verbatim}", renderedRows, "\\end{verbatim}" ] |> String.join "\n"
+
+                                Just title ->
+                                    let
+                                        separator =
+                                            String.repeat (String.length title) "-"
+                                    in
+                                    [ "\\begin{verbatim}", title, separator, renderedRows, "\\end{verbatim}" ] |> String.join "\n"
 
                         Just "equation" ->
                             -- TODO: there should be a trailing "$$"
