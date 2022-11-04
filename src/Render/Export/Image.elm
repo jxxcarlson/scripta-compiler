@@ -57,7 +57,16 @@ export s exprs =
 
 
 normalizeUrl : String -> String
-normalizeUrl url_ =
+normalizeUrl url =
+    if String.contains "i.ibb.co" url then
+        url
+
+    else
+        normalizeUrl_ url
+
+
+normalizeUrl_ : String -> String
+normalizeUrl_ url_ =
     case url_ |> String.split "/" |> List.Extra.last of
         Nothing ->
             url_
