@@ -15,6 +15,7 @@ module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, 
 
 -}
 
+import Compiler.Util
 import Dict exposing (Dict)
 import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
@@ -871,10 +872,10 @@ fixAndRewind state =
 
                 Just ( topLabel, remainingLabels ) ->
                     let
-                        firstLine =
+                        firstLineNumber =
                             topLabel.lineNumber
 
-                        lastLine =
+                        lastLineNumber =
                             state.lineNumber
 
                         provisionalContent =
@@ -883,17 +884,29 @@ fixAndRewind state =
                                     block.content
 
                                 _ ->
-                                    slice (firstLine + 1) lastLine state.lines
+                                    slice (firstLineNumber + 1) lastLineNumber state.lines
 
                         content =
                             List.Extra.takeWhile (\item -> item /= "") provisionalContent
 
+                        revisedContent =
+                            case List.Extra.last content of
+                                Nothing ->
+                                    content
+
+                                Just str ->
+                                    if String.left 4 str == "\\end" then
+                                        Compiler.Util.dropLast content
+
+                                    else
+                                        content
+
                         lineNumber =
-                            firstLine + List.length content + 1
+                            firstLineNumber + List.length content + 1
 
                         newBlock =
                             { block
-                                | content = content
+                                | content = revisedContent
                                 , status = Finished
                                 , error = missingTagError block
                             }
@@ -905,10 +918,11 @@ fixAndRewind state =
                         , holdingStack = []
                         , labelStack = []
                         , lineNumber = lineNumber
+                        , verbatimClassifier = Nothing
                     }
 
 
-missingTagError : { a | name : Maybe String } -> Maybe { error : String }
+missingTagError : { b | name : Maybe String } -> Maybe { error : String }
 missingTagError block =
     case block.name of
         Just "item" ->
@@ -930,7 +944,7 @@ missingTagError block =
                         _ ->
                             block.name |> Maybe.withDefault "(anon)"
             in
-            Just { error = "missing end tag (" ++ name ++ ")" }
+            Just { error = "missing or mismatched end tag (" ++ name ++ ")" }
 
 
 slice : Int -> Int -> List a -> List a
