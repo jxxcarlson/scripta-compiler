@@ -478,7 +478,7 @@ getVerbatimContent (ExpressionBlock { content }) =
 
 
 type alias TableData =
-    { title : Maybe String, columnWidths : List Int, selectedCells : List (List String) }
+    { title : Maybe String, columnWidths : List Int, totalWidth : Int, selectedCells : List (List String) }
 
 
 prepareTable : Int -> ExpressionBlock -> TableData
@@ -536,19 +536,10 @@ prepareTable fontWidth_ ((ExpressionBlock { id, args, properties }) as block) =
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
                 |> List.map (\w -> fontWidth_ * w)
 
-        renderRow : Int -> List Int -> List String -> Element MarkupMsg
-        renderRow rowNumber widths_ cells_ =
-            let
-                totalWidth =
-                    List.sum widths_ + 0
-            in
-            if rowNumber == 0 then
-                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width), Font.underline ] (Element.text <| String.replace "_" "" cell)) cells_ widths_)
-
-            else
-                Element.row [ Element.width (Element.px totalWidth) ] (List.map2 (\cell width -> Element.el [ Element.width (Element.px width) ] (Element.text cell)) cells_ widths_)
+        totalWidth =
+            List.sum columnWidths
     in
-    { title = title, columnWidths = columnWidths, selectedCells = selectedCells }
+    { title = title, columnWidths = columnWidths, totalWidth = totalWidth, selectedCells = selectedCells }
 
 
 table : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg

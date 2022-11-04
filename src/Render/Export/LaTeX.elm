@@ -478,7 +478,7 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                                 Just title ->
                                     let
                                         separator =
-                                            String.repeat (String.length title) "-"
+                                            String.repeat data.totalWidth "-"
                                     in
                                     [ "\\begin{verbatim}", title, separator, renderedRows, "\\end{verbatim}" ] |> String.join "\n"
 
