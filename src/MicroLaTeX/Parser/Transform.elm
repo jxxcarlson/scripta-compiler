@@ -8,7 +8,7 @@ import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 
 
 pseudoBlockNamesWithContent =
-    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter", "contents" ]
+    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter", "contents", "endnotes" ]
 
 
 sectionDict : Dict String String

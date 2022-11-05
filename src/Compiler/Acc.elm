@@ -222,7 +222,7 @@ transformBlock acc (ExpressionBlock block) =
 
             else
                 ExpressionBlock
-                    -- TODO: default insertion of "label" property
+                    -- Default insertion of "label" property (used for block numbering)
                     (if List.member name_ Parser.Settings.numberedBlockNames then
                         { block
                             | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) block.properties
