@@ -4,7 +4,6 @@ module Scripta.API exposing
     , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport, encodeForPDF
     , Msg, SyntaxTree
     , matchingIdsInAST
-    -- note used
     )
 
 {-| Scripta.API provides the functions you will need for an application

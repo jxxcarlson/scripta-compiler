@@ -529,7 +529,8 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
 
 {-|
 
-    Used in function env (ender generic LaTeX environments)
+    Used in function env (ender generic LaTeX environments).
+    This function numbers blocks for which there is a "label" property
 
 -}
 blockHeading : Maybe String -> List String -> Dict String String -> String
@@ -540,7 +541,7 @@ blockHeading name args properties =
     else
         (name |> Maybe.withDefault "(name)" |> String.Extra.toTitleCase)
             ++ " "
-            ++ (Dict.get "label" properties |> Maybe.withDefault "?")
+            ++ (Dict.get "label" properties |> Maybe.withDefault "")
             ++ " "
             ++ String.join " " args
 

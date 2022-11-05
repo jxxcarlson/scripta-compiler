@@ -44,7 +44,7 @@ type alias Accumulator =
     , documentIndex : Vector
     , counter : Dict String Int
     , blockCounter : Int
-    , itemVector : Vector
+    , itemVector : Vector -- Used for section numbering
     , numberedItemDict : Dict String { level : Int, index : Int }
     , numberedBlockNames : List String
     , inList : Bool
@@ -222,9 +222,15 @@ transformBlock acc (ExpressionBlock block) =
 
             else
                 ExpressionBlock
-                    { block
-                        | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) block.properties
-                    }
+                    -- TODO: default insertion of "label" property
+                    (if List.member name_ Parser.Settings.numberedBlockNames then
+                        { block
+                            | properties = Dict.insert "label" (vectorPrefix acc.headingIndex ++ String.fromInt acc.blockCounter) block.properties
+                        }
+
+                     else
+                        block
+                    )
                     |> expand acc.textMacroDict
 
         _ ->
@@ -571,9 +577,12 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
             if List.member name_ [ "title", "contents", "banner", "a" ] then
                 accumulator
 
-            else
+            else if List.member name_ Parser.Settings.numberedBlockNames then
                 { accumulator | blockCounter = accumulator.blockCounter + 1 }
                     |> updateReference tag id tag
+
+            else
+                accumulator
 
         _ ->
             accumulator

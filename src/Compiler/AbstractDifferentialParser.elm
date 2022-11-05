@@ -90,9 +90,11 @@ update f editRecord sourceText =
         diffRecord =
             Compiler.DifferEq.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks
 
+        parsed_ : List parsedChunk
         parsed_ =
             differentialParser f.chunkParser diffRecord editRecord
 
+        tree_ : List (Tree parsedChunk)
         tree_ =
             f.forestFromBlocks parsed_
 
