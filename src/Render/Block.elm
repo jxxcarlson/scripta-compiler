@@ -454,7 +454,7 @@ question count acc settings ((ExpressionBlock { id, args, properties }) as block
             Dict.get id acc.qAndADict |> Maybe.withDefault id
     in
     Element.column [ Element.spacing 12 ]
-        [ Element.el [ Font.bold, Events.onClick (HighlightId qId) ] (Element.text (title ++ " " ++ label))
+        [ Element.el [ Font.bold, Font.color Color.blue, Events.onClick (HighlightId qId) ] (Element.text (title ++ " " ++ label))
         , Element.paragraph ([ Font.italic, Events.onClick (HighlightId qId), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "..." count acc settings (getExprs block))
         ]
