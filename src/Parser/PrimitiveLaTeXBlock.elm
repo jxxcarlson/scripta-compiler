@@ -148,7 +148,8 @@ nextStep state_ =
                     Loop <| handleSpecial (CSpecialBlock label) currentLine state
 
                 CMathBlockDelim ->
-                    Loop (state |> handleMathBlock currentLine)
+                    -- Loop (state |> handleMathBlock currentLine)
+                    Loop (state |> beginBlock CMathBlockDelim currentLine)
 
                 CVerbatimBlockDelim ->
                     Loop (state |> handleVerbatimBlock currentLine)
