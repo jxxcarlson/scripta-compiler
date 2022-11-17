@@ -1,0 +1,10 @@
+\begin{theorem}
+This is really nice:
+
+$$
+x^2 + y^2 = z^2
+$$
+
+Don't you agree?
+\end{theorem}
+
