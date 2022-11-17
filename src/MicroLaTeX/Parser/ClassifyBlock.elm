@@ -1,4 +1,10 @@
-module MicroLaTeX.Parser.ClassifyBlock exposing (Classification(..), LXSpecial(..), classificationString, classify)
+module MicroLaTeX.Parser.ClassifyBlock exposing
+    ( Classification(..)
+    , LXSpecial(..)
+    , classificationString
+    , classify
+    , match
+    )
 
 import Parser exposing ((|.), (|=), Parser)
 
@@ -11,6 +17,23 @@ type Classification
     | CVerbatimBlockDelim
     | CPlainText
     | CEmpty
+
+
+match : Classification -> Classification -> Bool
+match c1 c2 =
+    case ( c1, c2 ) of
+        ( CBeginBlock label1, CEndBlock label2 ) ->
+            label1 == label2
+
+        ( CMathBlockDelim, CMathBlockDelim ) ->
+            True
+
+        ( CVerbatimBlockDelim, CVerbatimBlockDelim ) ->
+            False
+
+        -- TODO: review -- what about CSpecialBlock?
+        _ ->
+            False
 
 
 classificationString : Classification -> String

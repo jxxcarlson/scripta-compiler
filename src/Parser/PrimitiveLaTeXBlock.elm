@@ -142,14 +142,26 @@ nextStep state_ =
                     Loop (state |> beginBlock (CBeginBlock label) currentLine)
 
                 CEndBlock label ->
-                    endBlock label currentLine state
+                    -- TODO: changed, review
+                    endBlock (CEndBlock label) currentLine state
 
                 CSpecialBlock label ->
                     Loop <| handleSpecial (CSpecialBlock label) currentLine state
 
                 CMathBlockDelim ->
+                    -- TODO: changed, review
                     -- Loop (state |> handleMathBlock currentLine)
-                    Loop (state |> beginBlock CMathBlockDelim currentLine)
+                    case List.head state.labelStack of
+                        Nothing ->
+                            Loop (state |> beginBlock CMathBlockDelim currentLine)
+
+                        Just label ->
+                            if label.classification == CMathBlockDelim then
+                                -- Loop state
+                                state |> endBlock CMathBlockDelim currentLine
+
+                            else
+                                Loop (state |> beginBlock CMathBlockDelim currentLine)
 
                 CVerbatimBlockDelim ->
                     Loop (state |> handleVerbatimBlock currentLine)
@@ -319,24 +331,32 @@ fillBlockOnStack state =
                 state.stack
 
 
-endBlock label currentLine state =
+
+--  : Classification -> Line -> State -> Step State a
+
+
+endBlock : Classification -> Line -> State -> Step State State
+endBlock classification currentLine state =
+    -- TODO: changed, review
     if state.level > -1 then
-        Loop (state |> endBlock1 (CBeginBlock label) currentLine)
+        Loop (state |> endBlock1 classification currentLine)
 
     else
-        Loop (state |> endBlock1 (CBeginBlock label) currentLine |> transfer)
+        Loop (state |> endBlock1 classification currentLine |> transfer)
 
 
-endBlock1 label currentLine state =
+endBlock1 : Classification -> Line -> State -> State
+endBlock1 classification currentLine state =
+    -- TODO: changed, review
     case state.verbatimClassifier of
         Nothing ->
-            endBlock2 label currentLine state
+            endBlock2 classification currentLine state
 
         Just verbatimClassifier_ ->
             case verbatimClassifier_ of
                 CBeginBlock verbatimLabel_ ->
-                    if label == CBeginBlock verbatimLabel_ then
-                        endBlock2 label currentLine state
+                    if classification == CBeginBlock verbatimLabel_ then
+                        endBlock2 classification currentLine state
 
                     else
                         state
@@ -347,13 +367,18 @@ endBlock1 label currentLine state =
 
 endBlock2 : Classification -> Line -> State -> State
 endBlock2 classifier line state =
+    -- TODO: changed, review
     case List.head state.labelStack of
         Nothing ->
             { state | verbatimClassifier = Nothing }
 
         Just label ->
-            if classifier == label.classification && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line { state | verbatimClassifier = Nothing }
+            let
+                _ =
+                    Debug.log ("endBlock2, label, " ++ String.fromInt state.lineNumber) ( label.classification, classifier )
+            in
+            if ClassifyBlock.match label.classification classifier && state.level == label.level then
+                endBlockOnMatch (Just label) (classifier |> Debug.log "endBlock2 >> endBlockOnMatch") line { state | verbatimClassifier = Nothing }
 
             else
                 endBlockOnMismatch label classifier line { state | verbatimClassifier = Nothing }
@@ -446,13 +471,16 @@ endBlockOnMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
+                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty |> Debug.log "AA1"
 
             else
                 let
                     newBlock =
                         if classifier == CSpecialBlock (LXVerbatimBlock "texComment") then
                             newBlockWithError classifier (getContent classifier line state ++ [ block.firstLine ]) block |> addSource line.content
+
+                        else if List.member classifier [ CEndBlock "equation", CEndBlock "aligned" ] then
+                            newBlockWithError classifier (getContent classifier line state) block |> Debug.log "BB1"
 
                         else
                             newBlockWithError classifier (getContent classifier line state) block |> addSource line.content
@@ -466,6 +494,7 @@ endBlockOnMatch labelHead classifier line state =
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
+                    |> Debug.log "BBBB"
 
 
 addSource : String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
@@ -498,6 +527,10 @@ getError label classifier =
 
 getContent : Classification -> Line -> State -> List String
 getContent classifier line state =
+    let
+        _ =
+            Debug.log "getContent, classifier" classifier
+    in
     case classifier of
         CPlainText ->
             slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
@@ -511,6 +544,16 @@ getContent classifier line state =
             slice state.firstBlockLine line.lineNumber state.lines
                 |> List.reverse
                 |> List.map (\line_ -> String.replace "\\numbered" "" line_ |> String.trim)
+
+        CEndBlock "equation" ->
+            -- TODO: is this robust?
+            slice (state.firstBlockLine + 1) (line.lineNumber - 2) state.lines
+                |> List.reverse
+
+        CEndBlock "aligned" ->
+            -- TODO: is this robust?
+            slice (state.firstBlockLine + 1) (line.lineNumber - 2) state.lines
+                |> List.reverse
 
         _ ->
             slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
@@ -774,7 +817,7 @@ emptyLine currentLine state =
 
         Just (CBeginBlock name) ->
             if List.member name [ "equation", "aligned" ] then
-                Loop <| endBlock2 (CEndBlock "missing") currentLine state
+                Loop <| endBlock2 (CEndBlock name) currentLine state
 
             else
                 Loop state
