@@ -31,7 +31,9 @@ match c1 c2 =
         ( CVerbatimBlockDelim, CVerbatimBlockDelim ) ->
             False
 
-        -- TODO: review -- what about CSpecialBlock?
+        ( CSpecialBlock _, _ ) ->
+            True
+
         _ ->
             False
 

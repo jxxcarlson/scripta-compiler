@@ -373,12 +373,8 @@ endBlock2 classifier line state =
             { state | verbatimClassifier = Nothing }
 
         Just label ->
-            let
-                _ =
-                    Debug.log ("endBlock2, label, " ++ String.fromInt state.lineNumber) ( label.classification, classifier )
-            in
             if ClassifyBlock.match label.classification classifier && state.level == label.level then
-                endBlockOnMatch (Just label) (classifier |> Debug.log "endBlock2 >> endBlockOnMatch") line { state | verbatimClassifier = Nothing }
+                endBlockOnMatch (Just label) classifier line { state | verbatimClassifier = Nothing }
 
             else
                 endBlockOnMismatch label classifier line { state | verbatimClassifier = Nothing }
@@ -471,7 +467,7 @@ endBlockOnMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty |> Debug.log "AA1"
+                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
@@ -480,10 +476,10 @@ endBlockOnMatch labelHead classifier line state =
                             newBlockWithError classifier (getContent classifier line state ++ [ block.firstLine ]) block |> addSource line.content
 
                         else if List.member classifier [ CEndBlock "equation", CEndBlock "aligned" ] then
-                            newBlockWithError classifier (getContent classifier line state) block |> Debug.log "BB1"
+                            newBlockWithError classifier (getContent classifier line state) block
 
                         else
-                            newBlockWithError classifier (getContent classifier line state) block |> addSource line.content
+                            newBlockWithOutError (getContent classifier line state) block |> addSource line.content
                 in
                 { state
                     | holdingStack = newBlock :: state.holdingStack
@@ -494,7 +490,6 @@ endBlockOnMatch labelHead classifier line state =
                     , level = state.level - 1
                 }
                     |> resolveIfStackEmpty
-                    |> Debug.log "BBBB"
 
 
 addSource : String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
@@ -527,10 +522,6 @@ getError label classifier =
 
 getContent : Classification -> Line -> State -> List String
 getContent classifier line state =
-    let
-        _ =
-            Debug.log "getContent, classifier" classifier
-    in
     case classifier of
         CPlainText ->
             slice state.firstBlockLine (line.lineNumber - 1) state.lines |> List.reverse
@@ -557,6 +548,14 @@ getContent classifier line state =
 
         _ ->
             slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
+
+
+newBlockWithOutError : List String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
+newBlockWithOutError content block =
+    { block
+        | content = List.reverse content
+        , status = Finished
+    }
 
 
 newBlockWithError : Classification -> List String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
