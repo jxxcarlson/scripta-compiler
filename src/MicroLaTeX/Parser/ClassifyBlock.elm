@@ -82,21 +82,21 @@ classify str verbatimClassif_ =
         Ok classif ->
             case verbatimClassif_ of
                 Nothing ->
-                    classif |> Debug.log ("classify (1), " ++ str)
+                    classif
 
                 Just verbatimClassif ->
                     if match verbatimClassif classif then
-                        classif |> Debug.log ("classify (2), " ++ str)
+                        classif
 
                     else
-                        CPlainText |> Debug.log ("classify (3), " ++ str)
+                        CPlainText
 
         Err _ ->
             if str == "" then
-                CEmpty |> Debug.log ("classify (4), " ++ str)
+                CEmpty
 
             else
-                CPlainText |> Debug.log ("classify (5), " ++ str)
+                CPlainText
 
 
 mathBlockDelimParser : Parser Classification
