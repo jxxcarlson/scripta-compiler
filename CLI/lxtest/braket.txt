@@ -1,0 +1,4 @@
+\begin{equation}
+x^2
+\end{equation}
+

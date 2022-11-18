@@ -137,7 +137,7 @@ nextStep state_ =
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
             in
-            case ClassifyBlock.classify currentLine.content of
+            case ClassifyBlock.classify currentLine.content state.verbatimClassifier of
                 CBeginBlock label ->
                     Loop (state |> beginBlock (CBeginBlock label) currentLine)
 
@@ -354,8 +354,8 @@ endBlock1 classification currentLine state =
 
         Just verbatimClassifier_ ->
             case verbatimClassifier_ of
-                CBeginBlock verbatimLabel_ ->
-                    if classification == CBeginBlock verbatimLabel_ then
+                CBeginBlock _ ->
+                    if ClassifyBlock.match verbatimClassifier_ classification then
                         endBlock2 classification currentLine state
 
                     else
@@ -404,7 +404,7 @@ endBlockOnMismatch label_ classifier line state =
                         newBlock =
                             { block
                                 | content =
-                                    if List.member name [ "equation", "aligned" ] then
+                                    if List.member name verbatimBlockNames then
                                         getContent label_.classification line state |> List.reverse
 
                                     else
@@ -475,8 +475,8 @@ endBlockOnMatch labelHead classifier line state =
                         if classifier == CSpecialBlock (LXVerbatimBlock "texComment") then
                             newBlockWithError classifier (getContent classifier line state ++ [ block.firstLine ]) block |> addSource line.content
 
-                        else if List.member classifier [ CEndBlock "equation", CEndBlock "aligned" ] then
-                            newBlockWithError classifier (getContent classifier line state) block
+                        else if List.member classifier (List.map CEndBlock verbatimBlockNames) then
+                            newBlockWithError classifier (getContent classifier line state) { block | sourceText = getSource line state }
 
                         else
                             newBlockWithOutError (getContent classifier line state) block |> addSource line.content
@@ -536,18 +536,18 @@ getContent classifier line state =
                 |> List.reverse
                 |> List.map (\line_ -> String.replace "\\numbered" "" line_ |> String.trim)
 
-        CEndBlock "equation" ->
+        CEndBlock _ ->
             -- TODO: is this robust?
-            slice (state.firstBlockLine + 1) (line.lineNumber - 2) state.lines
-                |> List.reverse
-
-        CEndBlock "aligned" ->
-            -- TODO: is this robust?
-            slice (state.firstBlockLine + 1) (line.lineNumber - 2) state.lines
+            slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines
                 |> List.reverse
 
         _ ->
             slice (state.firstBlockLine + 1) (line.lineNumber - 1) state.lines |> List.reverse
+
+
+getSource : Line -> State -> String
+getSource line state =
+    slice state.firstBlockLine line.lineNumber state.lines |> String.join "\n"
 
 
 newBlockWithOutError : List String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
@@ -1080,7 +1080,8 @@ blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
 blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
     let
         ( blockType, label ) =
-            getBlockTypeAndLabel line.content
+            -- TODO: the Nothing argument
+            getBlockTypeAndLabel line.content Nothing
     in
     { indent = indent
     , lineNumber = lineNumber
@@ -1121,9 +1122,9 @@ verbatimBlockNames =
     ]
 
 
-getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
-getBlockTypeAndLabel str =
-    case ClassifyBlock.classify str of
+getBlockTypeAndLabel : String -> Maybe Classification -> ( PrimitiveBlockType, Maybe String )
+getBlockTypeAndLabel str verbatimClassification =
+    case ClassifyBlock.classify str verbatimClassification of
         CBeginBlock label ->
             if List.member label verbatimBlockNames then
                 ( PBVerbatim, Just label )

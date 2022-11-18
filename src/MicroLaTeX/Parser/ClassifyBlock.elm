@@ -72,22 +72,31 @@ classifierParser =
         ]
 
 
-classify : String -> Classification
-classify str =
+classify : String -> Maybe Classification -> Classification
+classify str verbatimClassif_ =
     let
         str_ =
             String.trimLeft str
     in
     case Parser.run classifierParser str_ of
         Ok classif ->
-            classif
+            case verbatimClassif_ of
+                Nothing ->
+                    classif |> Debug.log ("classify (1), " ++ str)
+
+                Just verbatimClassif ->
+                    if match verbatimClassif classif then
+                        classif |> Debug.log ("classify (2), " ++ str)
+
+                    else
+                        CPlainText |> Debug.log ("classify (3), " ++ str)
 
         Err _ ->
             if str == "" then
-                CEmpty
+                CEmpty |> Debug.log ("classify (4), " ++ str)
 
             else
-                CPlainText
+                CPlainText |> Debug.log ("classify (5), " ++ str)
 
 
 mathBlockDelimParser : Parser Classification
