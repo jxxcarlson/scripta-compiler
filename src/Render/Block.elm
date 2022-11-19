@@ -1,4 +1,4 @@
-module Render.Block exposing (render)
+module Render.Block exposing (render, render_)
 
 import Bool.Extra
 import Compiler.ASTTools as ASTTools
@@ -28,6 +28,39 @@ import Render.Utility
 import String.Extra
 
 
+type alias RenderData msg =
+    { format : List (Element.Attribute msg), content : List (Element msg) }
+
+
+render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+render count acc settings block =
+    render_ count acc settings block |> finalize
+
+
+render_ : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
+render_ count acc settings ((ExpressionBlock { name, indent, args, error, blockType, content, id }) as block) =
+    -- Debug.todo "renderBlock"
+    case blockType of
+        Paragraph ->
+            { format = clickableParagraph id (selectedColor id settings) |> indentParagraph indent
+            , content = paragraphContent count acc settings block
+            }
+
+        -- renderParagraph count acc settings block
+        OrdinaryBlock _ ->
+            -- renderOrdinaryBlock count acc settings block |> showError error
+            { format = [], content = [] }
+
+        VerbatimBlock _ ->
+            --  renderVerbatimBlock count acc settings block |> showError error
+            { format = [], content = [] }
+
+
+finalize : RenderData MarkupMsg -> Element MarkupMsg
+finalize { format, content } =
+    Element.column format content
+
+
 
 -- TOPLEVEL
 
@@ -36,35 +69,20 @@ topPaddingForIndentedElements =
     10
 
 
-render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-render count acc settings ((ExpressionBlock { name, indent, args, error, blockType, content, id }) as block) =
-    case blockType of
-        Paragraph ->
-            renderParagraph count acc settings block
-
-        OrdinaryBlock _ ->
-            renderOrdinaryBlock count acc settings block |> showError error
-
-        VerbatimBlock _ ->
-            renderVerbatimBlock count acc settings block |> showError error
-
-
-renderParagraph : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-renderParagraph count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
+paragraphContent : Int -> Accumulator -> Settings -> ExpressionBlock -> List (Element MarkupMsg)
+paragraphContent count acc settings (ExpressionBlock { content }) =
     case content of
         Right exprs ->
             List.map (Render.Elm.render count acc settings) exprs
-                |> clickableParagraph id (selectedColor id settings)
-                |> indentParagraph indent
 
         Left _ ->
-            Element.none
+            []
 
 
-indentParagraph : number -> Element msg -> Element msg
+indentParagraph : number -> List (Element.Attribute msg) -> List (Element.Attribute msg)
 indentParagraph indent x =
     if indent > 0 then
-        Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+        Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } :: x
 
     else
         x
@@ -78,9 +96,9 @@ selectedColor id settings =
         Background.color settings.backgroundColor
 
 
-clickableParagraph : String -> Element.Attribute MarkupMsg -> List (Element MarkupMsg) -> Element MarkupMsg
-clickableParagraph id color elements =
-    Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
+clickableParagraph : String -> Element.Attribute MarkupMsg -> List (Element.Attribute MarkupMsg)
+clickableParagraph id color =
+    [ color, Events.onClick (SendId id), htmlId id ]
 
 
 renderOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg

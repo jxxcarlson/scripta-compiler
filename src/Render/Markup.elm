@@ -17,6 +17,21 @@ import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 
 
+renderTree : Int -> Accumulator -> Settings -> Tree ExpressionBlock -> Element MarkupMsg
+renderTree count acc settings tree =
+    let
+        root =
+            Render.Block.render_ count acc settings (Tree.label tree)
+    in
+    case Tree.children tree of
+        [] ->
+            Element.paragraph root.format root.content
+
+        children ->
+            Element.column root.format
+                (root.content ++ List.map (renderTree count acc settings) children)
+
+
 renderFromString : Language -> Int -> Accumulator -> Settings -> String -> List (Element MarkupMsg)
 renderFromString lang count acc settings str =
     str |> Markup.parse lang |> renderFromAST count acc settings
@@ -35,23 +50,26 @@ renderFromAST count accumulator settings ast =
 
 {-| Transform a tree of expression blocks to Element MarkupMsg ("HTML")
 -}
-renderTree : Int -> Accumulator -> Settings -> Tree ExpressionBlock -> Element MarkupMsg
-renderTree count accumulator settings tree =
-    let
-        blockName =
-            Parser.Block.getName (Tree.label tree)
-                |> Maybe.withDefault "---"
 
-        root : ExpressionBlock
-        root =
-            Tree.label tree
-    in
-    if List.member blockName Parser.Settings.numberedBlockNames then
-        -- Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
-        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel) tree)
 
-    else
-        (Tree.map (Render.Block.render count accumulator settings) >> unravel) tree
+
+--renderTree : Int -> Accumulator -> Settings -> Tree ExpressionBlock -> Element MarkupMsg
+--renderTree count accumulator settings tree =
+--    let
+--        blockName =
+--            Parser.Block.getName (Tree.label tree)
+--                |> Maybe.withDefault "---"
+--
+--        root : ExpressionBlock
+--        root =
+--            Tree.label tree
+--    in
+--    if List.member blockName Parser.Settings.numberedBlockNames then
+--        -- Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
+--        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel) tree)
+--
+--    else
+--        (Tree.map (Render.Block.render count accumulator settings) >> unravel) tree
 
 
 getMessages : Forest ExpressionBlock -> List String
