@@ -166,6 +166,7 @@ blockDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> El
 blockDict =
     Dict.fromList
         [ ( "indent", indented )
+        , ( "box", box )
         , ( "quotation", quotation )
         , ( "set-key", \_ _ _ _ -> Element.none )
         , ( "comment", comment )
@@ -565,7 +566,27 @@ blockLabel properties =
 indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 indented count acc settings ((ExpressionBlock { id }) as block) =
     Element.paragraph ([ Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "| indent" count acc settings (getExprs block))
+        (renderWithDefault "indent" count acc settings (getExprs block))
+
+
+box : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+box count acc settings ((ExpressionBlock { id, name, args, properties }) as block) =
+    Element.column [ Element.paddingXY 48 0 ]
+        [ Element.column
+            ([ Background.color Color.lightBlue
+             , Element.padding 20
+             , Events.onClick (SendId id)
+             , Render.Utility.elementAttribute "id" id
+             , Element.spacing 18
+             ]
+                ++ highlightAttrs id settings
+            )
+            [ Element.el [ Font.bold ] (Element.text (blockHeading name args properties))
+            , Element.paragraph
+                []
+                (renderWithDefault "box" count acc settings (getExprs block))
+            ]
+        ]
 
 
 {-| -}

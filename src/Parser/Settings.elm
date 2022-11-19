@@ -4,6 +4,7 @@ module Parser.Settings exposing (Arity, blockData, numberedBlockNames)
 numberedBlockNames =
     [ "q"
     , "axiom"
+    , "box"
     , "theorem"
     , "definition"
     , "lemma"
