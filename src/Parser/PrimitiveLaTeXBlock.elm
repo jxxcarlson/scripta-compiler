@@ -408,7 +408,7 @@ endBlockOnMismatch label_ classifier line state =
                                         getContent label_.classification line state |> List.reverse
 
                                     else
-                                        getContent label_.classification line state
+                                        getContent label_.classification line state |> List.reverse
                                 , args =
                                     if List.member name [ "item", "numbered" ] then
                                         block.content
