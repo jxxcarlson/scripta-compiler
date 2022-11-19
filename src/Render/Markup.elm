@@ -2,6 +2,7 @@ module Render.Markup exposing (getMessages, renderFromAST, renderFromString, ren
 
 import Compiler.Acc exposing (Accumulator)
 import Element exposing (Element)
+import Element.Background
 import Element.Font as Font
 import Markup
 import Parser.Block exposing (ExpressionBlock)
@@ -9,6 +10,7 @@ import Parser.BlockUtil as BlockUtil
 import Parser.Forest exposing (Forest)
 import Parser.Settings
 import Render.Block
+import Render.Color
 import Render.Msg exposing (MarkupMsg)
 import Render.Settings exposing (Settings)
 import Scripta.Language exposing (Language)
@@ -39,9 +41,14 @@ renderTree count accumulator settings tree =
         blockName =
             Parser.Block.getName (Tree.label tree)
                 |> Maybe.withDefault "---"
+
+        root : ExpressionBlock
+        root =
+            Tree.label tree
     in
     if List.member blockName Parser.Settings.numberedBlockNames then
-        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
+        -- Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
+        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel) tree)
 
     else
         (Tree.map (Render.Block.render count accumulator settings) >> unravel) tree
@@ -83,9 +90,10 @@ unravel tree =
         Tree.label tree
 
     else
-        Element.column []
+        Element.column [ Element.Background.color Render.Color.pink ]
             --  Render.Settings.leftIndentation,
-            [ Tree.label tree
+            [ Element.el [] (Element.text "BEGIN")
+            , Tree.label tree
             , Element.column
                 [ Element.paddingEach
                     { top = Render.Settings.topMarginForChildren
@@ -95,4 +103,5 @@ unravel tree =
                     }
                 ]
                 (List.map unravel children)
+            , Element.el [] (Element.text "END")
             ]

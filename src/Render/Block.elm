@@ -49,30 +49,25 @@ render count acc settings ((ExpressionBlock { name, indent, args, error, blockTy
             renderVerbatimBlock count acc settings block |> showError error
 
 
+renderParagraph : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderParagraph count acc settings (ExpressionBlock { name, indent, args, blockType, content, id }) =
     case content of
         Right exprs ->
-            let
-                color =
-                    if id == settings.selectedId then
-                        Background.color (Element.rgb 0.9 0.9 1.0)
-
-                    else
-                        Background.color settings.backgroundColor
-            in
             List.map (Render.Elm.render count acc settings) exprs
                 |> clickableParagraph id (selectedColor id settings)
-                -- (\x -> Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] x)
-                |> (\x ->
-                        if indent > 0 then
-                            Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
-
-                        else
-                            x
-                   )
+                |> indentParagraph indent
 
         Left _ ->
             Element.none
+
+
+indentParagraph : number -> Element msg -> Element msg
+indentParagraph indent x =
+    if indent > 0 then
+        Element.el [ Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+
+    else
+        x
 
 
 selectedColor id settings =
@@ -88,6 +83,7 @@ clickableParagraph id color elements =
     Element.paragraph [ color, Events.onClick (SendId id), htmlId id ] elements
 
 
+renderOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, error, args, blockType, content, id }) as block) =
     case content of
         Left _ ->
@@ -102,24 +98,20 @@ renderOrdinaryBlock count acc settings ((ExpressionBlock { name, indent, error, 
                     case Dict.get functionName blockDict of
                         Nothing ->
                             env count acc settings block
-                                |> (\x ->
-                                        if indent > 0 then
-                                            Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                                |> indentOrdinaryBlock indent id settings
 
-                                        else
-                                            x
-                                   )
-
-                        --  |> showError error
                         Just f ->
                             f count acc settings block
-                                |> (\x ->
-                                        if indent > 0 then
-                                            Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+                                |> indentOrdinaryBlock indent id settings
 
-                                        else
-                                            x
-                                   )
+
+indentOrdinaryBlock : Int -> String -> Settings -> Element msg -> Element msg
+indentOrdinaryBlock indent id settings x =
+    if indent > 0 then
+        Element.el [ selectedColor id settings, Element.paddingEach { top = topPaddingForIndentedElements, bottom = 0, left = 0, right = 0 } ] x
+
+    else
+        x
 
 
 
