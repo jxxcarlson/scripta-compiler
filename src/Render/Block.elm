@@ -1,4 +1,14 @@
-module Render.Block exposing (render, render_)
+module Render.Block exposing
+    ( emptyRenderData
+    , emptyRenderDatum
+    , render
+    , renderDatumAsColumn
+    , renderDatumAsColumnWithAttributes
+    , renderDatumAsParagraph
+    , renderDatumAsParagraphWithAttributes
+    , renderDatumAsRow
+    , render_
+    )
 
 import Bool.Extra
 import Compiler.ASTTools as ASTTools
@@ -30,6 +40,13 @@ import String.Extra
 
 
 type alias RenderData msg =
+    { outer : List (Element.Attribute msg)
+    , head : RenderDatum msg
+    , body : RenderDatum msg
+    }
+
+
+type alias RenderDatum msg =
     { format : List (Element.Attribute msg), content : List (Element msg) }
 
 
@@ -43,8 +60,12 @@ render_ count acc settings ((ExpressionBlock { name, indent, args, error, blockT
     -- Debug.todo "renderBlock"
     case blockType of
         Paragraph ->
-            { format = clickableParagraph id (selectedColor id settings) |> indentParagraph indent
-            , content = paragraphContent count acc settings block
+            { outer = []
+            , head = emptyRenderDatum
+            , body =
+                { format = clickableParagraph id (selectedColor id settings) |> indentParagraph indent
+                , content = paragraphContent count acc settings block
+                }
             }
 
         -- renderParagraph count acc settings block
@@ -54,12 +75,43 @@ render_ count acc settings ((ExpressionBlock { name, indent, args, error, blockT
 
         VerbatimBlock _ ->
             --  renderVerbatimBlock count acc settings block |> showError error
-            { format = [], content = [] }
+            { outer = []
+            , head = emptyRenderDatum
+            , body = emptyRenderDatum
+            }
+
+
+renderDatumAsParagraph : RenderDatum MarkupMsg -> Element MarkupMsg
+renderDatumAsParagraph { format, content } =
+    Element.paragraph format content
+
+
+renderDatumAsParagraphWithAttributes : List (Element.Attribute MarkupMsg) -> RenderDatum MarkupMsg -> Element MarkupMsg
+renderDatumAsParagraphWithAttributes attrs { format, content } =
+    Element.paragraph (format ++ attrs) content
+
+
+renderDatumAsRow : RenderDatum MarkupMsg -> Element MarkupMsg
+renderDatumAsRow { format, content } =
+    Element.row format content
+
+
+renderDatumAsColumn : RenderDatum MarkupMsg -> Element MarkupMsg
+renderDatumAsColumn { format, content } =
+    Element.column format content
+
+
+renderDatumAsColumnWithAttributes : List (Element.Attribute MarkupMsg) -> RenderDatum MarkupMsg -> Element MarkupMsg
+renderDatumAsColumnWithAttributes attrs { format, content } =
+    Element.column (format ++ attrs) content
 
 
 finalize : RenderData MarkupMsg -> Element MarkupMsg
-finalize { format, content } =
-    Element.column format content
+finalize { head, body } =
+    Element.column []
+        [ renderDatumAsRow head
+        , renderDatumAsColumn body
+        ]
 
 
 
@@ -102,8 +154,17 @@ clickableParagraph id color =
     [ color, Events.onClick (SendId id), htmlId id ]
 
 
-emptyRenderData =
+emptyRenderDatum =
     { format = [], content = [] }
+
+
+emptyRenderData =
+    { outer = [], head = emptyRenderDatum, body = emptyRenderDatum }
+
+
+fEmptyRenderData : a -> b -> c -> d -> RenderData MarkupMsg
+fEmptyRenderData =
+    \_ _ _ _ -> emptyRenderData
 
 
 renderOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
@@ -183,28 +244,30 @@ renderVerbatimBlock count acc settings ((ExpressionBlock { name, error, indent, 
 blockDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg)
 blockDict =
     Dict.fromList
-        [ --( "indent", indented )
-          --, ( "box", box )
-          --, ( "quotation", quotation )
-          --, ( "set-key", \_ _ _ _ -> Element.none )
-          --, ( "comment", comment )
-          --, ( "q", question ) -- xx
-          --, ( "a", answer ) -- xx
-          --, ( "document", document )
-          --, ( "collection", collection )
-          --, ( "bibitem", bibitem )
-          --, ( "section", section ) -- xx
-          --, ( "subheading", subheading ) -- xx
-          --, ( "runninghead_", \_ _ _ _ -> Element.none ) -- DEPRECATED
-          --, ( "banner", \_ _ _ _ -> Element.none )
-          --, ( "title", \_ _ _ _ -> Element.none )
-          --, ( "subtitle", \_ _ _ _ -> Element.none )
-          --, ( "author", \_ _ _ _ -> Element.none )
-          --, ( "date", \_ _ _ _ -> Element.none )
-          --, ( "contents", \_ _ _ _ -> Element.none )
-          --, ( "tags", \_ _ _ _ -> Element.none )
-          --, ( "type", \_ _ _ _ -> Element.none )
-          ( "env", env_ )
+        [ ( "indent", indented )
+        , ( "box", box )
+
+        --, ( "quotation", quotation )
+        --, ( "set-key", \_ _ _ _ -> Element.none )
+        --, ( "comment", comment )
+        --, ( "q", question ) -- xx
+        --, ( "a", answer ) -- xx
+        --, ( "document", document )
+        --, ( "collection", collection )
+        --, ( "bibitem", bibitem )
+        --, ( "section", section ) -- xx
+        --, ( "subheading", subheading ) -- xx
+        --, ( "runninghead_", \_ _ _ _ -> Element.none ) -- DEPRECATED
+        --, ( "banner", \_ _ _ _emptyRenderData)
+        , ( "title", fEmptyRenderData )
+
+        --, ( "subtitle", \_ _ _ _ -> Element.none )
+        --, ( "author", \_ _ _ _ -> Element.none )
+        --, ( "date", \_ _ _ _ -> Element.none )
+        --, ( "contents", \_ _ _ _ -> Element.none )
+        --, ( "tags", \_ _ _ _ -> Element.none )
+        --, ( "type", \_ _ _ _ -> Element.none )
+        , ( "env", env_ )
 
         --, ( "item", item )
         --, ( "desc", desc )
@@ -255,15 +318,10 @@ noSuchVerbatimBlock functionName content =
 
 noSuchOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
 noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
-    { format = [ Element.spacing 4 ], content = (Element.text <| "No such block:" ++ (args |> String.join " ")) :: List.map (Render.Elm.render count acc settings) (getExprs block) }
-
-
-
--- getExprs block }
---Element.column [ Element.spacing 4 ]
---    [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "No such block:" ++ (args |> String.join " ") ]
---    , Element.paragraph [] (List.map (Render.Elm.render count acc settings) (getExprs block))
---    ]
+    { outer = []
+    , head = { format = [ Font.color (Element.rgb255 180 0 0) ], content = [ Element.text <| "No such block:" ++ (args |> String.join " ") ] }
+    , body = { format = [], content = List.map (Render.Elm.render count acc settings) (getExprs block) }
+    }
 
 
 renderNothing : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -286,6 +344,11 @@ renderWithDefault default count acc settings exprs =
 
 renderWithDefault2 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault2 _ count acc settings exprs =
+    List.map (Render.Elm.render count acc settings) exprs
+
+
+renderWithDefault3 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
+renderWithDefault3 _ count acc settings exprs =
     List.map (Render.Elm.render count acc settings) exprs
 
 
@@ -527,9 +590,11 @@ env_ : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
 env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, content, id, properties }) as block) =
     case List.head args of
         Nothing ->
-            { format = [ Render.Utility.elementAttribute "id" id, Font.color Render.Settings.redColor, Events.onClick (SendId id) ], content = [ Element.text "| env (missing name!)" ] }
+            { outer = []
+            , head = { format = [ Render.Utility.elementAttribute "id" id, Font.color Render.Settings.redColor, Events.onClick (SendId id) ], content = [ Element.text "| env (missing name!)" ] }
+            , body = emptyRenderDatum
+            }
 
-        -- Element.paragraph [ Render.Utility.elementAttribute "id" id, Font.color Render.Settings.redColor, Events.onClick (SendId id) ] [ Element.text "| env (missing name!)" ]
         Just _ ->
             env count acc settings block
 
@@ -546,17 +611,16 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
             emptyRenderData
 
         Right exprs ->
-            { format = [ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings
-            , content = Element.text (blockHeading name args properties) :: renderWithDefault2 ("block: " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs
+            { outer = []
+            , head =
+                { format = [ Font.bold, Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings
+                , content = [ Element.text (blockHeading name args properties) ]
+                }
+            , body =
+                { format = [ Font.italic, Background.color Color.pink, Events.onClick (SendId id) ]
+                , content = renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs
+                }
             }
-
-
-
---Element.column ([ Element.spacing 8, Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
---    [ Element.el [ Font.bold, Events.onClick (SendId id) ] (Element.text (blockHeading name args properties))
---    , Element.paragraph [ Font.italic, Events.onClick (SendId id) ]
---        (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
---    ]
 
 
 {-|
@@ -594,30 +658,57 @@ blockLabel properties =
 
 {-| indented block
 -}
-indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+indented : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
 indented count acc settings ((ExpressionBlock { id }) as block) =
-    Element.paragraph ([ Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
-        (renderWithDefault "indent" count acc settings (getExprs block))
+    { outer = [ Render.Settings.leftIndentation ]
+    , head = { format = [ Font.bold ], content = [] }
+    , body =
+        { format = [ Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings
+        , content = renderWithDefault "indent" count acc settings (getExprs block)
+        }
+    }
 
 
-box : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+
+--Element.paragraph ([ Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+--    (renderWithDefault "indent" count acc settings (getExprs block))
+
+
+box : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
 box count acc settings ((ExpressionBlock { id, name, args, properties }) as block) =
-    Element.column [ Element.paddingXY 48 0 ]
-        [ Element.column
-            ([ Background.color Color.lightBlue
-             , Element.padding 20
-             , Events.onClick (SendId id)
-             , Render.Utility.elementAttribute "id" id
-             , Element.spacing 18
-             ]
-                ++ highlightAttrs id settings
-            )
-            [ Element.el [ Font.bold ] (Element.text (blockHeading name args properties))
-            , Element.paragraph
-                []
-                (renderWithDefault "box" count acc settings (getExprs block))
+    { outer = [ Element.paddingXY 40 0 ]
+    , head = { format = [ Font.bold ], content = [ Element.text (blockHeading name args properties) ] }
+    , body =
+        { format =
+            [ Background.color Color.lightBlue
+            , Element.paddingXY 20 20
+            , Events.onClick (SendId id)
+            , Render.Utility.elementAttribute "id" id
+            , Element.spacing 18
             ]
-        ]
+                ++ highlightAttrs id settings
+        , content = renderWithDefault "box" count acc settings (getExprs block)
+        }
+    }
+
+
+
+--Element.column [ Element.paddingXY 48 0 ]
+--    [ Element.column
+--        ([ Background.color Color.lightBlue
+--         , Element.padding 20
+--         , Events.onClick (SendId id)
+--         , Render.Utility.elementAttribute "id" id
+--         , Element.spacing 18
+--         ]
+--            ++ highlightAttrs id settings
+--        )
+--        [ Element.el [ Font.bold ] (Element.text (blockHeading name args properties))
+--        , Element.paragraph
+--            []
+--            (renderWithDefault "box" count acc settings (getExprs block))
+--        ]
+--    ]
 
 
 {-| -}

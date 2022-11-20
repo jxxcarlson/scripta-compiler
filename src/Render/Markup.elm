@@ -23,13 +23,36 @@ renderTree count acc settings tree =
         root =
             Render.Block.render_ count acc settings (Tree.label tree)
     in
+    renderTree_ count acc settings [] tree
+
+
+renderTree_ : Int -> Accumulator -> Settings -> List (Element.Attribute MarkupMsg) -> Tree ExpressionBlock -> Element MarkupMsg
+renderTree_ count acc settings attrs tree =
+    let
+        root =
+            Render.Block.render_ count acc settings (Tree.label tree)
+    in
     case Tree.children tree of
         [] ->
-            Element.paragraph root.format root.content
+            if root.head == Render.Block.emptyRenderDatum then
+                Render.Block.renderDatumAsParagraphWithAttributes attrs root.body
+
+            else
+                Element.column root.outer
+                    [ Element.paragraph attrs
+                        [ Render.Block.renderDatumAsRow root.head
+                        , Render.Block.renderDatumAsColumnWithAttributes attrs root.body
+                        ]
+                    ]
 
         children ->
-            Element.column root.format
-                (root.content ++ List.map (renderTree count acc settings) children)
+            Element.column root.outer
+                [ Render.Block.renderDatumAsColumn root.head
+                , Element.column root.body.format
+                    (Render.Block.renderDatumAsColumn root.body
+                        :: List.map (renderTree_ count acc settings attrs) children
+                    )
+                ]
 
 
 renderFromString : Language -> Int -> Accumulator -> Settings -> String -> List (Element MarkupMsg)
