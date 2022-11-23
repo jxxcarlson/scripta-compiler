@@ -40,7 +40,8 @@ initialData lang =
 
 
 type alias Accumulator =
-    { headingIndex : Vector
+    { language : Language
+    , headingIndex : Vector
     , documentIndex : Vector
     , counter : Dict String Int
     , blockCounter : Int
@@ -98,7 +99,8 @@ type alias InitialAccumulatorData =
 
 init : InitialAccumulatorData -> Accumulator
 init data =
-    { headingIndex = Vector.init data.vectorSize
+    { language = data.language
+    , headingIndex = Vector.init data.vectorSize
     , documentIndex = Vector.init data.vectorSize
     , inList = False
     , counter = Dict.empty
