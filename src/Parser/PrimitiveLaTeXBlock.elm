@@ -422,6 +422,7 @@ endBlockOnMismatch label_ classifier line state =
                     in
                     { state
                         | holdingStack = newBlock :: state.holdingStack
+                        , level = state.level - 1
 
                         -- blocks = newBlock :: state.blocks
                         , stack = rest
