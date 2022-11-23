@@ -48,10 +48,10 @@ renderTree count accumulator settings tree =
     in
     if List.member blockName Parser.Settings.numberedBlockNames then
         -- Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
-        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel) tree)
+        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree)
 
     else
-        (Tree.map (Render.Block.render count accumulator settings) >> unravel) tree
+        (Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree
 
 
 getMessages : Forest ExpressionBlock -> List String
@@ -65,8 +65,8 @@ getMessages syntaxTree =
 
 {-| Comment on this! Get better name.
 -}
-unravelFlat : Tree (Element MarkupMsg) -> Element MarkupMsg
-unravelFlat tree =
+unravelFlat : Language -> Tree (Element MarkupMsg) -> Element MarkupMsg
+unravelFlat lang tree =
     let
         children =
             Tree.children tree
@@ -77,11 +77,11 @@ unravelFlat tree =
     else
         Element.column []
             --  Render.Settings.leftIndentation,
-            (Tree.label tree :: List.map unravel children)
+            (Tree.label tree :: List.map (unravel lang) children)
 
 
-unravel : Tree (Element MarkupMsg) -> Element MarkupMsg
-unravel tree =
+unravel : Language -> Tree (Element MarkupMsg) -> Element MarkupMsg
+unravel lang tree =
     let
         children =
             Tree.children tree
@@ -90,18 +90,21 @@ unravel tree =
         Tree.label tree
 
     else
-        Element.column [ Element.Background.color Render.Color.pink ]
+        Element.column []
             --  Render.Settings.leftIndentation,
-            [ Element.el [] (Element.text "BEGIN")
-            , Tree.label tree
+            [ Tree.label tree
             , Element.column
                 [ Element.paddingEach
                     { top = Render.Settings.topMarginForChildren
-                    , left = Render.Settings.leftIndent
+                    , left =
+                        if lang == Scripta.Language.MicroLaTeXLang then
+                            0
+
+                        else
+                            Render.Settings.leftIndent
                     , right = 0
                     , bottom = 0
                     }
                 ]
-                (List.map unravel children)
-            , Element.el [] (Element.text "END")
+                (List.map (unravel lang) children)
             ]
