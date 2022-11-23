@@ -105,7 +105,7 @@ parse lang isVerbatimLine lines =
 
 toPrimitiveBlock : Parser.PrimitiveLaTeXBlock.PrimitiveLaTeXBlock -> PrimitiveBlock
 toPrimitiveBlock block =
-    { indent = block.indent
+    { indent = block.level -- block.indent
     , lineNumber = block.lineNumber
     , position = block.position
     , content = block.content
