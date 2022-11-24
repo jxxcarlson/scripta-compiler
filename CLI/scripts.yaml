@@ -3,4 +3,6 @@ scripts:
 
   l0parse: elm-cli run --debug src/L0PB.elm
 
-  bench: elm-cli run src/Benchmark.elm
+  rt: elm-cli run src/RoundTrip.elm
+
+  bench: elm-cli run --debug src/Benchmark.elm

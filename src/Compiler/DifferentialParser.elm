@@ -1,4 +1,4 @@
-module Compiler.DifferentialParser exposing (EditRecord, init, toExprBlock, update)
+module Compiler.DifferentialParser exposing (EditRecord, forestFromBlocks, init, toExprBlock, update)
 
 import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser

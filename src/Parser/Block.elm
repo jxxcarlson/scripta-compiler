@@ -1,6 +1,6 @@
 module Parser.Block exposing
     ( BlockType(..), ExpressionBlock(..)
-    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getContent, getName, setName
+    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getName, getVerbatimContent, setName
     )
 
 {-| Source text is parsed into a tree of IntermediateBlocks, where the tree
@@ -92,6 +92,11 @@ setName name (ExpressionBlock data) =
     ExpressionBlock { data | name = Just name }
 
 
+getBlockType : ExpressionBlock -> BlockType
+getBlockType (ExpressionBlock { blockType }) =
+    blockType
+
+
 getContent : ExpressionBlock -> List Expr
 getContent (ExpressionBlock { content }) =
     case content of
@@ -100,6 +105,16 @@ getContent (ExpressionBlock { content }) =
 
         Either.Right exprs ->
             exprs
+
+
+getVerbatimContent : ExpressionBlock -> String
+getVerbatimContent (ExpressionBlock { content }) =
+    case content of
+        Either.Left str ->
+            str
+
+        Either.Right _ ->
+            ""
 
 
 
