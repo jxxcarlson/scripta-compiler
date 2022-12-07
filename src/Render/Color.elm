@@ -1,4 +1,4 @@
-module Render.Color exposing (blue, lightBlue, pink)
+module Render.Color exposing (blue, lightBlue, paleBlue, pink)
 
 import Element as E
 
@@ -13,3 +13,7 @@ lightBlue =
 
 pink =
     E.rgb 1.0 0.9 0.9
+
+
+paleBlue =
+    E.rgb 0.9 0.9 1.0

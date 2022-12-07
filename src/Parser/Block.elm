@@ -1,6 +1,6 @@
 module Parser.Block exposing
     ( BlockType(..), ExpressionBlock(..)
-    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getName, getVerbatimContent, setName
+    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getName, getType, getVerbatimContent, setName
     )
 
 {-| Source text is parsed into a tree of IntermediateBlocks, where the tree
@@ -64,6 +64,11 @@ type ExpressionBlock
         , sourceText : String
         , error : Maybe { error : String }
         }
+
+
+getType : ExpressionBlock -> BlockType
+getType (ExpressionBlock { blockType }) =
+    blockType
 
 
 empty =
