@@ -15,7 +15,7 @@ checkErrorHandling text output =
 
 happy : Test
 happy =
-    describe "L0 Parser, round trip-tests, happy path"
+    describe "L0 Expression, round trip-tests, happy path"
         [ roundTrip1 "abc"
         , roundTrip1 "[foo]"
         , roundTrip1 "[foo bar]"
@@ -26,6 +26,6 @@ happy =
 
 unhappy : Test
 unhappy =
-    describe "L0 Parser, round trip-tests, unhappy path"
+    describe "L0 Expression, round trip-tests, unhappy path"
         [ checkErrorHandling "[foo" "[errorHighlight[foo][errorHighlight]?]"
         ]

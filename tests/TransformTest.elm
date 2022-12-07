@@ -17,7 +17,7 @@ toPrimitiveBlocks =
 
 suite : Test
 suite =
-    describe "MicroLaTeX.Parser.Transform"
+    describe "MicroLaTeX.Expression.Transform"
         [ test_ "transform, args"
             (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .args)
             (toPrimitiveBlocks "\n\n| section 1\n Intro\n\n" |> List.map .args)

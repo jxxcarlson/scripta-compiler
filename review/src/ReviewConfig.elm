@@ -45,7 +45,7 @@ config =
                 , "vendor/jinjor/elm-debounce/3.0.0/src/Debounce.elm" -- vendored: not touching
                 , "compiler/Tools.elm" -- Deliberately excluded: used only in debugging
                 , "compiler/Render/Data.elm" -- work in progress
-                , "compiler/Parser/Tools.elm" -- Evan's Parser.Advanced requires a nonempty Context type even though I am not using that part of Parser.Advanced.
+                , "compiler/Expression/Tools.elm" -- Evan's Expression.Advanced requires a nonempty Context type even though I am not using that part of Expression.Advanced.
                 , "compiler/Compiler/Acc.elm" -- I don't want to remove 'lang' in 'transformAccumulate lang ast' until I am sure it is not going to be needed (work in progress)
                 ]
             )

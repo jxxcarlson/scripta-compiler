@@ -63,8 +63,8 @@ Code
 
 If you are interested in looking at the code, there are two
 good places to start. The first is `compiler/Scripta/API.elm`.
-The second is the folder `compiler/L0/Parser/` especially
-the file `compiler/L0/Parser/Expression`.  The latter
+The second is the folder `compiler/L0/Expression/` especially
+the file `compiler/L0/Expression/Expression`.  The latter
 is the shift-reduce parser used for L0, the simplest
 of the three markup languages considered.
 
@@ -105,7 +105,6 @@ feature requests, and comments in general to me at jxxcarlson (gmail).
 I am on the Elm Slack and Github as jxxcarlson and on Twitter as @epsilon2718.
 
 """
-
 
 
 microLaTeXDemo =
@@ -168,8 +167,6 @@ $$
 [bold Tip:] Click on a section title to go back to the table of contents.
 
 """
-
-
 
 
 xMarkdown =
@@ -615,7 +612,9 @@ $$
 4: $\\foo{\\cal{C}}$
 """
 
-testFile = """
+
+testFile =
+    """
 
 \\section{Pythagoras: $x^{2}$}
 

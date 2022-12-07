@@ -57,7 +57,7 @@ toExpressionBlock lang parse { name, args, properties, indent, error, lineNumber
         , tag = Compiler.Util.getItem lang "label" sourceText
         , blockType = blockType_
         , content = exprs
-        , messages = messages -- MicroLaTeX.Parser.Expression.parseToState lineNumber sourceText |> MicroLaTeX.Parser.Expression.extractMessages
+        , messages = messages -- MicroLaTeX.Expression.Expression.parseToState lineNumber sourceText |> MicroLaTeX.Expression.Expression.extractMessages
         , sourceText = sourceText
         , error = error
         }

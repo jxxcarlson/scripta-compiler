@@ -20,7 +20,7 @@ tokenizer text tokens =
 
 happy : Test
 happy =
-    describe "MicroLaTeX Parser, round trip-tests, happy path"
+    describe "MicroLaTeX Expression, round trip-tests, happy path"
         [ roundTrip1 "abc"
         , roundTrip1 "\\foo{bar}"
         , roundTrip1 "\\foo bar"
@@ -48,7 +48,7 @@ happy =
 
 happy2 : Test
 happy2 =
-    describe "MicroLaTeX Parser, round trip-tests, unhappy path"
+    describe "MicroLaTeX Expression, round trip-tests, unhappy path"
         [ roundTrip1 "\\f{u v w \\foo{#1}}"
         , roundTrip2 "\\foo{bar}{\\aargh{baz}}"
         , roundTrip2 "\\foo{bar}{baz}"
@@ -58,6 +58,6 @@ happy2 =
 
 --unhappy : Test
 --unhappy =
---    describe "L0 Parser, round trip-tests, unhappy path"
+--    describe "L0 Expression, round trip-tests, unhappy path"
 --        [ checkErrorHandling "[foo" "[errorHighlight[foo][errorHighlight]?]"
 --        ]

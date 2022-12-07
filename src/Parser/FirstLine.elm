@@ -58,12 +58,12 @@ bareMacroParser =
 
 
 
---bareMacroParser : Parser FirstLineClassification
+--bareMacroParser : Expression FirstLineClassification
 --bareMacroParser =
---    Parser.variable
+--    Expression.variable
 --        { start = \c -> c == '\\'
 --        , inner = \c -> Char.isAlphaNum c
 --        , reserved = Set.fromList []
 --        }
---        |> Parser.map (String.dropLeft 1)
---        |> Parser.map FBareMacro
+--        |> Expression.map (String.dropLeft 1)
+--        |> Expression.map FBareMacro

@@ -11,7 +11,7 @@ module Parser.PrimitiveBlock exposing
 
 -}
 
--- import MicroLaTeX.Parser.TransformLaTeX
+-- import MicroLaTeX.Expression.TransformLaTeX
 
 import Dict exposing (Dict)
 import List.Extra
@@ -92,14 +92,14 @@ parse lang isVerbatimLine lines =
             lines |> parse_ lang isVerbatimLine
 
         MicroLaTeXLang ->
-            -- lines |> MicroLaTeX.Parser.TransformLaTeX.toL0 |> parse_ lang isVerbatimLine
+            -- lines |> MicroLaTeX.Expression.TransformLaTeX.toL0 |> parse_ lang isVerbatimLine
             lines |> Parser.PrimitiveLaTeXBlock.parse |> List.map toPrimitiveBlock
 
         PlainTextLang ->
             parsePlainText lines
 
         XMarkdownLang ->
-            -- lines |> MicroLaTeX.Parser.TransformLaTeX.toL0 |> parse_ isVerbatimLine
+            -- lines |> MicroLaTeX.Expression.TransformLaTeX.toL0 |> parse_ isVerbatimLine
             lines |> parse_ lang isVerbatimLine
 
 

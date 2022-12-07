@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.Transform exposing (macroArg, transform)
+module MicroLaTeX.Parser.Transform exposing (macroArg, pseudoBlockNamesWithContent, transform)
 
 import Compiler.Util
 import Dict exposing (Dict)

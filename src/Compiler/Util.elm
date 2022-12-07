@@ -235,7 +235,7 @@ runParser stringParser str default =
 
 {-|
 
-    > Parser.run macroValParser "... whatever ... \\foo{bar} ... whatever else ..."
+    > Expression.run macroValParser "... whatever ... \\foo{bar} ... whatever else ..."
     Ok "bar"
 
 -}
@@ -307,7 +307,7 @@ itemParser leftDelimiter rightDelimiter =
 
 {-|
 
-    > Parser.run macroValParser "... whatever ... \\foo{bar} ... whatever else ..."
+    > Expression.run macroValParser "... whatever ... \\foo{bar} ... whatever else ..."
     Ok "bar"
 
 -}

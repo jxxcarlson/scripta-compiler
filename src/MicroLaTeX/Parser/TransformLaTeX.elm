@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.TransformLaTeX exposing (toL0)
+module MicroLaTeX.Parser.TransformLaTeX exposing (pseudoBlockNames, toL0)
 
 import Dict exposing (Dict)
 import List.Extra
@@ -10,6 +10,10 @@ import Parser.Utility
 
 fakeDebugLog =
     \_ _ str -> str
+
+
+pseudoBlockNames =
+    [ "tags", "item", "abstract", "numbered", "bibitem", "desc", "contents" ]
 
 
 
@@ -129,7 +133,7 @@ nextState2 line (MyMacro name args) state =
 
     else if name == "begin" && List.member firstArg [ "code", "equation", "aligned", "verse", "verbatim", "hide", "tikz" ] then
         -- HANDLE VERBATIM BLOCKS (CODE, EQUATION, ALIGNED), BEGIN
-        -- ADDED 6/21/2022: Parser.Cond.getLeadingBlanks line ++
+        -- ADDED 6/21/2022: Expression.Cond.getLeadingBlanks line ++
         { state | output = (Parser.Utility.getLeadingBlanks line ++ "|| " ++ firstArg) :: state.output, status = InVerbatimBlock firstArg, stack = InVerbatimBlock firstArg :: state.stack } |> fakeDebugLog state.i "(1)"
 
     else if name == "end" && List.member firstArg [ "code", "equation", "aligned" ] then
@@ -160,7 +164,7 @@ nextState2 line (MyMacro name args) state =
         -- HANDLE ENVIRONMENT, END
         { state | output = "" :: state.output, stack = List.drop 1 state.stack } |> fakeDebugLog state.i "(6)"
 
-    else if state.status == LXNormal && List.member name [ "tags", "item", "abstract", "numbered", "bibitem", "desc", "contents" ] then
+    else if state.status == LXNormal && List.member name pseudoBlockNames then
         -- HANDLE \item, \numbered, etc
         { state | output = (String.replace ("\\" ++ name) ("| " ++ name) line |> fixArgs) :: state.output } |> fakeDebugLog state.i "(7)"
         -- ??

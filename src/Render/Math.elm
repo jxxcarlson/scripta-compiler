@@ -49,7 +49,7 @@ displayedMath count acc settings ((ExpressionBlock { id, error }) as block) =
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
 
         --adjustedLines =
-        --    List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
+        --    List.map (Expression.MathMacro.evalStr acc.mathMacroDict) filteredLines
         --        |> List.filter (\line -> line /= "")
         --        |> List.map (\line -> line ++ "\\\\")
         leftPadding =

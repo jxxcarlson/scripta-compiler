@@ -3,7 +3,7 @@ module Markup exposing
     , isVerbatimLine, messagesFromForest, parsePlainText, primitiveBlockToExpressionBlock, toPrimitiveBlockForest, toPrimitiveBlocks
     )
 
-{-| A Parser for the experimental Markup module. See the app folder to see how it is used.
+{-| A Expression for the experimental Markup module. See the app folder to see how it is used.
 The Render folder in app could have been included with the parser. However, this way
 users are free to design their own renderer.
 

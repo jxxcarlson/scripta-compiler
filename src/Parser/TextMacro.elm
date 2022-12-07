@@ -58,7 +58,7 @@ arg =
 
 {-| Use `inWord` to parse a word.
 
-import Parser
+import Expression
 
 inWord : Char -> Bool
 inWord c = not (c == ' ')

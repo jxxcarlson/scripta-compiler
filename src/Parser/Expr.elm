@@ -3,7 +3,7 @@ module Parser.Expr exposing
     , SExpr(..), condenseUrl, getName, simplify
     )
 
-{-| The syntax tree for the parser is of type Expr. In the examples below, we use `Parser.Expression.parse`;
+{-| The syntax tree for the parser is of type Expr. In the examples below, we use `Expression.Expression.parse`;
 in `parse 0 STRING` 0 is the line number at which the text begins. The Meta component
 of an expression gives the position of the text of the expression in the source text and
 other information, e.g., the index of the associated token in the list of tokens from
