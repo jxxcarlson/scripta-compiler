@@ -13,7 +13,7 @@ import Scripta.Language
 
 
 -- EXAMPLE:
--- elm-cli run src/Benchmark.elm expr 100 bench/harmonic.tex
+-- elm-cli run src/Benchmark.elm init 100 bench/harmonic.tex
 
 
 program : Process -> IO ()
@@ -50,13 +50,13 @@ bench testName repetitions_ content =
         testFunction =
             case testName of
                 "pb" ->
-                    bench1a
+                    benchPrimitiveLaTeXBlock
 
-                "expr" ->
-                    bench2
+                "init" ->
+                    benchMicroLaTeXApiInit
 
                 "compile" ->
-                    bench3
+                    benchMicroLaTeXCompiler
 
                 _ ->
                     \a b -> ()
@@ -94,15 +94,15 @@ bench1 repetitions content =
     repeat repetitions input parse_
 
 
-bench1a repetitions content =
+benchPrimitiveLaTeXBlock repetitions content =
     repeat repetitions (String.lines content) parse_
 
 
-bench3 repetitions content =
+benchMicroLaTeXCompiler repetitions content =
     repeat repetitions content compile
 
 
-bench2 repetitions content =
+benchMicroLaTeXApiInit repetitions content =
     repeat repetitions content (Scripta.API.init Dict.empty Scripta.Language.MicroLaTeXLang)
 
 

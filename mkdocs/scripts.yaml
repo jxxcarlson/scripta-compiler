@@ -1,0 +1,7 @@
+scripts:
+
+  update-site:
+    - mkdocs build
+    - cp -r * site/ /Users/carlson/dev/jxxcarlson.github.io/docs-scripta-compiler/
+
+  view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/docs-scripta-compiler/

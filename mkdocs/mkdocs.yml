@@ -1,0 +1,9 @@
+site_name: Scripta Compiler
+site_url: https://example.com
+
+theme: readthedocs
+
+nav:
+  - Home: 'index.md'
+  - Overview: 'overview.md'
+  - Mkdocs: 'mkdocs.md'

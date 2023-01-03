@@ -59,51 +59,9 @@ displaySettings counter =
     }
 
 
-initialText =
-    Data.initialText
-
-
-initialText0 =
-    """
-\\begin{equation}
-a^2 + b^2 = c^2
-\\end{equation}
-
-
-\\begin{theorem}
-foo
-
-
-aaa
-
-$x^2$
-
-"""
-
-
-initialText2 =
-    """
-
-Pythagoras says: $a^2 + b^2 = c^2$
-
-| theorem (Whatever)
-There are infinitely many primes
-
-This \\strong{will} be on the test:
-
-$$
-\\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
-
-|| image width:fill caption: Yellow bird
-https://natureconservancy-h.assetsadobe.com/is/image/content/dam/tnc/nature/en/photos/AmericanGoldfinch_MattWilliams_4000x2200.jpg?crop=0%2C0%2C4000%2C2200&wid=4000&hei=2200&scl=1.0
-
-"""
-
-
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { sourceText = initialText
+    ( { sourceText = Data.initialText
       , count = 0
       , language = MicroLaTeXLang
       }
