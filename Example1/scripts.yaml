@@ -1,3 +1,10 @@
 scripts:
 
   compile: elm make src/Main.elm --output=assets/main.js --optimize
+
+  update-site: cp assets/* /Users/carlson/dev/jxxcarlson.github.io/scripta-compiler-example1/
+
+  view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/scripta-compiler-example1
+
+  view-local:  /usr/bin/open -a /Applications/Firefox.app ./assets/index.html
+  
