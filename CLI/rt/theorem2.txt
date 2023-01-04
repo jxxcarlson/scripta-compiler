@@ -1,0 +1,7 @@
+\begin{theorem}
+There are infinitely many primes
+
+\begin{equation}
+p \equiv 1 \text{ mod } 4
+\end{equation}
+\end{theorem}

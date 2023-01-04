@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.RoundTrip exposing (test)
+module MicroLaTeX.Parser.Pretty exposing (print)
 
 import Compiler.DifferentialParser
 import Dict
@@ -16,18 +16,18 @@ pseudoBlockNames =
     MicroLaTeX.Parser.TransformLaTeX.pseudoBlockNames ++ MicroLaTeX.Parser.Transform.pseudoBlockNamesWithContent
 
 
-test : String -> String
-test input =
+print : String -> String
+print input =
     input
         |> Compiler.DifferentialParser.init Dict.empty Scripta.Language.MicroLaTeXLang
         |> .parsed
         |> Compiler.DifferentialParser.forestFromBlocks
-        |> print
+        |> printForest
 
 
-print : Parser.Forest.Forest Parser.Block.ExpressionBlock -> String
-print forest =
-    List.map printTree forest |> String.join "\n\n"
+printForest : Parser.Forest.Forest Parser.Block.ExpressionBlock -> String
+printForest forest =
+    List.map printTree forest |> String.join ""
 
 
 printTree : Tree Parser.Block.ExpressionBlock -> String
@@ -69,10 +69,10 @@ unravel tree =
     else
         case Parser.Block.getBlockType root of
             Parser.Block.OrdinaryBlock _ ->
-                (printOrdinaryBlock name rootContent :: List.map unravel children) ++ [ endTag name ] |> String.join "\n\n"
+                (printOrdinaryBlock name rootContent :: List.map unravel children) ++ [ endTag name ] |> String.join "\n"
 
             _ ->
-                (printBlock root :: List.map unravel children) |> String.join "\n\n"
+                (printBlock root :: List.map unravel children) |> String.join "\n"
 
 
 printOrdinaryBlock : String -> List Parser.Expr.Expr -> String
@@ -82,9 +82,9 @@ printOrdinaryBlock name exprs =
 
 printBlock : Parser.Block.ExpressionBlock -> String
 printBlock block =
-    case Parser.Block.getBlockType block of
+    (case Parser.Block.getBlockType block of
         Parser.Block.Paragraph ->
-            block |> Parser.Block.getContent |> printExprs
+            (block |> Parser.Block.getContent |> printExprs) ++ "\n"
 
         Parser.Block.OrdinaryBlock args ->
             let
@@ -94,14 +94,16 @@ printBlock block =
                 content =
                     block |> Parser.Block.getContent
             in
-            if List.member name MicroLaTeX.Parser.TransformLaTeX.pseudoBlockNames then
+            (if List.member name MicroLaTeX.Parser.TransformLaTeX.pseudoBlockNames then
                 "\\" ++ name ++ " " ++ printExprs content
 
-            else if List.member name MicroLaTeX.Parser.Transform.pseudoBlockNamesWithContent then
+             else if List.member name MicroLaTeX.Parser.Transform.pseudoBlockNamesWithContent then
                 macro name content
 
-            else
+             else
                 [ beginTag name, printExprs content, endTag name ] |> String.join "\n"
+            )
+                ++ "\n"
 
         Parser.Block.VerbatimBlock args ->
             let
@@ -112,6 +114,8 @@ printBlock block =
                     block |> Parser.Block.getName |> Maybe.withDefault "(anon)"
             in
             [ beginTag name, content, endTag name ] |> String.join "\n"
+    )
+        ++ "\n"
 
 
 beginTag : String -> String

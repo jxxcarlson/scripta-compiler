@@ -1,6 +1,6 @@
 module RoundTrip exposing (..)
 
-import MicroLaTeX.Parser.RoundTrip
+import MicroLaTeX.Parser.Pretty
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
 import Posix.IO.Process as Proc
@@ -13,7 +13,10 @@ analyze input =
             String.replace "\n" "" str
 
         output =
-            MicroLaTeX.Parser.RoundTrip.test input
+            MicroLaTeX.Parser.Pretty.print input
+
+        output2 =
+            MicroLaTeX.Parser.Pretty.print output
 
         match =
             if input == output then
@@ -28,8 +31,15 @@ analyze input =
 
             else
                 "Inexact match:  NO"
+
+        idempotencyMatch =
+            if output == output2 then
+                "Idempotency match:  YES"
+
+            else
+                "Idempotency match:  NO"
     in
-    [ match, inexactMatch, "------", output ] |> String.join "\n"
+    [ input, "------", match, inexactMatch, idempotencyMatch, "------", output, "------", output2 ] |> String.join "\n"
 
 
 program : Process -> IO ()

@@ -1,0 +1,6 @@
+\begin{theorem}
+There are infinitely many primes
+hohoho
+\end{theorem}
+
+DEF

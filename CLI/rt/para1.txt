@@ -8,11 +8,12 @@ Turing sez: `a[i] = 0` for all $i$.
 
 \begin{theorem}
 There are infinitely many primes
-\end{theorem}
 
 \begin{equation}
 p \equiv 1 \text{ mod } 4
 \end{equation}
+
+\end{theorem}
 
 Its a nice day!
 

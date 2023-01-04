@@ -6,4 +6,5 @@ theme: readthedocs
 nav:
   - Home: 'index.md'
   - Overview: 'overview.md'
+  - CLI: 'cli.md'
   - Mkdocs: 'mkdocs.md'
