@@ -2,29 +2,12 @@
 
 (( Under construction! ))
 
-## Functional loops are used throughout the compiler:
 
-```elm
--- Parser.Helpers
-type Step state a
-    = Loop state
-    | Done a
-
-
-loop : state -> (state -> Step state a) -> a
-loop s f =
-    case f s of
-        Loop s_ ->
-            loop s_ f
-
-        Done b ->
-            b
-```
 
 ## Parser
 
-The parser is implemented as a functional loop the state
-is defined by
+The parser is implemented as a [functional loop](/docs-scripta-compiler/common-code#functional-loops/) with state
+defined by
 
 ```elm
 -- L0.Parser.Expression
@@ -40,8 +23,8 @@ type alias State =
     }
 ```
 
-and the driving function `State -> Step State State`
-is defined by
+and driving function `State -> Step State State`
+defined by
 
 ```elm
 -- L0.Parser.Expression
