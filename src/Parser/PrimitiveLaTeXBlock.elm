@@ -1,4 +1,4 @@
-module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, print, printErr)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parseLoop, print, printErr)
 
 {-|
 
@@ -79,11 +79,11 @@ type alias ParserOutput =
 
 parse : List String -> List PrimitiveLaTeXBlock
 parse lines =
-    lines |> parse_ |> .blocks
+    lines |> parseLoop |> .blocks
 
 
-parse_ : List String -> ParserOutput
-parse_ lines =
+parseLoop : List String -> ParserOutput
+parseLoop lines =
     loop (init lines) nextStep |> finalize
 
 
@@ -136,6 +136,9 @@ nextStep state_ =
             let
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
+
+                --_ =
+                --    Debug.log "LINE" ( state.lineNumber, currentLine.content, ( ClassifyBlock.classify currentLine.content state.verbatimClassifier, state.verbatimClassifier, state.level ) )
             in
             case ClassifyBlock.classify currentLine.content state.verbatimClassifier of
                 CBeginBlock label ->
@@ -329,10 +332,6 @@ fillBlockOnStack state =
 
             else
                 state.stack
-
-
-
---  : Classification -> Line -> State -> Step State a
 
 
 endBlock : Classification -> Line -> State -> Step State State
