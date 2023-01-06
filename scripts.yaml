@@ -17,7 +17,7 @@ scripts:
 
   review-x: npx elm-review  --rules NoUnused.CustomTypeConstructors
 
-  cloc: cloc --by-file compiler/
+  cloc: cloc --by-file src/
 
   clean-macros:
     cat macros.txt | sed 's/^, (//g' | sed 's/,.*//g' | sed 's/"//g'
