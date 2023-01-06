@@ -3,11 +3,16 @@ scripts:
   # Example: vr lxparse lxtest/a1.txt
   # Test the MicroLaTeX block parser
 
+  lxerr: elm-cli run --debug src/LXPBErr.elm
+
   l0parse: elm-cli run --debug src/L0PB.elm
   # Example: vr l0parse l0test/datatable.txt
   # Test the L0 block parser
 
   rt: elm-cli run src/RoundTrip.elm
+  # Example: vr rt rt/para.txt
+
+  rs: elm-cli run src/RoundTrip2.elm
   # Example: vr rt rt/para.txt
 
   bench: time elm-cli run src/Benchmark.elm
