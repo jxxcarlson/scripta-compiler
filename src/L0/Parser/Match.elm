@@ -1,4 +1,4 @@
-module L0.Parser.Match exposing (deleteAt, getSegment, hasReducibleArgs, isReducible, match, splitAt)
+module L0.Parser.Match exposing (getSegment, isReducible, match, splitAt)
 
 import L0.Parser.Symbol exposing (Symbol(..), value)
 import List.Extra
