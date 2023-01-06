@@ -10,5 +10,6 @@ nav:
   - Introduction: 'introduction.md'
   - Overview: 'overview.md'
   - Primitive Blocks: 'primitiveBlocks.md'
+  - Rendering: 'render.md'
   - CLI: 'cli.md'
   - Mkdocs: 'mkdocs.md'

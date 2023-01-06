@@ -156,8 +156,4 @@ In the case of
 MicroLaTeX, there are two additional fields,
 `level: Int` and `status: Status`.
 
-```elm
-render : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-```
-of module `Block.Render`.
 
