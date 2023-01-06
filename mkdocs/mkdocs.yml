@@ -1,10 +1,14 @@
-site_name: Scripta Compiler
-site_url: https://example.com
+site_name: Scripta Compiler Docs
+site_url: https://jxxcarlson.github.io/docs-scripta-compiler
+docs_dir: 'docs-scripta-compiler'
 
 theme: readthedocs
 
+
 nav:
   - Home: 'index.md'
+  - Introduction: 'introduction.md'
   - Overview: 'overview.md'
+  - Primitive Blocks: 'primitiveBlocks.md'
   - CLI: 'cli.md'
   - Mkdocs: 'mkdocs.md'
