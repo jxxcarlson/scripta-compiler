@@ -1,4 +1,4 @@
-module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, print)
+module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parse_, print, printErr)
 
 {-|
 
@@ -1003,6 +1003,11 @@ transfer state =
 
 
 --- PRINT
+
+
+printErr : PrimitiveLaTeXBlock -> String
+printErr block =
+    showError block.error
 
 
 {-| Used for debugging with CLI.LXPB
