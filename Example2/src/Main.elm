@@ -1,11 +1,5 @@
 module Main exposing (main)
 
-{- This is a starter app which presents a text label, text field, and a button.
-   What you enter in the text field is echoed in the label.  When you press the
-   button, the text in the label is revers
-   This version uses `mdgriffith/elm-ui` for the view functions.
--}
-
 import Browser
 import Browser.Dom
 import Button
@@ -16,7 +10,6 @@ import Element.Background as Background
 import Element.Events
 import Element.Font as Font
 import Element.Input as Input
-import Experimental
 import File.Download
 import Html exposing (Html)
 import Html.Attributes
@@ -97,9 +90,9 @@ settings counter =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { input = Experimental.text
+    ( { input = Text.microLaTeXDemo
       , count = 0
-      , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Experimental.text
+      , editRecord = Scripta.API.init Dict.empty MicroLaTeXLang Text.microLaTeXDemo
       , language = MicroLaTeXLang
       , documentType = Example
       , currentTime = Time.millisToPosix 0
@@ -311,6 +304,8 @@ view : Model -> Html Msg
 view model =
     layoutWith { options = [ focusStyle noFocus ] }
         [ bgGray 0.2 ]
+        --(mainColumn model)
+        -- (Element.el [ Font.color (Element.rgb 1 1 1) ] (Element.text "Howdy!"))
         (mainColumn model)
 
 
@@ -367,6 +362,8 @@ outputDisplay_ model =
         , scrollbarY
         , htmlId "scripta-output"
         ]
+        -- (Scripta.API.render (settings model.count) model.editRecord |> List.map (Element.map Render))
+        -- [ Element.el [ Font.color (Element.rgb 1 1 1) ] (Element.text "Howdy!") ]
         (Scripta.API.render (settings model.count) model.editRecord |> List.map (Element.map Render))
 
 
@@ -467,11 +464,11 @@ testFileButton documentType =
                     darkRed
     in
     Button.template
-        { tooltipText = "Load Test file"
+        { tooltipText = "Quantum mechanics example"
         , tooltipPlacement = above
         , attributes = [ Font.color white, Background.color bgColor, width (px buttonWidth) ]
         , msg = SetDocument
-        , label = "Test Doc"
+        , label = "Example"
         }
 
 

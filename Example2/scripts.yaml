@@ -4,4 +4,4 @@ scripts:
 
   watch: npx elm-watch hot
 
-  serve: npx serve ./assets -l 4000
+  serve: npx serve ./assets -l 4002

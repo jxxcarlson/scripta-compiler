@@ -118,7 +118,7 @@ microLaTeXDemo =
 
 \\section{Images}
 
-\\image{https://see.news/wp-content/uploads/2020/12/UK_wildbirds-01-robin.jpg width:400}
+\\image{\\image{https://www.nps.gov/cuva/learn/nature/images/20060507-Yellow-Warbler5-c-Jim-Schmidt.JPG?maxwidth=1200&autorotate=false width:400}}
 
 \\section{Math}
 
@@ -284,7 +284,7 @@ Here is the source text:
 """
 
 
-testFile1 =
+testFile =
     """
 
 \\title{Wave Packets and the Dispersion Relation}
@@ -610,12 +610,4 @@ $$
 2: $\\cal{\\red{A}}$
 3: $\\foo{x}$,
 4: $\\foo{\\cal{C}}$
-"""
-
-
-testFile =
-    """
-
-\\section{Pythagoras: $x^{2}$}
-
 """
