@@ -458,6 +458,8 @@ finishBlock lastLine state =
             }
 
 
+{-| Be sure to decrement level (both branches of if) when the end of a block is reached.
+-}
 endBlockOnMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOnMatch labelHead classifier line state =
     case List.Extra.uncons state.stack of
@@ -467,7 +469,7 @@ endBlockOnMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
+                { state | level = state.level - 1, blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
