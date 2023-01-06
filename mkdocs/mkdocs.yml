@@ -11,5 +11,6 @@ nav:
   - Overview: 'overview.md'
   - Primitive Blocks: 'primitiveBlocks.md'
   - Rendering: 'render.md'
+  - L0 Parser: 'l0-parser.md'
   - CLI: 'cli.md'
   - Mkdocs: 'mkdocs.md'

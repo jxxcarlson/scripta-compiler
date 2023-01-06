@@ -45,29 +45,64 @@ text.
 
 ![Flowchart](image/scripta-compiler-flowchart.jpg)
 
-## Error Recovery
+## Parsing the internal language
 
-Error recovery occurs in two places
+Let us concentrate for the moment on step (2) above,
+parsing the content of the primitive blocks.
+We will do this first in the case of "pure" L0,
+a simplified version of L0 described below. 
+All the ideas needed in the general case, including
+for microLaTeX and XMarkdown are present in this 
+simple case. 
 
-1. Formation of 
-a list of primitive blocks from the source text,
-which is just a long string.
+The parser first tokenizes the input, then consumes
+the tokens one at a time.  To process them, it maintains
+two data structures: a list of committed expressions
+and a stack of "unreduced" tokens.  At each step the
+parser may either commit the token or push it onto the 
+stack.  The stack contents may or may not be reducible
+to an expression (see XX below for examples).  
+If the stack is reducible, the resulting expression 
+is pushed onto the committed list. If not, the process
+continues.  
 
+If the stack is empty after
+all the tokens have been consumed, the parse is
+successful.  If not, there is an error, and the 
+recovery procedure is called.  In rough outline, the 
+procedure is as follows: (a) remove the token at the bottom
+of the stack and use it to construct an expression
+indicating the presence and nature of the error; 
+(b) push this expression onto the committed list;
+(c) restart the parser with the truncated stack 
+as input.
 
-2. Parsing the content of primitive blocks
+In short, error recovery works by pushing an
+error expression onto the committed list based
+the state of the stack, then skipping a token
+and restarting the parser.  This procedure is
+guaranteed to terminate and can also handle
+multiple errors. Whiile simple, it has proved
+effective in the case of the three markup
+languages considered here.
 
-### Language definition
+The strategy just described is essentially that of
+a classical shift-reduce parser. The shift
+operation is the act of taking a token from
+the input and putting it either on the stack
+or (as an expression), the committed list.
+The reduce operation occurs when the stack represents
+an expression: that expression is pushed onto the 
+committed list and the stack is cleared.
+ 
+### Pure L0
 
-The strategy is basically the same in both cases.  Let
-us describe (2) for the case of pure L0.  
-
-For this we need a more precise definition of the
-internal language to be parsed.  An element
-of pure L0 text is
+An element
+of pure L0 text is one of the following:
 
 - a span of pure text, e.g. "roses are red"
 
-- a function element, e.g. "[italic roses are red]",
+- a function element, e.g. `[italic roses are red]`,
 consisting of a function name (italic here) and a body,
 which is a sequence consisting of pure text spans and 
 function elements.
@@ -75,11 +110,15 @@ function elements.
 - a sequence of the above.
 
 Function elements can be nested, as in 
-"[italic roses [bold are] red]".  In this 
+`[italic roses [bold are] red`".  In this 
 example, "roses" and "red" are italicized,
-while "are" bold italic.  Text like
-"He said that [italic roses [bold are] red]"
-are also legitimate L0 text.
+while "are" bold italic.  Here is a slightly
+more complicated example:
+
+```text
+He said that [italic roses [bold are] red]. Cool!
+```
+
 
 ### Tokenization
 
@@ -120,4 +159,40 @@ S "italic" { begin = 1, end = 6, index = 1 }
 ```
 
 The index refers to the index of the token in
-the token list.  This will be used in error recovery.
+the token list.  It will be used in error recovery.
+
+### Reduction of a list of tokens
+
+Recall that expressions are of type
+
+```elm
+type Expr
+    = Fun String (List Expr) Meta
+    | Text String Meta
+    | Verbatim String String Meta
+```
+
+The token list
+
+```
+LB, S "italic", S " roses", RB
+```
+represents an expression, namely
+
+```elm
+Fun "italic" [S " roses"]
+```
+
+where again we ignore the metadata.  On the other
+hand, the token list 
+
+```elm
+LB, S "italic", S " roses"
+```
+is not reducible, since the opening `LB` is unmatched. 
+See the [detailed documentation of the L0 parser](/docs-scripta-compiler/l0-parser#reducibility/)
+to see how the function `isReducible : List Symbol -> Bool` works.
+
+
+
+
