@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.Pretty exposing (print)
+module MicroLaTeX.Parser.Pretty exposing (idempotencyTest, print, roundTripTest, weakRoundTripTest)
 
 import Compiler.DifferentialParser
 import Dict
@@ -10,6 +10,25 @@ import Parser.Forest
 import Parser.Settings
 import Scripta.Language
 import Tree exposing (Tree)
+
+
+roundTripTest : String -> Bool
+roundTripTest input =
+    String.trim input == print input
+
+
+weakRoundTripTest : String -> Bool
+weakRoundTripTest input =
+    compress (String.trim input) == compress (print input)
+
+
+idempotencyTest : String -> Bool
+idempotencyTest input =
+    String.trim input == (input |> print |> print)
+
+
+compress str =
+    String.replace "\n" "" str
 
 
 pseudoBlockNames =

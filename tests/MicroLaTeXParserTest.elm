@@ -1,6 +1,7 @@
-module MicroLaTeXParserTest exposing (happy, happy2)
+module MicroLaTeXParserTest exposing (happy, happy2, primitiveBlock)
 
 import Expect exposing (equal)
+import MicroLaTeX.Parser.Pretty
 import MicroLaTeX.Parser.Token exposing (Token(..))
 import MicroLaTeX.Test
 import Test exposing (Test, describe, test)
@@ -53,6 +54,42 @@ happy2 =
         , roundTrip2 "\\foo{bar}{\\aargh{baz}}"
         , roundTrip2 "\\foo{bar}{baz}"
         ]
+
+
+primitiveBlock : Test
+primitiveBlock =
+    Test.only <|
+        describe "parse text to primitive blocks"
+            [ primitiveBlockTest "nested environments" text1
+            ]
+
+
+primitiveBlockTest : String -> String -> Test
+primitiveBlockTest label input =
+    test (label ++ ":2") <|
+        \_ ->
+            equal
+                ( MicroLaTeX.Parser.Pretty.roundTripTest input, MicroLaTeX.Parser.Pretty.idempotencyTest input )
+                ( True, True )
+
+
+text1 =
+    """
+\\begin{theorem}
+Yay!
+
+\\begin{equation}
+x^2
+\\end{equation}
+
+\\end{theorem}
+
+ABC
+
+XYZ
+
+PQR
+"""
 
 
 

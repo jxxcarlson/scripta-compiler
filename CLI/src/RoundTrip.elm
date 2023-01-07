@@ -19,21 +19,21 @@ analyze input =
             MicroLaTeX.Parser.Pretty.print output
 
         match =
-            if String.trim input == String.trim output then
+            if MicroLaTeX.Parser.Pretty.roundTripTest input then
                 "Exact match:    YES"
 
             else
                 "Exact match:    NO"
 
         inexactMatch =
-            if compress input == compress output then
+            if MicroLaTeX.Parser.Pretty.weakRoundTripTest input then
                 "Inexact match:  YES"
 
             else
                 "Inexact match:  NO"
 
         idempotencyMatch =
-            if output == output2 then
+            if MicroLaTeX.Parser.Pretty.idempotencyTest input then
                 "Idempotency match:  YES"
 
             else
