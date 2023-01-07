@@ -3,6 +3,7 @@ module TransformTest exposing (..)
 import Expect exposing (equal)
 import Markup
 import MicroLaTeX.Parser.Transform exposing (transform)
+import Parser.Line
 import Scripta.Language exposing (..)
 import Test exposing (Test, describe, test)
 
@@ -20,14 +21,14 @@ suite =
     describe "MicroLaTeX.Expression.Transform"
         [ test_ "transform, args"
             (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .args)
-            (toPrimitiveBlocks "\n\n| section 1\n Intro\n\n" |> List.map .args)
+            [ [ "1" ] ]
         , test_ "transform, name"
             (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .name)
-            (toPrimitiveBlocks "\n\n| section 1\n Intro\n\n" |> List.map .name)
+            [ Just "section" ]
         , test_ "transform, content"
             (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .content)
-            (toPrimitiveBlocks "\n\n| section 1\n Intro\n\n" |> List.map .content)
+            [ [ "Intro" ] ]
         , test_ "transform, blockType"
             (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .blockType)
-            (toPrimitiveBlocks "\n\n| section 1\n Intro\n\n" |> List.map .blockType)
+            [ Parser.Line.PBOrdinary ]
         ]

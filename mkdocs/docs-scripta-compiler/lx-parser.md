@@ -110,3 +110,15 @@ parse lines =
 ### The Parser
 
 This parser operates a [functional loop](/docs-scripta-compiler/common-code#functional-loops/)
+
+## NOTES
+
+```text
+-- MicroLaTeX.Parser.Transform
+-- tests: TransformLaTeXTest
+The purpose of this function is to transform a primitive block
+like the one coming from a single-line paragraph with text
+"\section{Intro}" to an ordinary (blockType PBOrdinaryBlock)
+block with name "section", args ["1"], and content ["Introduction"].
+This is to coerce parsed MiniLaTeX source to our standard model.
+```
