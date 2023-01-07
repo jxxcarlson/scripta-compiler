@@ -1,6 +1,6 @@
 module LXPBErr exposing (program)
 
-import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
+import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parseLoop)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
 import Posix.IO.Process as Proc
@@ -18,7 +18,7 @@ program process =
                 \content ->
                     let
                         parsed =
-                            content |> String.lines |> parse_
+                            content |> String.lines |> parseLoop
 
                         blockString =
                             List.map Parser.PrimitiveLaTeXBlock.printErr parsed.blocks |> String.join "\n\n"

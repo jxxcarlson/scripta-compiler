@@ -15,7 +15,7 @@ testBlockError : String -> String -> String -> Test
 testBlockError label input expectedOutput =
     let
         parsed =
-            input |> String.lines |> Parser.PrimitiveLaTeXBlock.parse_
+            input |> String.lines |> Parser.PrimitiveLaTeXBlock.parseLoop
 
         output =
             List.map Parser.PrimitiveLaTeXBlock.printErr parsed.blocks
@@ -38,11 +38,10 @@ macroSuite =
 
 blockSuite : Test
 blockSuite =
-    Test.only <|
-        describe "MicroLaTeX Block Error Tests"
-            [ testBlockError "missmatched tags" missmatchedTags "Missmatched tags: begin(foo) ≠ end(bar)"
-            , testBlockError "missing end tag" missingEndTag "missing or mismatched end tag (foo)"
-            ]
+    describe "MicroLaTeX Block Error Tests"
+        [ testBlockError "missmatched tags" missmatchedTags "Missmatched tags: begin(foo) ≠ end(bar)"
+        , testBlockError "missing end tag" missingEndTag "missing or mismatched end tag (foo)"
+        ]
 
 
 missingEndTag =

@@ -4,7 +4,7 @@ import Compiler.Differ
 import Compiler.DifferentialParser
 import Dict
 import Element exposing (Element)
-import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
+import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parseLoop)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
 import Posix.IO.Process as Proc
@@ -111,10 +111,10 @@ diff repetitions content1 content2 =
             String.lines content2
 
         pb1 =
-            parse_ input1 |> .blocks
+            parseLoop input1 |> .blocks
 
         pb2 =
-            parse_ input2 |> .blocks
+            parseLoop input2 |> .blocks
     in
     repeat2 repetitions pb1 pb2 Compiler.Differ.diff
 
