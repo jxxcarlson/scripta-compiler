@@ -643,7 +643,7 @@ elaborate line pb =
             namedArgs =
                 getKVData args_
 
-            args =
+            simpleArgs =
                 getArgs args_
 
             properties =
@@ -656,11 +656,15 @@ elaborate line pb =
                 else
                     pb.content
         in
-        { pb | content = content, name = name, args = args, properties = properties }
+        { pb | content = content, name = name, args = simpleArgs, properties = properties }
 
 
-{-| return all the elements in the list 'strs' up to the first element contaiing ':'
-This functio is used to return the positional arguments but not the named ones.
+{-| return all the comma-separated elements of the given Maybe String that contain
+the character ':' and hence are potentially elements defining key:value pairs.
+
+    > getKVData (Just "foo:bar, a:b:c, hoho")
+    ["foo:bar","a:b:c"]
+
 -}
 getKVData : Maybe String -> List String
 getKVData mstr =
@@ -676,6 +680,13 @@ getKVData mstr =
             List.filter (\t -> String.contains ":" t) strs
 
 
+{-| return all the comma-separated elements of the given Maybe String that do not contain
+the character ':' and hence are not elements defining key:value pairs.
+
+        > getArgs (Just "foo:bar, a:b:c, hoho")
+        ["hoho"]
+
+-}
 getArgs : Maybe String -> List String
 getArgs mstr =
     case mstr of

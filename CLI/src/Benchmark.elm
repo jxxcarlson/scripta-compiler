@@ -2,7 +2,7 @@ module Benchmark exposing (program)
 
 import Dict
 import Element exposing (Element)
-import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse_)
+import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parseLoop)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
 import Posix.IO.Process as Proc
@@ -91,11 +91,11 @@ bench1 repetitions content =
         input =
             String.lines content
     in
-    repeat repetitions input parse_
+    repeat repetitions input parseLoop
 
 
 benchPrimitiveLaTeXBlock repetitions content =
-    repeat repetitions (String.lines content) parse_
+    repeat repetitions (String.lines content) parseLoop
 
 
 benchMicroLaTeXCompiler repetitions content =
