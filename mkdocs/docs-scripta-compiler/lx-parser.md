@@ -1,5 +1,10 @@
 # MicroLaTeX Parser
 
+The MicroLaTeX parser first transforms source
+into a list of primitive LaTeX blocks, then 
+by mapping the parser for the internal
+language over this list, into a list of expression blocks.
+
 
 ## Primitive Blocks 
 
@@ -109,7 +114,37 @@ parse lines =
 
 ### The Parser
 
-This parser operates a [functional loop](/docs-scripta-compiler/common-code#functional-loops/)
+The parser is defined in 
+module `Parser.PrimitiveLaTeXBlock` 
+by functions
+
+
+```text
+parse : List String -> List PrimitiveLaTeXBlock
+parse lines =
+    lines |> parseLoop |> .blocks
+```
+
+and
+
+```text
+parseLoop : List String -> ParserOutput
+parseLoop lines =
+    loop (init lines) nextStep |> finalize
+```
+
+where
+
+```text
+type alias ParserOutput =
+    { blocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
+    , holdingStack : List PrimitiveLaTeXBlock }
+```
+
+The parser operates a 
+[functional loop](/docs-scripta-compiler/common-code#functional-loops/).
+
 
 
 ## Transform
@@ -170,9 +205,9 @@ and benchmarking.  All use Albert Dahlin's
 package and can be run using velociraptor (command: `vr`).
 Some examples:
 
--  vr lxparse lxtest/a1.txt
+- vr lxparse lxtest/a1.txt
 
-- rt: elm-cli run src/RoundTrip.elm
+- vr rt foo.txt
 
 - vr bench init 100 bench/harmonic.tex
 

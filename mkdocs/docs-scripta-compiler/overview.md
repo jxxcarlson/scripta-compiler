@@ -166,6 +166,7 @@ the token list.  It will be used in error recovery.
 Recall that expressions are of type
 
 ```
+-- Parser.Expr
 type Expr
     = Fun String (List Expr) Meta
     | Text String Meta
