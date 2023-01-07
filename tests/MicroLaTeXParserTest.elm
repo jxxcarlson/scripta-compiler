@@ -59,7 +59,8 @@ happy2 =
 primitiveBlock : Test
 primitiveBlock =
     describe "parse text to primitive blocks"
-        [ primitiveBlockTest "nested environments" text1
+        [ primitiveBlockTest "environments" text0
+        , primitiveBlockTest "nested environments" text1
         ]
 
 
@@ -70,6 +71,19 @@ primitiveBlockTest label input =
             equal
                 ( MicroLaTeX.Parser.Pretty.roundTripTest input, MicroLaTeX.Parser.Pretty.idempotencyTest input )
                 ( True, True )
+
+
+text0 =
+    """
+\\begin{A}
+abc OK
+def
+\\end{A}
+
+\\begin{B}
+xyz
+\\end{B}
+"""
 
 
 text1 =

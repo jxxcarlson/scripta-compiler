@@ -27,5 +27,5 @@ happy =
 unhappy : Test
 unhappy =
     describe "L0 Expression, round trip-tests, unhappy path"
-        [ checkErrorHandling "[foo" "[errorHighlight[foo][errorHighlight]?]"
+        [ checkErrorHandling "[foo" "[errorHighlight[foo][errorHighlight ]?]" -- XX do we want that space after 'errorHighLight'?
         ]
