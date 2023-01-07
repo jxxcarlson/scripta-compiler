@@ -105,15 +105,46 @@ type alias EditRecord chunk parsedChunk accumulator =
 
 ## Accumulator
 
-The `Accumulator` type is used to collect, build up, 
+The `Accumulator` type, defined in module `Compiler.Acc`,
+is used to collect, build up, 
 and apply auxiliary information about the text.
-For example, the `headingIndex`, stores the current
+For example, the `headingIndex` stores the current
 section number, where "current" refers to the 
 the current section of the document as the 
 accumulator-building function walks through
 the current parse forest.  As it does, it simultaneously
-updates the accumulator using function 
-[updateAccumulator](/docs-scripta-compiler/dataStructures/#update-accumulator/)
+(1) updates the accumulator and (2) applies new "patches" 
+of the accumulator to the parse forest.  
+
+This process is managed by
+function `transformAccumulateTree` which is called every time 
+the parser pipeline runs.  For this reason one does not have
+to recompile to have up-to-date cross-references, etc., as
+in standard LaTeX.
+
+
+```text
+transformAccumulateTree : Tree ExpressionBlock -> Accumulator -> ( Accumulator, Tree ExpressionBlock )
+transformAccumulateTree tree acc =
+    Tree.mapAccumulate transformAccumulateBlock acc tree
+```
+
+where the function `transformAccumulateBlock` carries out the 
+per-block step:
+
+```text
+transformAccumulateBlock : Accumulator -> ExpressionBlock -> ( Accumulator, ExpressionBlock )
+```
+
+This function in turn calls upon functions `updateAccumulator` for (1) and 
+function `transformBlock` for (2):
+
+```text
+updateAccumulator : ExpressionBlock -> Accumulator -> Accumulator
+```
+
+```text
+transformBlock : Accumulator -> ExpressionBlock -> ExpressionBlock
 ```
 
 
@@ -141,10 +172,3 @@ type alias Accumulator =
     }
 ```
 
-### updateAccumulator
-
-```text
--- Compiler.Acc
-updateAccumulator : ExpressionBlock -> Accumulator -> Accumulator
-updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag, id }) accumulator
-```
