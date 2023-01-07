@@ -14,5 +14,4 @@ nav:
   - Rendering: 'render.md'
   - L0 Parser: 'l0-parser.md'
   - microLaTeX Parser: 'lx-parser.md'
-  - CLI: 'cli.md'
   - Mkdocs: 'mkdocs.md'

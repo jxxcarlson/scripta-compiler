@@ -59,13 +59,13 @@ happy2 =
 primitiveBlock : Test
 primitiveBlock =
     describe "parse text to primitive blocks"
-        [ primitiveBlockTest "environments" text0
-        , primitiveBlockTest "nested environments" text1
+        [ primitiveBlockRoundTripTest "environments" text0
+        , primitiveBlockRoundTripTest "nested environments" text1
         ]
 
 
-primitiveBlockTest : String -> String -> Test
-primitiveBlockTest label input =
+primitiveBlockRoundTripTest : String -> String -> Test
+primitiveBlockRoundTripTest label input =
     test (label ++ ":2") <|
         \_ ->
             equal

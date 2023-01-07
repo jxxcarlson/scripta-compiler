@@ -111,14 +111,69 @@ parse lines =
 
 This parser operates a [functional loop](/docs-scripta-compiler/common-code#functional-loops/)
 
-## NOTES
 
-```text
--- MicroLaTeX.Parser.Transform
--- tests: TransformLaTeXTest
+## Transform
+
+
+**Module MicroLaTeX.Parser.Transform**
+
 The purpose of this function is to transform a primitive block
 like the one coming from a single-line paragraph with text
 "\section{Intro}" to an ordinary (blockType PBOrdinaryBlock)
 block with name "section", args ["1"], and content ["Introduction"].
 This is to coerce parsed MiniLaTeX source to our standard model.
+
+
+## Tests
+
+Test parsing of text to a list of primitive blocks:
+
+```text
+-- MicroLaTeXParserTest
+primitiveBlockRoundTripTest "nested environments" text1
 ```
+
+Test the internal language:
+
+```
+-- MicroLaTeXParserTest
+roundTrip1 "\\blue{\\italic{abc \\strong{def}}}"
+```
+
+Test coercion of MicroLaTeX macros to blocks:
+
+```text
+-- TransformLaTeXTest
+test_ "tags" (toL0 [ "\\tags{AAA}" ]) [ "| tags AAA " ]
+```
+
+```text
+-- TransformTest
+test_ "transform, args"
+    (toPrimitiveBlocks "\n\n\\section{Intro}\n\n" |> List.map transform |> List.map .args)
+    [ [ "1" ] ]
+```
+
+where
+
+```text
+toPrimitiveBlocks = 
+  Markup.toPrimitiveBlocks MicroLaTeXLang
+
+```
+## Command line tools
+
+
+The `./CLI` folder contains various CLI tools for testing
+and benchmarking.  All use Albert Dahlin's
+[elm/posix](https://package.elm-lang.org/packages/albertdahlin/elm-posix/latest/)
+package and can be run using velociraptor (command: `vr`).
+Some examples:
+
+-  vr lxparse lxtest/a1.txt
+
+- rt: elm-cli run src/RoundTrip.elm
+
+- vr bench init 100 bench/harmonic.tex
+
+
