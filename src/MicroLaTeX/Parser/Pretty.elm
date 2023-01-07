@@ -23,11 +23,12 @@ print input =
         |> .parsed
         |> Compiler.DifferentialParser.forestFromBlocks
         |> printForest
+        |> String.trim
 
 
 printForest : Parser.Forest.Forest Parser.Block.ExpressionBlock -> String
 printForest forest =
-    List.map printTree forest |> String.join ""
+    List.map printTree forest |> String.join "" |> String.trim
 
 
 printTree : Tree Parser.Block.ExpressionBlock -> String
@@ -69,10 +70,13 @@ unravel tree =
     else
         case Parser.Block.getBlockType root of
             Parser.Block.OrdinaryBlock _ ->
-                (printOrdinaryBlock name rootContent :: List.map unravel children) ++ [ endTag name ] |> String.join "\n"
+                (printOrdinaryBlock name rootContent :: List.map unravel children)
+                    ++ [ endTag name ]
+                    |> String.join "\n"
+                    |> appendDoubleNewline
 
             _ ->
-                (printBlock root :: List.map unravel children) |> String.join "\n"
+                (printBlock root :: List.map unravel children) |> String.join "\n" |> appendDoubleNewline
 
 
 printOrdinaryBlock : String -> List Parser.Expr.Expr -> String
@@ -167,3 +171,13 @@ printExpr expr =
 
                 _ ->
                     [ name, body ] |> String.join " "
+
+
+appendNewline : String -> String
+appendNewline str =
+    str ++ "\n"
+
+
+appendDoubleNewline : String -> String
+appendDoubleNewline str =
+    str ++ "\n\n"

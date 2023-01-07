@@ -19,7 +19,7 @@ analyze input =
             MicroLaTeX.Parser.Pretty.print output
 
         match =
-            if input == output then
+            if String.trim input == String.trim output then
                 "Exact match:    YES"
 
             else
