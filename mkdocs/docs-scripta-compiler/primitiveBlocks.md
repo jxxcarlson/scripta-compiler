@@ -15,7 +15,7 @@ is brought into view and highlighted.
 
 
 
-```elm
+```
 type ExpressionBlock
     = ExpressionBlock
         { name : Maybe String
@@ -38,7 +38,7 @@ type ExpressionBlock
 ## Edit records
 
 
-```elm
+```
 type alias EditRecord chunk parsedChunk accumulator =
     { chunks : List chunk
     , parsed : List parsedChunk

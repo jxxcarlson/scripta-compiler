@@ -11,7 +11,7 @@ or a value of type `Loop state`.   In the first case
 the loop terminates with the indicated value.  In the
 second case it runs again with the new state value.˜
 
-```elm
+```
 -- Parser.Helpers
 type Step state a
     = Loop state

@@ -129,7 +129,7 @@ records the location of the part of the source text
 corresponding to the token.  `S` stands for `String`
 and `W` stands for white space.
 
-```elm
+```
 type Token
     = LB Meta
     | RB Meta
@@ -165,7 +165,7 @@ the token list.  It will be used in error recovery.
 
 Recall that expressions are of type
 
-```elm
+```
 type Expr
     = Fun String (List Expr) Meta
     | Text String Meta
@@ -179,14 +179,14 @@ LB, S "italic", S " roses", RB
 ```
 represents an expression, namely
 
-```elm
+```
 Fun "italic" [S " roses"]
 ```
 
 where again we ignore the metadata.  On the other
 hand, the token list 
 
-```elm
+```
 LB, S "italic", S " roses"
 ```
 is not reducible, since the opening `LB` is unmatched. 

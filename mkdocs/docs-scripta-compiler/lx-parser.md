@@ -8,7 +8,7 @@ A primitve LaTeX block is a 13-field record as displayed
 below.  
 
 
-```elm
+```
 -- Parser.PrimitiveLaTeXBlock
 type alias PrimitiveLaTeXBlock =
     { indent : Int
@@ -70,7 +70,7 @@ args. (XX: improve this discussion)
 
 6. The `blockType` field has type
     
-    ```elm
+    ```
     type PrimitiveBlockType
         = PBVerbatim
         | PBOrdinary
@@ -84,7 +84,7 @@ args. (XX: improve this discussion)
 
 7. The `status` field has type 
 
-    ```elm
+    ```
     type Status
         = Finished
         | Started
@@ -100,7 +100,7 @@ is needed to handle nested blocks.
 Lists of lines of text are parsed into lists 
 of primitive blocks by the function
 
-```elm
+```
 -- Parser.PrimitiveLaTeXBlock
 parse : List String -> List PrimitiveLaTeXBlock
 parse lines =

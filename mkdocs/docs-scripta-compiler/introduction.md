@@ -122,7 +122,7 @@ same for all tree.  Indeed, text in the internal
 language always parses to `Either String (List Expr)`,
 where
 
-```elm
+```
 type Expr
     = Fun String (List Expr) Meta
     | Text String Meta
@@ -137,7 +137,7 @@ type Expr
 In the case of L0 and XMarkdown, a primitive
 block is defined by
 
-```elm
+```
 type alias PrimitiveBlock =
     { indent : Int
     , lineNumber : Int

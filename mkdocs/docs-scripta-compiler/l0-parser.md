@@ -9,7 +9,7 @@
 The parser is implemented as a [functional loop](/docs-scripta-compiler/common-code#functional-loops/) with state
 defined by
 
-```elm
+```
 -- L0.Parser.Expression
 type alias State =
     { step : Int
@@ -26,7 +26,7 @@ type alias State =
 and driving function `State -> Step State State`
 defined by
 
-```elm
+```
 -- L0.Parser.Expression
 nextStep : State -> Step State State
 nextStep state =
@@ -53,7 +53,7 @@ below.  If it is, it reduces the stack using
 `reduceStack`, returning the updated state.  If not,
 the state is passed on unchanged.
 
-```elm
+```
 -- L0.Parser.Expression
 reduceState : State -> State
 reduceState state =
@@ -69,7 +69,7 @@ reduceState state =
 
 
 
-```elm
+```
 -- L0.Parser.Match:
 isReducible : List Symbol -> Bool
 isReducible symbols_ =
