@@ -27,12 +27,12 @@ testBlockError label input expectedOutput =
 macroSuite : Test
 macroSuite =
     describe "MicroLaTeX Error Tests"
-        [ testError "missing right brace" "\\italic{foo" "\\errorHighlight{\\italic{}foo\n\n"
-        , testError "naked backslash" "\\" "\\errorHighlight{ \\?}\n\n"
-        , testError "complete macro (no error)" "\\foo{bar}" "\\foo{bar}\n\n"
-        , testError "extra right brace" "\\foo{bar}}" "\\foo{bar}\\errorHighlight{ extra }?}\n\n"
-        , testError "empty argument" "\\foo{}" "\\foo{\\errorHighlight{{??}}}\n\n"
-        , testError "extra left brace" "\\foo{{bar}" "\\errorHighlight{\\foo{}\\blue{{bar}\\errorHighlight{}\\errorHighlight{ extra }?}\n\n"
+        [ testError "missing right brace" "\\italic{foo" "\\errorHighlight{\\italic{}foo"
+        , testError "naked backslash" "\\" "\\errorHighlight{ \\?}"
+        , testError "complete macro (no error)" "\\foo{bar}" "\\foo{bar}"
+        , testError "extra right brace" "\\foo{bar}}" "\\foo{bar}\\errorHighlight{ extra }?}"
+        , testError "empty argument" "\\foo{}" "\\foo{\\errorHighlight{{??}}}"
+        , testError "extra left brace" "\\foo{{bar}" "\\errorHighlight{\\foo{}\\blue{{bar}\\errorHighlight{}\\errorHighlight{ extra }?}"
         ]
 
 

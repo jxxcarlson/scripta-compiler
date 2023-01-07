@@ -58,10 +58,9 @@ happy2 =
 
 primitiveBlock : Test
 primitiveBlock =
-    Test.only <|
-        describe "parse text to primitive blocks"
-            [ primitiveBlockTest "nested environments" text1
-            ]
+    describe "parse text to primitive blocks"
+        [ primitiveBlockTest "nested environments" text1
+        ]
 
 
 primitiveBlockTest : String -> String -> Test
