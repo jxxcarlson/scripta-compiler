@@ -3,11 +3,13 @@ module Compiler.DifferentialParser exposing (EditRecord, forestFromBlocks, init,
 import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
+import Compiler.Differ
 import Compiler.Transform
 import Dict exposing (Dict)
 import Either exposing (Either)
 import L0.Parser.Classify
 import L0.Parser.Expression
+import List.Extra
 import Markup
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock(..), ExpressionBlockData)
@@ -96,11 +98,54 @@ updateFunctions lang =
     { chunker = chunker lang -- String -> List PrimitiveBlock
     , chunkEq = Parser.PrimitiveBlock.eq -- PrimitiveBlock -> PrimitiveBlock -> Bool
     , chunkLevel = chunkLevel -- PrimitiveBlock -> Bool
+    , diffPostProcess = diffPostProcess
     , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk
     , forestFromBlocks = forestFromBlocks -- : List parsedChunk -> List (Tree parsedChunk)
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
     , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> Forest parsedChunk -> (acc, Forest parsedChunk)
     }
+
+
+diffPostProcess : Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
+diffPostProcess diffRecord =
+    let
+        ms : List PrimitiveBlock
+        ms =
+            diffRecord.middleSegmentInSource
+
+        mt : List PrimitiveBlock
+        mt =
+            diffRecord.middleSegmentInTarget
+
+        sourceMiddleLineNumberOfBlock : Maybe Int
+        sourceMiddleLineNumberOfBlock =
+            List.Extra.last ms |> Maybe.map .lineNumber
+
+        sourceMiddleLinesInBlock : Maybe Int
+        sourceMiddleLinesInBlock =
+            List.Extra.last ms |> Maybe.map (.content >> List.length)
+
+        sourceMiddleLastLine =
+            Maybe.map2 (+) sourceMiddleLineNumberOfBlock sourceMiddleLinesInBlock
+
+        targetMiddleLineNumberOfBlock : Maybe Int
+        targetMiddleLineNumberOfBlock =
+            List.Extra.last mt |> Maybe.map .lineNumber
+
+        targetMiddleLinesInBlock : Maybe Int
+        targetMiddleLinesInBlock =
+            List.Extra.last mt |> Maybe.map (.content >> List.length)
+
+        targetMiddleLastLine =
+            Maybe.map2 (+) targetMiddleLineNumberOfBlock targetMiddleLinesInBlock
+
+        delta =
+            Maybe.map2 (-) sourceMiddleLineNumberOfBlock targetMiddleLineNumberOfBlock
+
+        _ =
+            Debug.log "(source, target, delta)" ( sourceMiddleLineNumberOfBlock, targetMiddleLineNumberOfBlock, delta )
+    in
+    diffRecord
 
 
 chunkLevel : PrimitiveBlock -> Int
