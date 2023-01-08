@@ -1,9 +1,10 @@
 module DiffTests exposing (..)
 
 import Compiler.Differ as D exposing (DiffRecord)
-import Compiler.DifferForest as DE
+import Compiler.DifferForest as DifferForest
 import Dict
 import Expect exposing (equal)
+import List.Extra
 import Markup
 import Parser.Line exposing (PrimitiveBlockType(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
@@ -18,12 +19,21 @@ import Test exposing (Test, describe, test)
 
 diffS : List String -> List String -> DiffRecord String
 diffS =
-    DE.diff (\a b -> a == b) (\a -> String.length (Parser.Utility.getLeadingBlanks a))
+    DifferForest.diff (\a b -> a == b) (\a -> String.length (Parser.Utility.getLeadingBlanks a))
+
+
+diffC : List Data -> List Data -> DiffRecord Data
+diffC =
+    DifferForest.diff (\a b -> a.content == b.content) (\a -> String.length (Parser.Utility.getLeadingBlanks a.content))
+
+
+type alias Data =
+    { line : Int, content : String }
 
 
 diffB : List PrimitiveBlock -> List PrimitiveBlock -> DiffRecord PrimitiveBlock
 diffB =
-    DE.diff Parser.PrimitiveBlock.eq (\b -> b.indent)
+    DifferForest.diff Parser.PrimitiveBlock.eq (\b -> b.indent)
 
 
 testB : String -> List PrimitiveBlock -> List PrimitiveBlock -> DiffRecord PrimitiveBlock -> Test
@@ -34,6 +44,24 @@ testB label a b c =
 testS : String -> List String -> List String -> DiffRecord String -> Test
 testS label a b c =
     test label <| \_ -> equal (diffS a b) c
+
+
+testData : String -> List Data -> List Data -> DiffRecord Data -> Test
+testData label a b c =
+    let
+        diffRecord =
+            diffC a b
+
+        lastIndexMiddleSource =
+            Maybe.map .line (List.Extra.last diffRecord.middleSegmentInSource)
+
+        lastIndexMiddleTarget =
+            Maybe.map .line (List.Extra.last diffRecord.middleSegmentInTarget)
+
+        _ =
+            Debug.log "(p, q)" ( lastIndexMiddleSource, lastIndexMiddleTarget )
+    in
+    test label <| \_ -> equal diffRecord c
 
 
 toPrimitiveBlocks =
@@ -50,6 +78,8 @@ suite =
         , testS "indented string 2 different, difference should go forward to string 3 and back to string 1 (root)" x5 y5 d5
         , testS "indented string 4 different, difference should go back to string 2" x6 y6 d6
         , testS "indented string 3 different, difference should go forward to string 4 and back to string 2" x7 y7 d7
+        , testS "add leaf to" x8 y8 d8
+        , Test.only <| testData "add leaf (data)" xx8 yy8 dd8
 
         --, testB  "primitive blocks: item >> item! in 3rd block" a1 b1 dd1
         ]
@@ -137,6 +167,54 @@ y7 =
 
 d7 =
     { commonPrefix = [ "000" ], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bxb", "  ccc" ] }
+
+
+x8 =
+    [ "000", "aaa", "  bbb", "  ccc", "ddd" ]
+
+
+y8 =
+    [ "000", "aaa", "  bbb", "  ccc", "  xxx", "ddd" ]
+
+
+d8 =
+    { commonPrefix = [ "000" ], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bbb", "  ccc", "  xxx" ] }
+
+
+xx8 =
+    [ { line = 0, content = "000" }
+    , { line = 1, content = "aaa" }
+    , { line = 2, content = "  bbb" }
+    , { line = 3, content = "  ccc" }
+    , { line = 4, content = "ddd" }
+    ]
+
+
+yy8 =
+    [ { line = 0, content = "000" }
+    , { line = 1, content = "aaa" }
+    , { line = 2, content = "  bbb" }
+    , { line = 3, content = "  ccc" }
+    , { line = 4, content = "  xxx" }
+    , { line = 5, content = "ddd" }
+    ]
+
+
+dd8 =
+    { commonPrefix = [ { line = 0, content = "000" } ]
+    , commonSuffix = [ { line = 4, content = "ddd" } ]
+    , middleSegmentInSource =
+        [ { line = 1, content = "aaa" }
+        , { line = 2, content = "  bbb" }
+        , { line = 3, content = "  ccc" }
+        ]
+    , middleSegmentInTarget =
+        [ { line = 1, content = "aaa" }
+        , { line = 2, content = "  bbb" }
+        , { line = 3, content = "  ccc" }
+        , { line = 4, content = "  xxx" }
+        ]
+    }
 
 
 a1 =
