@@ -39,3 +39,65 @@ a function `transform: p -> q`.
 -- Compiler.Differ
 differentialTransform : (p -> q) -> DiffRecord p -> List q -> List q
 ```
+
+## DifferForest
+
+Module `Compiler.DifferForest` is designed to diff lists with an 
+implicit forest structure (list of trees) defined by a 
+function `level: p -> Int`. In the resulting `DiffRecord`,
+the prefix, suffix, and middle segments all 
+represent subforests.
+
+To illustrate
+the main issue, consider the lists `u` and `v` (below). These
+have an indentation structure like an outline for
+an article, and so define the structure
+of a forest. In the example
+below, the leaf `jkl` in the tree with root `def` is
+changed to `JKL`. 
+
+```text
+    u:
+    ----
+    abc
+    def
+      ghi
+      jkl
+      mno
+    pqr
+
+    v:
+    ----
+    abc
+    def
+      ghi
+      JKL
+      mno
+    pqr
+```
+
+In this example the diff record represents the following structure:
+
+```text
+    commonPrefix:
+    ----
+    abc
+    
+    middleSegmentInSource:
+    ---
+    def
+      ghi
+      jkl
+      mno
+      
+    middleSegmentInTarget:
+    ---
+    def
+      ghi
+      JKL
+      mno
+         
+    commonSuffix:  
+    ---
+    pqr
+```

@@ -2,7 +2,7 @@ module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions
 
 import Compiler.Acc
 import Compiler.Differ
-import Compiler.DifferEq
+import Compiler.DifferForest
 import Dict exposing (Dict)
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
@@ -88,7 +88,7 @@ update f editRecord sourceText =
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
-            Compiler.DifferEq.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks
+            Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks
 
         parsed_ : List parsedChunk
         parsed_ =

@@ -1,22 +1,78 @@
-module Compiler.DifferEq exposing (backwardClosure, diff, diffc, forwardClosure)
+module Compiler.DifferForest exposing (backwardClosure, diff, diffc, forwardClosure)
 
 import Compiler.Differ exposing (DiffRecord)
 import List.Extra
 
 
-{-| Let u and v be two lists of q's (strings, primitive blocks,
-whatever). Write them as u = axb, v = ayb, where a is the greatest
-common prefix and b is the greatest common suffix.
-Return DiffRecord a b x y
+{-| Module `Compiler.DifferForest` is designed to diff lists with an
+implicit forest structure (list of trees) defined by a
+function `level: p -> Int`. In the resulting `DiffRecord`,
+the prefix, suffix, and middle segments all
+represent subforests.
+
+To illustrate
+the main issue, consider the lists `u` and `v` (below). These
+have an indentation structure like an outline for
+an article, and so define the structure
+of a forest. In the example
+below, the leaf `jkl` in the tree with root `def` is
+changed to `JKL`.
+
+```text
+    u:
+    ----
+    abc
+    def
+      ghi
+      jkl
+      mno
+    pqr
+
+    v:
+    ----
+    abc
+    def
+      ghi
+      JKL
+      mno
+    pqr
+```
+
+In this example the diff record represents the following structure:
+
+```text
+    commonPrefix:
+    ----
+    abc
+
+    middleSegmentInSource:
+    ---
+    def
+      ghi
+      jkl
+      mno
+
+    middleSegmentInTarget:
+    ---
+    def
+      ghi
+      JKL
+      mno
+
+    commonSuffix:
+    ---
+    pqr
+```
+
 -}
-diff : (q -> q -> Bool) -> (q -> Int) -> List q -> List q -> DiffRecord q
-diff eq indentation u v =
+diff : (p -> p -> Bool) -> (p -> Int) -> List p -> List p -> DiffRecord p
+diff eq level u v =
     let
         a =
-            commonInitialSegment eq u v
+            commonPrefix eq u v
 
         b_ =
-            commonTerminalSegmentAux eq a u v
+            commonSuffixAux eq a u v
 
         la =
             List.length a
@@ -37,10 +93,10 @@ diff eq indentation u v =
             else
                 b_
     in
-    DiffRecord a b x y |> backwardClosure indentation |> forwardClosure indentation
+    DiffRecord a b x y |> backwardClosure level |> forwardClosure level
 
 
-backwardClosure : (q -> Int) -> DiffRecord q -> DiffRecord q
+backwardClosure : (p -> Int) -> DiffRecord p -> DiffRecord p
 backwardClosure level diffRecord =
     let
         n =
@@ -63,7 +119,7 @@ backwardClosure level diffRecord =
                 diffRecord
 
 
-retreat : q -> List q -> DiffRecord q -> DiffRecord q
+retreat : p -> List p -> DiffRecord p -> DiffRecord p
 retreat last remaining diffRecord =
     let
         n =
@@ -76,7 +132,7 @@ retreat last remaining diffRecord =
     }
 
 
-forwardClosure : (q -> Int) -> DiffRecord q -> DiffRecord q
+forwardClosure : (p -> Int) -> DiffRecord p -> DiffRecord p
 forwardClosure level diffRecord =
     case List.Extra.uncons diffRecord.commonSuffix of
         Nothing ->
@@ -90,7 +146,7 @@ forwardClosure level diffRecord =
                 forwardClosure level (advance first remaining diffRecord)
 
 
-advance : q -> List q -> DiffRecord q -> DiffRecord q
+advance : p -> List p -> DiffRecord p -> DiffRecord p
 advance first remaining diffRecord =
     let
         n =
@@ -103,7 +159,7 @@ advance first remaining diffRecord =
     }
 
 
-diffc : (q -> q -> Bool) -> (q -> Int) -> List q -> List q -> List Int
+diffc : (p -> p -> Bool) -> (p -> Int) -> List p -> List p -> List Int
 diffc eq ind u v =
     let
         r =
@@ -112,8 +168,8 @@ diffc eq ind u v =
     List.map List.length [ r.commonPrefix, r.commonSuffix, r.middleSegmentInSource, r.middleSegmentInTarget ]
 
 
-commonInitialSegment : (q -> q -> Bool) -> List q -> List q -> List q
-commonInitialSegment eq x y =
+commonPrefix : (p -> p -> Bool) -> List p -> List p -> List p
+commonPrefix eq x y =
     if x == [] then
         []
 
@@ -124,7 +180,7 @@ commonInitialSegment eq x y =
         case ( List.head x, List.head y ) of
             ( Just a, Just b ) ->
                 if eq a b then
-                    a :: commonInitialSegment eq (List.drop 1 x) (List.drop 1 y)
+                    a :: commonPrefix eq (List.drop 1 x) (List.drop 1 y)
 
                 else
                     []
@@ -133,8 +189,8 @@ commonInitialSegment eq x y =
                 []
 
 
-commonTerminalSegmentAux : (q -> q -> Bool) -> List q -> List q -> List q -> List q
-commonTerminalSegmentAux eq cis x y =
+commonSuffixAux : (p -> p -> Bool) -> List p -> List p -> List p -> List p
+commonSuffixAux eq cis x y =
     let
         n =
             List.length cis
@@ -145,14 +201,14 @@ commonTerminalSegmentAux eq cis x y =
         yy =
             List.drop n y |> List.reverse
     in
-    commonInitialSegment eq xx yy |> List.reverse
+    commonPrefix eq xx yy |> List.reverse
 
 
-dropLast : Int -> List a -> List a
+dropLast : Int -> List p -> List p
 dropLast k x =
     x |> List.reverse |> List.drop k |> List.reverse
 
 
-takeLast : Int -> List a -> List a
+takeLast : Int -> List p -> List p
 takeLast k x =
     x |> List.reverse |> List.take k |> List.reverse

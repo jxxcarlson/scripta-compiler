@@ -1,6 +1,6 @@
 module TestStuff exposing (..)
 
-import Compiler.DifferEq
+import Compiler.DifferForest
 import Markup
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Scripta.Language exposing (Language(..))
@@ -11,11 +11,11 @@ toPrimitiveBlocks =
 
 
 diff a b =
-    Compiler.DifferEq.diff Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+    Compiler.DifferForest.diff Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 
 diffc a b =
-    Compiler.DifferEq.diffc Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
+    Compiler.DifferForest.diffc Parser.PrimitiveBlock.eq (\block -> block.indent + itemLevel block) (toPrimitiveBlocks a) (toPrimitiveBlocks b)
 
 
 itemLevel : PrimitiveBlock -> Int

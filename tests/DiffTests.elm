@@ -1,7 +1,7 @@
 module DiffTests exposing (..)
 
 import Compiler.Differ as D exposing (DiffRecord)
-import Compiler.DifferEq as DE
+import Compiler.DifferForest as DE
 import Dict
 import Expect exposing (equal)
 import Markup
@@ -42,7 +42,7 @@ toPrimitiveBlocks =
 
 suite : Test
 suite =
-    describe "Compiler.DifferEq.diff"
+    describe "Compiler.DifferForest.diff"
         [ testS "middle string is different" x1 y1 d1
         , testS "initial string is different" x2 y2 d2
         , testS "final string is different" x3 y3 d3
