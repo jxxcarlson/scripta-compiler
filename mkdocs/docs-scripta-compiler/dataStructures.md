@@ -35,6 +35,7 @@ In the case of L0 and XMarkdown, a primitive
 block is defined by
 
 ```
+-- Parser.PrimitiveBlock
 type alias PrimitiveBlock =
 { indent : Int
 , lineNumber : Int

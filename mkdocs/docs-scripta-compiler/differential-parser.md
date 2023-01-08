@@ -8,7 +8,7 @@ to only re-parse what has been changed after an edit.
 ## Differ
 
 We use an extremely primitive strategy.
-Let u and v be two lists of things of type `q`. Write them as
+Let u and v be two lists of things of type `p`. Write them as
 u = axb, v = ayb, where a is the greatest common prefix
 and b is the greatest common suffix. 
 Return DiffRecord a b x y.  This operation is carried
@@ -100,3 +100,9 @@ The resuting diff record represents the following structure:
     ---
     pqr
 ```
+
+## Differential Parsing in Scripta
+
+In Scripta, differential parsing takes place
+at the level of primitive blocks, as indicated in
+the [flowchart](/docs-scripta-compiler/overview#flowchart).
