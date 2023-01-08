@@ -79,7 +79,7 @@ suite =
         , testS "indented string 4 different, difference should go back to string 2" x6 y6 d6
         , testS "indented string 3 different, difference should go forward to string 4 and back to string 2" x7 y7 d7
         , testS "add leaf to" x8 y8 d8
-        , Test.only <| testData "add leaf (data)" xx8 yy8 dd8
+        , testData "add leaf (data)" xx8 yy8 dd8
 
         --, testB  "primitive blocks: item >> item! in 3rd block" a1 b1 dd1
         ]
