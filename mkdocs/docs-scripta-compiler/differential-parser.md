@@ -52,8 +52,7 @@ To illustrate
 the main issue, consider the lists `u` and `v` (below). These
 have an indentation structure like an outline for
 an article, and so define the structure
-of a forest. In the example
-below, the leaf `jkl` in the tree with root `def` is
+of a forest. Here the leaf `jkl` in the tree with root `def` is
 changed to `JKL`. 
 
 ```text
@@ -76,7 +75,7 @@ changed to `JKL`.
     pqr
 ```
 
-In this example the diff record represents the following structure:
+The resuting diff record represents the following structure:
 
 ```text
     commonPrefix:

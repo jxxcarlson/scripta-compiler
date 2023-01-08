@@ -1,4 +1,4 @@
-module Compiler.DifferForest exposing (backwardClosure, diff, diffc, forwardClosure)
+module Compiler.DifferForest exposing (backwardClosure, diff, forwardClosure)
 
 import Compiler.Differ exposing (DiffRecord)
 import List.Extra
@@ -157,15 +157,6 @@ advance first remaining diffRecord =
         , middleSegmentInSource = diffRecord.middleSegmentInSource ++ [ first ]
         , middleSegmentInTarget = diffRecord.middleSegmentInTarget ++ [ first ]
     }
-
-
-diffc : (p -> p -> Bool) -> (p -> Int) -> List p -> List p -> List Int
-diffc eq ind u v =
-    let
-        r =
-            diff eq ind u v
-    in
-    List.map List.length [ r.commonPrefix, r.commonSuffix, r.middleSegmentInSource, r.middleSegmentInTarget ]
 
 
 commonPrefix : (p -> p -> Bool) -> List p -> List p -> List p
