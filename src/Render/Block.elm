@@ -1,4 +1,4 @@
-module Render.Block exposing (render)
+module Render.Block exposing (render, renderVerbatimBlock)
 
 import Bool.Extra
 import Compiler.ASTTools as ASTTools
@@ -131,6 +131,7 @@ showError error_ x =
                 ]
 
 
+renderVerbatimBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderVerbatimBlock count acc settings ((ExpressionBlock { name, error, indent, args, blockType, content, id }) as block) =
     case content of
         Right _ ->

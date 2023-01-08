@@ -44,7 +44,7 @@ backwardClosure : (q -> Int) -> DiffRecord q -> DiffRecord q
 backwardClosure level diffRecord =
     let
         n =
-            List.length diffRecord.commonInitialSegment
+            List.length diffRecord.commonPrefix
     in
     case List.head diffRecord.middleSegmentInTarget of
         Nothing ->
@@ -52,7 +52,7 @@ backwardClosure level diffRecord =
 
         Just item ->
             if level item > 0 then
-                case List.Extra.unconsLast diffRecord.commonInitialSegment of
+                case List.Extra.unconsLast diffRecord.commonPrefix of
                     Nothing ->
                         diffRecord
 
@@ -67,10 +67,10 @@ retreat : q -> List q -> DiffRecord q -> DiffRecord q
 retreat last remaining diffRecord =
     let
         n =
-            List.length diffRecord.commonInitialSegment
+            List.length diffRecord.commonPrefix
     in
     { diffRecord
-        | commonInitialSegment = remaining
+        | commonPrefix = remaining
         , middleSegmentInSource = last :: diffRecord.middleSegmentInSource
         , middleSegmentInTarget = last :: diffRecord.middleSegmentInTarget
     }
@@ -78,7 +78,7 @@ retreat last remaining diffRecord =
 
 forwardClosure : (q -> Int) -> DiffRecord q -> DiffRecord q
 forwardClosure level diffRecord =
-    case List.Extra.uncons diffRecord.commonTerminalSegment of
+    case List.Extra.uncons diffRecord.commonSuffix of
         Nothing ->
             diffRecord
 
@@ -94,10 +94,10 @@ advance : q -> List q -> DiffRecord q -> DiffRecord q
 advance first remaining diffRecord =
     let
         n =
-            List.length diffRecord.commonTerminalSegment + List.length diffRecord.middleSegmentInTarget
+            List.length diffRecord.commonSuffix + List.length diffRecord.middleSegmentInTarget
     in
     { diffRecord
-        | commonTerminalSegment = remaining
+        | commonSuffix = remaining
         , middleSegmentInSource = diffRecord.middleSegmentInSource ++ [ first ]
         , middleSegmentInTarget = diffRecord.middleSegmentInTarget ++ [ first ]
     }
@@ -109,7 +109,7 @@ diffc eq ind u v =
         r =
             diff eq ind u v
     in
-    List.map List.length [ r.commonInitialSegment, r.commonTerminalSegment, r.middleSegmentInSource, r.middleSegmentInTarget ]
+    List.map List.length [ r.commonPrefix, r.commonSuffix, r.middleSegmentInSource, r.middleSegmentInTarget ]
 
 
 commonInitialSegment : (q -> q -> Bool) -> List q -> List q -> List q

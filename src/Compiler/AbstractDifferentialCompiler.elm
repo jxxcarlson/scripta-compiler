@@ -90,10 +90,10 @@ differentialParser :
 differentialParser parser diffRecord editRecord =
     let
         ii =
-            List.length diffRecord.commonInitialSegment
+            List.length diffRecord.commonPrefix
 
         it =
-            List.length diffRecord.commonTerminalSegment
+            List.length diffRecord.commonSuffix
 
         initialSegmentParsed =
             List.take ii editRecord.parsed

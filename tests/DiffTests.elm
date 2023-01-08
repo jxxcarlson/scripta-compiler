@@ -64,7 +64,7 @@ y1 =
 
 
 d1 =
-    { commonInitialSegment = [ "aaa" ], commonTerminalSegment = [ "ccc" ], middleSegmentInSource = [ "bbb" ], middleSegmentInTarget = [ "bxb" ] }
+    { commonPrefix = [ "aaa" ], commonSuffix = [ "ccc" ], middleSegmentInSource = [ "bbb" ], middleSegmentInTarget = [ "bxb" ] }
 
 
 x2 =
@@ -76,7 +76,7 @@ y2 =
 
 
 d2 =
-    { commonInitialSegment = [], commonTerminalSegment = [ "bbb", "ccc" ], middleSegmentInSource = [ "aaa" ], middleSegmentInTarget = [ "axa" ] }
+    { commonPrefix = [], commonSuffix = [ "bbb", "ccc" ], middleSegmentInSource = [ "aaa" ], middleSegmentInTarget = [ "axa" ] }
 
 
 x3 =
@@ -88,7 +88,7 @@ y3 =
 
 
 d3 =
-    { commonInitialSegment = [ "aaa", "bbb" ], commonTerminalSegment = [], middleSegmentInSource = [ "ccc" ], middleSegmentInTarget = [ "cxc" ] }
+    { commonPrefix = [ "aaa", "bbb" ], commonSuffix = [], middleSegmentInSource = [ "ccc" ], middleSegmentInTarget = [ "cxc" ] }
 
 
 x4 =
@@ -100,7 +100,7 @@ y4 =
 
 
 d4 =
-    { commonInitialSegment = [], commonTerminalSegment = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bbb", "  cxc" ] }
+    { commonPrefix = [], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bbb", "  cxc" ] }
 
 
 x5 =
@@ -112,7 +112,7 @@ y5 =
 
 
 d5 =
-    { commonInitialSegment = [], commonTerminalSegment = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bxb", "  ccc" ] }
+    { commonPrefix = [], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bxb", "  ccc" ] }
 
 
 x6 =
@@ -124,7 +124,7 @@ y6 =
 
 
 d6 =
-    { commonInitialSegment = [ "000" ], commonTerminalSegment = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bbb", "  cxc" ] }
+    { commonPrefix = [ "000" ], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bbb", "  cxc" ] }
 
 
 x7 =
@@ -136,7 +136,7 @@ y7 =
 
 
 d7 =
-    { commonInitialSegment = [ "000" ], commonTerminalSegment = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bxb", "  ccc" ] }
+    { commonPrefix = [ "000" ], commonSuffix = [ "ddd" ], middleSegmentInSource = [ "aaa", "  bbb", "  ccc" ], middleSegmentInTarget = [ "aaa", "  bxb", "  ccc" ] }
 
 
 a1 =
@@ -172,4 +172,4 @@ Wine
 
 
 dd1 =
-    { commonInitialSegment = [ { args = [], blockType = PBOrdinary, content = [ "L0 Test" ], indent = 0, lineNumber = 2, name = Just "title", position = 1, properties = Dict.fromList [], sourceText = "L0 Test" }, { args = [], blockType = PBOrdinary, content = [ "Bread" ], indent = 0, lineNumber = 5, name = Just "item", position = 15, properties = Dict.fromList [], sourceText = "Bread" } ], commonTerminalSegment = [ { args = [], blockType = PBParagraph, content = [], indent = 0, lineNumber = 13, name = Nothing, position = 48, properties = Dict.fromList [], sourceText = "" } ], middleSegmentInSource = [ { args = [], blockType = PBOrdinary, content = [ "Cheese" ], indent = 0, lineNumber = 8, name = Just "item", position = 26, properties = Dict.fromList [], sourceText = "Cheese" }, { args = [], blockType = PBOrdinary, content = [ "Wine" ], indent = 0, lineNumber = 11, name = Just "item", position = 38, properties = Dict.fromList [], sourceText = "Wine" } ], middleSegmentInTarget = [ { args = [], blockType = PBOrdinary, content = [ "Cheese" ], indent = 0, lineNumber = 8, name = Just "item!", position = 26, properties = Dict.fromList [], sourceText = "Cheese" }, { args = [], blockType = PBOrdinary, content = [ "Wine" ], indent = 0, lineNumber = 11, name = Just "numbered", position = 39, properties = Dict.fromList [], sourceText = "Wine" } ] }
+    { commonPrefix = [ { args = [], blockType = PBOrdinary, content = [ "L0 Test" ], indent = 0, lineNumber = 2, name = Just "title", position = 1, properties = Dict.fromList [], sourceText = "L0 Test" }, { args = [], blockType = PBOrdinary, content = [ "Bread" ], indent = 0, lineNumber = 5, name = Just "item", position = 15, properties = Dict.fromList [], sourceText = "Bread" } ], commonSuffix = [ { args = [], blockType = PBParagraph, content = [], indent = 0, lineNumber = 13, name = Nothing, position = 48, properties = Dict.fromList [], sourceText = "" } ], middleSegmentInSource = [ { args = [], blockType = PBOrdinary, content = [ "Cheese" ], indent = 0, lineNumber = 8, name = Just "item", position = 26, properties = Dict.fromList [], sourceText = "Cheese" }, { args = [], blockType = PBOrdinary, content = [ "Wine" ], indent = 0, lineNumber = 11, name = Just "item", position = 38, properties = Dict.fromList [], sourceText = "Wine" } ], middleSegmentInTarget = [ { args = [], blockType = PBOrdinary, content = [ "Cheese" ], indent = 0, lineNumber = 8, name = Just "item!", position = 26, properties = Dict.fromList [], sourceText = "Cheese" }, { args = [], blockType = PBOrdinary, content = [ "Wine" ], indent = 0, lineNumber = 11, name = Just "numbered", position = 39, properties = Dict.fromList [], sourceText = "Wine" } ] }

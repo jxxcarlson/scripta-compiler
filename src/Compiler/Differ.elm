@@ -1,25 +1,25 @@
 module Compiler.Differ exposing (DiffRecord, diff, differentialTransform)
 
 
-type alias DiffRecord a =
-    { commonInitialSegment : List a
-    , commonTerminalSegment : List a
-    , middleSegmentInSource : List a
-    , middleSegmentInTarget : List a
+type alias DiffRecord p =
+    { commonPrefix : List p
+    , commonSuffix : List p
+    , middleSegmentInSource : List p
+    , middleSegmentInTarget : List p
     }
 
 
 {-| Update the renderedList by applying the transformer only to the
 changed source elements.
 -}
-differentialTransform : (a -> b) -> DiffRecord a -> List b -> List b
+differentialTransform : (p -> q) -> DiffRecord p -> List q -> List q
 differentialTransform transform diffRecord renderedList =
     let
         prefixLengh =
-            List.length diffRecord.commonInitialSegment
+            List.length diffRecord.commonPrefix
 
         suffixLength =
-            List.length diffRecord.commonTerminalSegment
+            List.length diffRecord.commonSuffix
 
         renderedPrefix =
             List.take prefixLengh renderedList
@@ -34,7 +34,7 @@ differentialTransform transform diffRecord renderedList =
 u = axb, v = ayb, where a is the greatest common prefix
 and b is the greatest common suffix. Return DiffRecord a b x y
 -}
-diff : List q -> List q -> DiffRecord q
+diff : List p -> List p -> DiffRecord p
 diff u v =
     let
         a =
@@ -68,7 +68,7 @@ diff u v =
     DiffRecord a b x y
 
 
-commonInitialSegment : List a -> List a -> List a
+commonInitialSegment : List p -> List p -> List p
 commonInitialSegment x y =
     if x == [] then
         []
@@ -91,7 +91,7 @@ commonInitialSegment x y =
             []
 
 
-commonTerminalSegmentAux : List a -> List a -> List a -> List a
+commonTerminalSegmentAux : List p -> List p -> List p -> List p
 commonTerminalSegmentAux cis x y =
     let
         n =
@@ -106,11 +106,11 @@ commonTerminalSegmentAux cis x y =
     commonInitialSegment xx yy |> List.reverse
 
 
-dropLast : Int -> List a -> List a
+dropLast : Int -> List p -> List p
 dropLast k x =
     x |> List.reverse |> List.drop k |> List.reverse
 
 
-takeLast : Int -> List a -> List a
+takeLast : Int -> List p -> List p
 takeLast k x =
     x |> List.reverse |> List.take k |> List.reverse
