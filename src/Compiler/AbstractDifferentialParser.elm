@@ -23,6 +23,7 @@ type alias UpdateFunctions chunk parsedChunk acc =
     { chunker : String -> List chunk
     , chunkEq : chunk -> chunk -> Bool
     , chunkLevel : chunk -> Int
+    , diffPostProcess : Compiler.Differ.DiffRecord chunk -> Compiler.Differ.DiffRecord chunk
     , chunkParser : chunk -> parsedChunk
     , forestFromBlocks : List parsedChunk -> List (Tree parsedChunk)
     , getMessages : List (Tree parsedChunk) -> List String
@@ -88,7 +89,7 @@ update f editRecord sourceText =
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
-            Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks
+            Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks |> f.diffPostProcess
 
         parsed_ : List parsedChunk
         parsed_ =
