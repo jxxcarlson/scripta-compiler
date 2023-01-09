@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , elaborate, eq, parse_, print
+    , elaborate, eq, length, listLength, parse_, print, toPrimitiveBlock
     )
 
 {-| The main function is
@@ -20,21 +20,6 @@ import Parser.PrimitiveLaTeXBlock
 import Scripta.Language exposing (Language(..))
 
 
-eq : PrimitiveBlock -> PrimitiveBlock -> Bool
-eq b1 b2 =
-    if b1.sourceText /= b2.sourceText then
-        False
-
-    else if b1.name /= b2.name then
-        False
-
-    else if b1.args /= b2.args then
-        False
-
-    else
-        True
-
-
 {-| -}
 type alias PrimitiveBlock =
     { indent : Int
@@ -48,6 +33,41 @@ type alias PrimitiveBlock =
     , blockType : PrimitiveBlockType
     , error : Maybe { error : String }
     }
+
+
+length : PrimitiveBlock -> Int
+length block =
+    List.length block.content
+
+
+listLength1 : List PrimitiveBlock -> Int
+listLength1 blocks =
+    (List.map length blocks |> List.sum) + List.length blocks - 1
+
+
+listLength : List PrimitiveBlock -> Int
+listLength blocks =
+    case List.Extra.unconsLast blocks of
+        Nothing ->
+            0
+
+        Just ( lastBlock, _ ) ->
+            lastBlock.lineNumber + length lastBlock - 1
+
+
+eq : PrimitiveBlock -> PrimitiveBlock -> Bool
+eq b1 b2 =
+    if b1.sourceText /= b2.sourceText then
+        False
+
+    else if b1.name /= b2.name then
+        False
+
+    else if b1.args /= b2.args then
+        False
+
+    else
+        True
 
 
 empty : PrimitiveBlock
