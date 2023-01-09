@@ -181,10 +181,11 @@ commonPrefix eq x y =
 
 
 commonSuffixAux : (p -> p -> Bool) -> List p -> List p -> List p -> List p
-commonSuffixAux eq cis x y =
+commonSuffixAux eq commonPrefixInSource x y =
+    -- TODO: more efficient implementation!
     let
         n =
-            List.length cis
+            List.length commonPrefixInSource
 
         xx =
             List.drop n x |> List.reverse
