@@ -1,13 +1,20 @@
-module Compiler.DifferentialParser exposing (EditRecord, forestFromBlocks, init, toExprBlock, update)
+module Compiler.DifferentialParser exposing
+    ( EditRecord
+    , chunkLevel
+    , chunker
+    , diffPostProcess
+    , forestFromBlocks
+    , init
+    , toExprBlock
+    , update
+    )
 
-import Compiler.ASTTools
 import Compiler.AbstractDifferentialParser
 import Compiler.Acc
 import Compiler.Differ
 import Compiler.Transform
 import Dict exposing (Dict)
 import Either exposing (Either)
-import L0.Parser.Classify
 import L0.Parser.Expression
 import List.Extra
 import Markup
@@ -15,7 +22,6 @@ import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock(..), ExpressionBlockData)
 import Parser.BlockUtil
 import Parser.Expr
-import Parser.Line exposing (PrimitiveBlockType(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 import Parser.Tree
 import Parser.Utility
@@ -140,12 +146,26 @@ diffPostProcess diffRecord =
             Maybe.map2 (+) targetMiddleLineNumberOfBlock targetMiddleLinesInBlock
 
         delta =
-            Maybe.map2 (-) sourceMiddleLineNumberOfBlock targetMiddleLineNumberOfBlock
+            Maybe.map2 (-) sourceMiddleLineNumberOfBlock targetMiddleLineNumberOfBlock |> Maybe.withDefault 0
 
         _ =
             Debug.log "(source, target, delta)" ( sourceMiddleLineNumberOfBlock, targetMiddleLineNumberOfBlock, delta )
     in
-    diffRecord
+    shiftLines delta diffRecord
+
+
+shiftLines : Int -> Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
+shiftLines delta diffRecord =
+    let
+        newSuffix =
+            List.map (shiftLinesInBlock delta) diffRecord.commonSuffix
+    in
+    { diffRecord | commonSuffix = newSuffix }
+
+
+shiftLinesInBlock : Int -> PrimitiveBlock -> PrimitiveBlock
+shiftLinesInBlock delta block =
+    { block | lineNumber = block.lineNumber + delta }
 
 
 chunkLevel : PrimitiveBlock -> Int
