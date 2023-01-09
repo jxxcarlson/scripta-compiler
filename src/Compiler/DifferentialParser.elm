@@ -114,23 +114,50 @@ updateFunctions lang =
 diffPostProcess : Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 diffPostProcess diffRecord =
     let
+        _ =
+            Debug.log "suffix" diffRecord.commonSuffix
+
         lengthS =
             Parser.PrimitiveBlock.listLength diffRecord.middleSegmentInSource
 
         lengthT =
             Parser.PrimitiveBlock.listLength diffRecord.middleSegmentInTarget
+
+        delta =
+            lengthT - lengthS
+
+        _ =
+            Debug.log "!! (lengthS, lengthT, delta)" ( lengthS, lengthT, delta )
     in
-    shiftLines (lengthT - lengthS) diffRecord
+    shiftLines delta diffRecord
 
 
 shiftLines : Int -> Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 shiftLines delta diffRecord =
-    { diffRecord | commonSuffix = List.map (shiftLinesInBlock delta) diffRecord.commonSuffix }
+    let
+        _ =
+            Debug.log "!! Delta" delta
+
+        _ =
+            Debug.log "!! BEFORE" (List.map .lineNumber diffRecord.commonSuffix)
+
+        newDiffRecord =
+            { diffRecord | commonSuffix = shiftLinesInBlockList delta diffRecord.commonSuffix }
+
+        _ =
+            Debug.log "!! AFTER" (List.map .lineNumber diffRecord.commonSuffix)
+    in
+    newDiffRecord
 
 
 shiftLinesInBlock : Int -> PrimitiveBlock -> PrimitiveBlock
 shiftLinesInBlock delta block =
-    { block | lineNumber = block.lineNumber + delta }
+    { block | lineNumber = (block.lineNumber |> Debug.log "!! BLOCK") + (delta |> Debug.log "!! BLOCK DELTA") }
+
+
+shiftLinesInBlockList : Int -> List PrimitiveBlock -> List PrimitiveBlock
+shiftLinesInBlockList delta blockList =
+    List.map (shiftLinesInBlock delta) blockList
 
 
 chunkLevel : PrimitiveBlock -> Int
