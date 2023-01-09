@@ -16,7 +16,6 @@ import Compiler.Transform
 import Dict exposing (Dict)
 import Either exposing (Either)
 import L0.Parser.Expression
-import List.Extra
 import Markup
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock(..), ExpressionBlockData)
@@ -115,52 +114,18 @@ updateFunctions lang =
 diffPostProcess : Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 diffPostProcess diffRecord =
     let
-        ms : List PrimitiveBlock
-        ms =
-            diffRecord.middleSegmentInSource
+        lengthS =
+            Parser.PrimitiveBlock.listLength diffRecord.middleSegmentInSource
 
-        mt : List PrimitiveBlock
-        mt =
-            diffRecord.middleSegmentInTarget
-
-        sourceMiddleLineNumberOfBlock : Maybe Int
-        sourceMiddleLineNumberOfBlock =
-            List.Extra.last ms |> Maybe.map .lineNumber
-
-        sourceMiddleLinesInBlock : Maybe Int
-        sourceMiddleLinesInBlock =
-            List.Extra.last ms |> Maybe.map (.content >> List.length)
-
-        sourceMiddleLastLine =
-            Maybe.map2 (+) sourceMiddleLineNumberOfBlock sourceMiddleLinesInBlock
-
-        targetMiddleLineNumberOfBlock : Maybe Int
-        targetMiddleLineNumberOfBlock =
-            List.Extra.last mt |> Maybe.map .lineNumber
-
-        targetMiddleLinesInBlock : Maybe Int
-        targetMiddleLinesInBlock =
-            List.Extra.last mt |> Maybe.map (.content >> List.length)
-
-        targetMiddleLastLine =
-            Maybe.map2 (+) targetMiddleLineNumberOfBlock targetMiddleLinesInBlock
-
-        delta =
-            Maybe.map2 (-) sourceMiddleLineNumberOfBlock targetMiddleLineNumberOfBlock |> Maybe.withDefault 0
-
-        _ =
-            Debug.log "(source, target, delta)" ( sourceMiddleLineNumberOfBlock, targetMiddleLineNumberOfBlock, delta )
+        lengthT =
+            Parser.PrimitiveBlock.listLength diffRecord.middleSegmentInTarget
     in
-    shiftLines delta diffRecord
+    shiftLines (lengthT - lengthS) diffRecord
 
 
 shiftLines : Int -> Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 shiftLines delta diffRecord =
-    let
-        newSuffix =
-            List.map (shiftLinesInBlock delta) diffRecord.commonSuffix
-    in
-    { diffRecord | commonSuffix = newSuffix }
+    { diffRecord | commonSuffix = List.map (shiftLinesInBlock delta) diffRecord.commonSuffix }
 
 
 shiftLinesInBlock : Int -> PrimitiveBlock -> PrimitiveBlock
