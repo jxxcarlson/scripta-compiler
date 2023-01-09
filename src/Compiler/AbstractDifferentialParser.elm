@@ -83,15 +83,20 @@ update :
     -> EditRecord chunk parsedChunk acc
 update f editRecord sourceText =
     let
-        newChunks_ =
+        newChunks =
             f.chunker sourceText
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
-            Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks_ |> f.diffPostProcess
+            --  diffPostProcess will renumber the blocks in the common suffix
+            Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks |> f.diffPostProcess
 
-        newChunks =
-            diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonPrefix
+        newChunks_ =
+            -- diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonPrefix
+            -- diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonSuffix
+            -- TODO: the below is a BAD solution.  It forces an update of the commonSuffix, but we need a real solution
+            -- TODO: that just involves modifying the line numbers of the common soffux
+            diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget
 
         parsed_ : List parsedChunk
         parsed_ =
