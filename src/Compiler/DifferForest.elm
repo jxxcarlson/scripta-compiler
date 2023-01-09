@@ -86,12 +86,15 @@ diff eq level u v =
         y =
             v |> List.drop la |> dropLast lb
 
-        b =
+        b1 =
             if la == List.length u then
                 []
 
             else
                 b_
+
+        b =
+            List.drop (List.length a + List.length y) v |> Debug.log "!!! SUFFIX"
     in
     DiffRecord a b x y |> backwardClosure level |> forwardClosure level
 
