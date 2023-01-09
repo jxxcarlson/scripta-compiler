@@ -1,6 +1,6 @@
-# Differential Parser
+# Differential Compilation
 
-Differential parsing is an optimization used to speed up
+Differential compilation is an optimization used to speed up
 recompilation of large inputs.  Since parsing is the most
 expensive part of the compiler pipeline, the idea is
 to only re-parse what has been changed after an edit.
@@ -99,6 +99,11 @@ The resuting diff record represents the following structure:
     commonSuffix:  
     ---
     pqr
+```
+## Abstract Differential Parser
+
+```text
+diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonSuffix
 ```
 
 ## Differential Parsing in Scripta
