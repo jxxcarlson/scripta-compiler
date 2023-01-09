@@ -56,6 +56,10 @@ diff u v =
             v |> List.drop la |> dropLast lb
 
         b =
+            List.drop (List.length a + List.length y) v
+
+        -- TODO: does this work?
+        b1 =
             if la == List.length u then
                 []
 
