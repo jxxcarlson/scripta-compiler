@@ -23,9 +23,9 @@ checkSuffix source1 source2 =
     Maybe.map .lineNumber (List.head (diff source1 source2).commonSuffix)
 
 
-diffTest : String -> Int -> String -> String -> Test
-diffTest label expectedLineNumber source1 source2 =
-    Test.test label <| \_ -> Expect.equal (Just expectedLineNumber) (checkSuffix source1 source2)
+diffTest : String -> Maybe Int -> String -> String -> Test
+diffTest label mExpectedLineNumber source1 source2 =
+    Test.test label <| \_ -> Expect.equal mExpectedLineNumber (checkSuffix source1 source2)
 
 
 lengthTest : String -> String -> List Int -> Test
@@ -40,13 +40,14 @@ lengthTest label source lineNumbers =
 diffSuite : Test
 diffSuite =
     Test.describe "MicroLaTeX diffing for primitive blocks"
-        [ diffTest "a1-a2" 8 a1 a2
-        , Test.only <| diffTest "a1-a2x" 10 a1 a2
-        , diffTest "a2-a1" 7 a2 a1
-        , diffTest "a1-a3" 8 a1 a3
-        , diffTest "a3-a1" 7 a3 a1
-        , diffTest "a1-a4" 9 a1 a4
-        , diffTest "a4-a1" 7 a4 a1
+        [ diffTest "a1-a1" Nothing a1 a1
+        , diffTest "a1-a2" (Just 8) a1 a2
+        , diffTest "a1-a2x" (Just 11) a1 a2x
+        , diffTest "a2-a1" (Just 7) a2 a1
+        , diffTest "a1-a3" (Just 8) a1 a3
+        , diffTest "a3-a1" (Just 7) a3 a1
+        , diffTest "a1-a4" (Just 9) a1 a4
+        , diffTest "a4-a1" (Just 7) a4 a1
         ]
 
 
