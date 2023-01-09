@@ -41,10 +41,11 @@ diffSuite : Test
 diffSuite =
     Test.describe "MicroLaTeX diffing for primitive blocks"
         [ diffTest "a1-a2" 8 a1 a2
+        , Test.only <| diffTest "a1-a2x" 10 a1 a2
         , diffTest "a2-a1" 7 a2 a1
         , diffTest "a1-a3" 8 a1 a3
         , diffTest "a3-a1" 7 a3 a1
-        , diffTest "a1-a4" 8 a1 a4
+        , diffTest "a1-a4" 9 a1 a4
         , diffTest "a4-a1" 7 a4 a1
         ]
 
@@ -79,6 +80,23 @@ a2
 b1
 b2
 b3
+
+c1
+c2
+"""
+
+
+a2x =
+    """
+a1
+a2
+
+b1
+b2
+b3
+
+
+
 
 c1
 c2

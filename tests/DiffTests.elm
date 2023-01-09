@@ -51,15 +51,6 @@ testData label a b c =
     let
         diffRecord =
             diffC a b
-
-        lastIndexMiddleSource =
-            Maybe.map .line (List.Extra.last diffRecord.middleSegmentInSource)
-
-        lastIndexMiddleTarget =
-            Maybe.map .line (List.Extra.last diffRecord.middleSegmentInTarget)
-
-        _ =
-            Debug.log "(p, q)" ( lastIndexMiddleSource, lastIndexMiddleTarget )
     in
     test label <| \_ -> equal diffRecord c
 
