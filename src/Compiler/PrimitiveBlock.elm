@@ -33,7 +33,7 @@ diff_ chunker_ chunkEq_ chunkLevel_ diffPostProcess_ source1 source2 =
         chunks2 =
             chunker_ source2
     in
-    Compiler.DifferForest.diff chunkEq_ chunkLevel_ chunks1 chunks2 |> diffPostProcess_ |> Debug.log "diff_"
+    Compiler.DifferForest.diff chunkEq_ chunkLevel_ chunks1 chunks2 |> Debug.log "diff_"
 
 
 chunker lang =
