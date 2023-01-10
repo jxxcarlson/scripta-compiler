@@ -169,7 +169,7 @@ getMessages_ blocks =
 
 update : EditRecord -> String -> EditRecord
 update editRecord text =
-    Compiler.AbstractDifferentialParser.update (updateFunctions editRecord.lang) editRecord (text ++ "\n")
+    Compiler.AbstractDifferentialParser.update (updateFunctions editRecord.lang) (text ++ "\n") editRecord
 
 
 chunker : Language -> String -> List PrimitiveBlock

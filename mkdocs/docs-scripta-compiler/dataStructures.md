@@ -128,10 +128,22 @@ below.
 -- Compiler.AbstractDifferentialParser
 update :
     UpdateFunctions chunk parsedChunk acc
-    -> EditRecord chunk parsedChunk acc
     -> String
     -> EditRecord chunk parsedChunk acc
+    -> EditRecord chunk parsedChunk acc
 ```
+The first argument is a record that holds the 
+functions needed in any concrete instantiation
+of the `update` function, e.g, the field
+
+```text
+setLineNumber : Int -> parsedChunk -> parsedChunk
+```
+
+used in renumbering parsed chunks.
+
+XX: more on keeping the line numbers up-to-data.
+
 
 ## Diff Records
 

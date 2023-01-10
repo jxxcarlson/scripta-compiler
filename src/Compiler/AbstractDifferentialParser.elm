@@ -83,10 +83,10 @@ a differential idList. This last step is perhaps unnecessary. To investigate.
 -}
 update :
     UpdateFunctions chunk parsedChunk acc
-    -> EditRecord chunk parsedChunk acc -- accumulator
     -> String
+    -> EditRecord chunk parsedChunk acc -- accumulator
     -> EditRecord chunk parsedChunk acc
-update f editRecord sourceText =
+update f sourceText editRecord =
     let
         newChunks =
             f.chunker sourceText
