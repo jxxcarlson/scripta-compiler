@@ -131,23 +131,13 @@ diffPostProcess diffRecord =
 
         delta =
             lengthT - lengthS
-
-        _ =
-            Debug.log "!! (lengthS, lengthT, delta)" ( lengthS, lengthT, delta )
     in
     shiftLines delta diffRecord
 
 
 shiftLines : Int -> Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 shiftLines delta diffRecord =
-    let
-        newDiffRecord =
-            { diffRecord | commonSuffix = shiftLinesInBlockList delta diffRecord.commonSuffix }
-
-        _ =
-            Debug.log "!! AFTER" (List.map .lineNumber diffRecord.commonSuffix)
-    in
-    newDiffRecord
+    { diffRecord | commonSuffix = shiftLinesInBlockList delta diffRecord.commonSuffix }
 
 
 shiftLinesInBlock : Int -> PrimitiveBlock -> PrimitiveBlock
