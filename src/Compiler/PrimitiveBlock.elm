@@ -1,10 +1,19 @@
-module Compiler.PrimitiveBlock exposing (diff, diffMicroLaTeX, x1, x2)
+module Compiler.PrimitiveBlock exposing (diff, diffMicroLaTeX, noChange, x1, x2)
 
 import Compiler.Differ
 import Compiler.DifferForest
 import Compiler.DifferentialParser
 import Parser.PrimitiveBlock
 import Scripta.Language
+
+
+noChange : Scripta.Language.Language -> String -> String -> Bool
+noChange lang source1 source2 =
+    let
+        dr =
+            diff lang source1 source2
+    in
+    dr.middleSegmentInTarget == [] && dr.middleSegmentInSource == [] && dr.commonSuffix == []
 
 
 diffMicroLaTeX : String -> String -> Compiler.Differ.DiffRecord Parser.PrimitiveBlock.PrimitiveBlock

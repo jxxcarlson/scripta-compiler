@@ -20,12 +20,17 @@ diff =
 
 checkSuffix : String -> String -> Maybe Int
 checkSuffix source1 source2 =
-    Maybe.map .lineNumber (List.head (diff source1 source2).commonSuffix)
+    Maybe.map .lineNumber (List.head (diff source1 source2 |> Debug.log "DIFF").commonSuffix)
 
 
 diffTest : String -> Maybe Int -> String -> String -> Test
 diffTest label mExpectedLineNumber source1 source2 =
     Test.test label <| \_ -> Expect.equal mExpectedLineNumber (checkSuffix source1 source2)
+
+
+noChangeTest : String -> String -> String -> Test
+noChangeTest label source1 source2 =
+    Test.test label <| \_ -> Expect.equal (Compiler.PrimitiveBlock.noChange Scripta.Language.MicroLaTeXLang source1 source2) True
 
 
 lengthTest : String -> String -> List Int -> Test
@@ -48,6 +53,10 @@ diffSuite =
         , diffTest "a3-a1" (Just 7) a3 a1
         , diffTest "a1-a4" (Just 9) a1 a4
         , diffTest "a4-a1" (Just 7) a4 a1
+        , Test.only <| diffTest "a5-a1" (Just 7) a5 a1
+        , noChangeTest "a5-a1, no change" a5 a1
+        , noChangeTest "a1-a5, no change" a1 a5
+        , diffTest "a1-a5" (Just 11) a1 a5
         ]
 
 
