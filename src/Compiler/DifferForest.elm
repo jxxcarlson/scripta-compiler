@@ -84,14 +84,10 @@ diff eq level u v =
             u |> List.drop la |> dropLast lb
 
         y =
+            -- IMPORTANT: taking y from v, the second argument
+            -- ensures that the line numbers in the common suffix
+            -- are correct
             v |> List.drop la |> dropLast lb
-
-        b1 =
-            if la == List.length u then
-                []
-
-            else
-                b_
 
         b =
             List.drop (List.length a + List.length y) v
