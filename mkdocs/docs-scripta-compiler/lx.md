@@ -1,4 +1,4 @@
-# MicroLaTeX Parser
+# MicroLaTeX
 
 The MicroLaTeX parser first transforms source
 into a list of primitive LaTeX blocks, then 
@@ -112,7 +112,7 @@ parse lines =
     lines |> parseLoop |> .blocks
 ```
 
-### The Parser
+### Parser
 
 The parser is defined in 
 module `Parser.PrimitiveLaTeXBlock` 

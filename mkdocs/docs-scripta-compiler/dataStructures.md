@@ -5,12 +5,16 @@ The primary data structures of the parser are
 1.  Primitive Blocks (`PrimitiveBlock`)
 2. Expressions (`Expr`)
 3. Expression blocks (`ExpressionBlock`)
-4. Accumulator (`Accumlator`)
+4. Accumulator (`Accumulator`)
 
 The parser first breaks source text into primitive
 blocks (1), then maps the internal language parser over 
 a list of primitive blocks to produce expression
-blocks (2).
+blocks (3).  Finally, the function
+[transformAccumulate](#accumulator) is mapped over the list 
+of expression blocks, simultaneously collecting
+information such as cross-references and updating
+the list of expression blocks with that information
 
 
 ## Primitive Blocks
@@ -90,9 +94,17 @@ type ExpressionBlock
 
 ## Edit records
 
+**Module:** Compiler.AbstractDifferentialCompiler
+
+To manage differential compilation, one uses
+_EditRecords_.  The main idea is to keep track 
+of the current list of primitive blocks (`List chunk`)
+and the current parse structure (`tree`).  When an
+edit is made, the source is parsed into primitive
+blocks and the new and old lists are compared, producing
+a _diff record_.  ... TO BE CONTINUED
 
 ```
--- Compiler.AbstractDifferentialCompiler
 type alias EditRecord chunk parsedChunk accumulator =
     { chunks : List chunk
     , parsed : List parsedChunk
@@ -104,9 +116,125 @@ type alias EditRecord chunk parsedChunk accumulator =
     }
 ```
 
+## Diff Records
+
+**Module:** Compiler.Differ
+
+Let u and v be two lists of things of type `p`. Write them as
+u = axb, v = ayb, where a is the greatest common prefix
+and b is the greatest common suffix. Return DiffRecord a b x y.
+The type parameter can be anything: characters, strings, 
+primitive blocks, etc.  In the example below, `p = Char`.
+
+```text
+type alias DiffRecord p =
+    { commonPrefix : List p
+    , commonSuffix : List p
+    , middleSegmentInSource : List p
+    , middleSegmentInTarget : List p
+    }
+```
+
+**Example**
+
+```text
+> import Compiler.Differ exposing(..)
+> a = "abcxyzdef" |> String.split ""
+["a","b","c","x","y","z","d","e","f"]
+    : List String
+> b = "abcXYZdef" |> String.split ""
+["a","b","c","X","Y","Z","d","e","f"]
+    : List String
+> diff a b
+{  commonPrefix = ["a","b","c"]
+ , commonSuffix = ["d","e","f"],
+ , middleSegmentInSource = ["x","y","z"]
+ , middleSegmentInTarget = ["X","Y","Z"] }
+```
+
+## Diffing a Forest
+
+Module `Compiler.DifferForest` is designed to diff lists with an
+implicit forest structure (list of trees) defined by a
+function `level: p -> Int`. In the resulting `DiffRecord`,
+the prefix, suffix, and middle segments all
+represent subforests.
+
+```text
+diff : (p -> p -> Bool) 
+       -> (p -> Int) 
+       -> List p 
+       -> List p 
+       -> DiffRecord p
+diff eq level u v =
+```
+
+The function `eq: p -> p -> Bool` tests for equality
+... XX: more detail.  In the case of primitive blocks ...
+important that line numbers be properly computed
+in the common suffix ...
+
+To illustrate
+the main issue, consider the lists `u` and `v` (below). These
+have an indentation structure like an outline for
+an article, and so define the structure
+of a forest. In the example
+below, the leaf `jkl` in the tree with root `def` is
+changed to `JKL`.
+
+```text
+    u:
+    ----
+    abc
+    def
+      ghi
+      jkl
+      mno
+    pqr
+
+    v:
+    ----
+    abc
+    def
+      ghi
+      JKL
+      mno
+    pqr
+```
+
+In this example the diff record represents the following structure:
+
+```text
+    commonPrefix:
+    ----
+    abc
+
+    middleSegmentInSource:
+    ---
+    def
+      ghi
+      jkl
+      mno
+
+    middleSegmentInTarget:
+    ---
+    def
+      ghi
+      JKL
+      mno
+
+    commonSuffix:
+    ---
+    pqr
+```
+
+
+
 ## Accumulator
 
-The `Accumulator` type, defined in module `Compiler.Acc`,
+**Module:** `Compiler.Acc`
+
+The `Accumulator` type
 is used to collect, build up, 
 and apply auxiliary information about the text.
 For example, the `headingIndex` stores the current
@@ -125,28 +253,13 @@ in standard LaTeX.
 
 
 ```text
-transformAccumulateTree : Tree ExpressionBlock -> Accumulator -> ( Accumulator, Tree ExpressionBlock )
-transformAccumulateTree tree acc =
-    Tree.mapAccumulate transformAccumulateBlock acc tree
+transformAccumulate : 
+        InitialAccumulatorData 
+        -> Forest ExpressionBlock 
+        -> ( Accumulator, Forest ExpressionBlock )
 ```
 
-where the function `transformAccumulateBlock` carries out the 
-per-block step:
-
-```text
-transformAccumulateBlock : Accumulator -> ExpressionBlock -> ( Accumulator, ExpressionBlock )
-```
-
-This function in turn calls upon functions `updateAccumulator` for (1) and 
-function `transformBlock` for (2):
-
-```text
-updateAccumulator : ExpressionBlock -> Accumulator -> Accumulator
-```
-
-```text
-transformBlock : Accumulator -> ExpressionBlock -> ExpressionBlock
-```
+Type definition:
 
 
 ```text
