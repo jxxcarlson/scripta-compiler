@@ -123,9 +123,6 @@ changeLineNumber delta ((Parser.Block.ExpressionBlock { lineNumber }) as block) 
 diffPostProcess : Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 diffPostProcess diffRecord =
     let
-        _ =
-            Debug.log "suffix" diffRecord.commonSuffix
-
         lengthS =
             Parser.PrimitiveBlock.listLength diffRecord.middleSegmentInSource
 
@@ -144,12 +141,6 @@ diffPostProcess diffRecord =
 shiftLines : Int -> Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock
 shiftLines delta diffRecord =
     let
-        _ =
-            Debug.log "!! Delta" delta
-
-        _ =
-            Debug.log "!! BEFORE" (List.map .lineNumber diffRecord.commonSuffix)
-
         newDiffRecord =
             { diffRecord | commonSuffix = shiftLinesInBlockList delta diffRecord.commonSuffix }
 
@@ -161,7 +152,7 @@ shiftLines delta diffRecord =
 
 shiftLinesInBlock : Int -> PrimitiveBlock -> PrimitiveBlock
 shiftLinesInBlock delta block =
-    { block | lineNumber = (block.lineNumber |> Debug.log "!! BLOCK") + (delta |> Debug.log "!! BLOCK DELTA") }
+    { block | lineNumber = block.lineNumber + delta }
 
 
 shiftLinesInBlockList : Int -> List PrimitiveBlock -> List PrimitiveBlock

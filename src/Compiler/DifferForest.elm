@@ -94,7 +94,7 @@ diff eq level u v =
                 b_
 
         b =
-            List.drop (List.length a + List.length y) v |> Debug.log "!!! SUFFIX"
+            List.drop (List.length a + List.length y) v
     in
     DiffRecord a b x y |> backwardClosure level |> forwardClosure level
 

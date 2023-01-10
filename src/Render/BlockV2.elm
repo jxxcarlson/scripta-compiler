@@ -642,10 +642,6 @@ env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, conte
 -}
 env : Int -> Accumulator -> Settings -> ExpressionBlock -> RenderData MarkupMsg
 env count acc settings (ExpressionBlock { name, indent, args, blockType, content, id, properties }) =
-    let
-        _ =
-            Debug.log "env, name" name
-    in
     case content of
         Left _ ->
             emptyRenderData

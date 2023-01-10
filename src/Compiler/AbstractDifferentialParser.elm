@@ -136,7 +136,6 @@ differentialParser lineNumber pLineNumber pChangeLineNumber parser diffRecord ed
             diffRecord.commonSuffix
                 |> List.head
                 |> Maybe.map lineNumber
-                |> Debug.log "!! leadingLineIndexOfCommonSuffix"
 
         initialSegmentParsed =
             List.take ii editRecord.parsed

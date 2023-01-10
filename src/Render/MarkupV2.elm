@@ -25,9 +25,6 @@ renderTree count acc settings tree =
 
         root =
             Render.BlockV2.render_ count acc settings (Tree.label tree)
-
-        _ =
-            Debug.log "TREE, ROOT, (name, children, inherit)" ( Parser.Block.getName root_, List.length <| Tree.children tree, root.inherit )
     in
     renderTree_ count acc settings (root.inherit |> Debug.log "TOP, inherit") tree
 

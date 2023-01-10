@@ -82,7 +82,7 @@ clickableParagraph : Int -> Element.Attribute MarkupMsg -> List (Element MarkupM
 clickableParagraph lineNumber color elements =
     let
         id =
-            String.fromInt lineNumber |> Debug.log "!! click"
+            String.fromInt lineNumber
     in
     Element.paragraph [ color, sendLineNumberOnClick lineNumber, htmlId id ] elements
 
