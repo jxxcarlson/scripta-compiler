@@ -83,10 +83,10 @@ elementAttribute key value =
 
 highlightElement id selectedId =
     if id == selectedId then
-        [ Events.onClick (SendId id), Background.color (Element.rgb 0.8 0.8 1.0) ]
+        [ Events.onClick (SendLineNumber id), Background.color (Element.rgb 0.8 0.8 1.0) ]
 
     else
-        [ Events.onClick (SendId id) ]
+        [ Events.onClick (SendLineNumber id) ]
 
 
 leftPadding =

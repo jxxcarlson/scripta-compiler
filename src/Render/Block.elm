@@ -273,7 +273,7 @@ subheading count acc settings ((ExpressionBlock { lineNumber, args }) as block) 
          , Font.bold
          , Render.Utility.makeId (getExprs block)
          , idAttribute lineNumber
-         , Events.onClick (SendId "title")
+         , Events.onClick (SendLineNumber "title")
          , Element.paddingEach { top = 10, bottom = 0, left = 0, right = 0 }
          ]
             ++ highlightAttrs lineNumber settings
@@ -313,7 +313,7 @@ section count acc settings ((ExpressionBlock { lineNumber, args, properties }) a
         ([ Font.size fontSize
          , Render.Utility.makeId exprs
          , idAttribute lineNumber
-         , Events.onClick (SendId "title")
+         , Events.onClick (SendLineNumber "title")
          , Element.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
          ]
             ++ highlightAttrs lineNumber settings
@@ -822,8 +822,8 @@ elmDict =
 
 
 sendLineNumberOnClick : Int -> Element.Attribute MarkupMsg
-sendLineNumberOnClick k =
-    Events.onClick (SendId (String.fromInt k))
+sendLineNumberOnClick lineNumber =
+    Events.onClick (SendLineNumber (String.fromInt lineNumber))
 
 
 idAttribute : Int -> Element.Attribute msg

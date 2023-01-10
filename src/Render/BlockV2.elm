@@ -154,7 +154,7 @@ selectedColor id settings =
 
 clickableParagraph : String -> Element.Attribute MarkupMsg -> List (Element.Attribute MarkupMsg)
 clickableParagraph id color =
-    [ color, Events.onClick (SendId id), htmlId id ]
+    [ color, Events.onClick (SendLineNumber id), htmlId id ]
 
 
 emptyRenderDatum =
@@ -389,7 +389,7 @@ subheading count acc settings ((ExpressionBlock { id, args }) as block) =
          , Font.bold
          , Render.Utility.makeId (getExprs block)
          , Render.Utility.elementAttribute "id" id
-         , Events.onClick (SendId "title")
+         , Events.onClick (SendLineNumber "title")
          , Element.paddingEach { top = 10, bottom = 0, left = 0, right = 0 }
          ]
             ++ highlightAttrs id settings
@@ -429,7 +429,7 @@ section count acc settings ((ExpressionBlock { id, args, properties }) as block)
         ([ Font.size fontSize
          , Render.Utility.makeId exprs
          , Render.Utility.elementAttribute "id" id
-         , Events.onClick (SendId "title")
+         , Events.onClick (SendLineNumber "title")
          , Element.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
          ]
             ++ highlightAttrs id settings
@@ -624,7 +624,7 @@ env_ count acc settings ((ExpressionBlock { name, indent, args, blockType, conte
                     [ Render.Utility.elementAttribute "id" id
                     , Element.paddingEach { left = 0, right = 0, top = 0, bottom = 18 }
                     , Font.color Render.Settings.redColor
-                    , Events.onClick (SendId id)
+                    , Events.onClick (SendLineNumber id)
                     ]
                 , content = [ Element.text "| env (missing name!)" ]
                 }
@@ -661,7 +661,7 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
                 , content = [ Element.text (blockHeading name args properties) ]
                 }
             , body =
-                { format = [ Font.italic, Events.onClick (SendId id), Element.width (Element.px settings.width) ]
+                { format = [ Font.italic, Events.onClick (SendLineNumber id), Element.width (Element.px settings.width) ]
                 , content = renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs
                 }
             }
@@ -709,7 +709,7 @@ indented count acc settings ((ExpressionBlock { id }) as block) =
     , inherit = []
     , head = { format = [ Font.bold ], content = [] }
     , body =
-        { format = [ Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings
+        { format = [ Events.onClick (SendLineNumber id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings
         , content = renderWithDefault "indent" count acc settings (getExprs block)
         }
     }
@@ -735,7 +735,7 @@ box count acc settings ((ExpressionBlock { id, name, args, properties }) as bloc
     , body =
         { format =
             [ Element.paddingXY 20 20
-            , Events.onClick (SendId id)
+            , Events.onClick (SendLineNumber id)
             , Render.Utility.elementAttribute "id" id
             , Background.color Color.paleBlue
 
@@ -781,14 +781,14 @@ comment count acc settings ((ExpressionBlock { id, args }) as block) =
     in
     Element.column [ Element.spacing 6 ]
         [ Element.el [ Font.bold, Font.color Color.blue ] (Element.text author)
-        , Element.paragraph ([ Font.italic, Font.color Color.blue, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+        , Element.paragraph ([ Font.italic, Font.color Color.blue, Events.onClick (SendLineNumber id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "| comment" count acc settings (getExprs block))
         ]
 
 
 quotation count acc settings ((ExpressionBlock { id, args, properties }) as block) =
     Element.column [ Element.spacing 12 ]
-        [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Events.onClick (SendId id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
+        [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Events.onClick (SendLineNumber id), Render.Utility.elementAttribute "id" id ] ++ highlightAttrs id settings)
             (renderWithDefault "(quotation)" count acc settings (getExprs block))
 
         --, Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
@@ -809,17 +809,17 @@ bibitem count acc settings ((ExpressionBlock { id, args }) as block) =
             , Element.width (Element.px 34)
             ]
             (Element.text label)
-        , Element.paragraph ([ Element.paddingEach { left = 25, right = 0, top = 0, bottom = 0 }, Events.onClick (SendId id) ] ++ highlightAttrs id settings)
+        , Element.paragraph ([ Element.paddingEach { left = 25, right = 0, top = 0, bottom = 0 }, Events.onClick (SendLineNumber id) ] ++ highlightAttrs id settings)
             (renderWithDefault "bibitem" count acc settings (getExprs block))
         ]
 
 
 highlightAttrs id settings =
     if id == settings.selectedId then
-        [ Events.onClick (SendId id), Background.color (Element.rgb 0.8 0.8 1.0) ]
+        [ Events.onClick (SendLineNumber id), Background.color (Element.rgb 0.8 0.8 1.0) ]
 
     else
-        [ Events.onClick (SendId id) ]
+        [ Events.onClick (SendLineNumber id) ]
 
 
 renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -854,7 +854,7 @@ renderIFrame count acc settings ((ExpressionBlock { id, properties }) as block) 
                             ""
             in
             Element.column
-                [ Events.onClick (SendId id)
+                [ Events.onClick (SendLineNumber id)
                 , Render.Utility.elementAttribute "id" id
                 , Element.width (Element.px w)
                 ]
@@ -919,7 +919,7 @@ renderCode count acc settings ((ExpressionBlock { id, args }) as block) =
 
         --, Element.spacing 8
         , Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Events.onClick (SendId id)
+        , Events.onClick (SendLineNumber id)
         , Render.Utility.elementAttribute "id" id
         ]
         (case List.head args of
@@ -934,7 +934,7 @@ renderCode count acc settings ((ExpressionBlock { id, args }) as block) =
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderVerse _ _ _ ((ExpressionBlock { id }) as block) =
     Element.column
-        [ Events.onClick (SendId id)
+        [ Events.onClick (SendLineNumber id)
         , Render.Utility.elementAttribute "id" id
         ]
         (List.map (renderVerbatimLine "plain") (String.lines (String.trim (getVerbatimContent block))))
@@ -1008,7 +1008,7 @@ renderVerbatim _ _ _ ((ExpressionBlock { id, args }) as block) =
             ]
         , Element.spacing 8
         , Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Events.onClick (SendId id)
+        , Events.onClick (SendLineNumber id)
         , Render.Utility.elementAttribute "id" id
         ]
         (case List.head args of
@@ -1050,7 +1050,7 @@ item count acc settings ((ExpressionBlock { id, args }) as block) =
             , Render.Settings.leftIndentation
             ]
             (Element.text label)
-        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
+        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendLineNumber id) ]
             (renderWithDefault "| item" count acc settings (getExprs block))
         ]
 
@@ -1098,7 +1098,7 @@ numbered count acc settings ((ExpressionBlock { id, args }) as block) =
             , Render.Settings.leftRightIndentation
             ]
             (Element.text (label ++ ". "))
-        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
+        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendLineNumber id) ]
             (renderWithDefault "| numbered" count acc settings (getExprs block))
         ]
 
@@ -1121,7 +1121,7 @@ desc count acc settings ((ExpressionBlock { id, args }) as block) =
     in
     Element.row ([ Element.alignTop, Render.Utility.elementAttribute "id" id, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs id settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
-        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendId id) ]
+        , Element.paragraph [ Render.Settings.leftIndentation, Events.onClick (SendLineNumber id) ]
             (renderWithDefault "| desc" count acc settings (getExprs block))
         ]
 

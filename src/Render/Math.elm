@@ -104,10 +104,10 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
 
         attrs =
             if id == settings.selectedId then
-                [ Events.onClick (SendId id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+                [ Events.onClick (SendLineNumber id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
 
             else
-                [ Events.onClick (SendId id), leftPadding ]
+                [ Events.onClick (SendLineNumber id), leftPadding ]
 
         attrs2 =
             if List.member "highlight" args then
@@ -159,10 +159,10 @@ aligned_ count acc settings _ id str =
 
         attrs =
             if id == settings.selectedId then
-                [ Events.onClick (SendId id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+                [ Events.onClick (SendLineNumber id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
 
             else
-                [ Events.onClick (SendId id), leftPadding ]
+                [ Events.onClick (SendLineNumber id), leftPadding ]
 
         deleteTrailingSlashes str_ =
             if String.right 2 str_ == "\\\\" then
