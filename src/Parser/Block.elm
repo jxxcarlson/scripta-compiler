@@ -1,6 +1,6 @@
 module Parser.Block exposing
     ( BlockType(..), ExpressionBlock(..)
-    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getName, getType, getVerbatimContent, setName
+    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getLineNumber, getName, getType, getVerbatimContent, setLineNumber, setName
     )
 
 {-| Source text is parsed into a tree of IntermediateBlocks, where the tree
@@ -64,6 +64,16 @@ type ExpressionBlock
         , sourceText : String
         , error : Maybe { error : String }
         }
+
+
+getLineNumber : ExpressionBlock -> Int
+getLineNumber (ExpressionBlock { lineNumber }) =
+    lineNumber
+
+
+setLineNumber : Int -> ExpressionBlock -> ExpressionBlock
+setLineNumber k (ExpressionBlock data) =
+    ExpressionBlock { data | lineNumber = k }
 
 
 getType : ExpressionBlock -> BlockType
