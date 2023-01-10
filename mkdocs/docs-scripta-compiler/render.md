@@ -52,7 +52,9 @@ markupDict :
 The entries in that dictionary are listed 
 below
 
-### Style
+### Function Elements
+
+#### Style
 
 ```text
 i, italic, textit, emph
@@ -63,7 +65,7 @@ underline
 large
 ```
 
-### Color
+#### Color
 
 ```text
 red
@@ -77,7 +79,7 @@ gray
 errorHighlight
 ```
 
-### Unclassified and ???
+#### Unclassified and ???
 
 ```text
 var
@@ -89,7 +91,7 @@ image
 ```
 
 
-### Formatting
+#### Formatting
 
 ```text
 vspace
@@ -97,7 +99,7 @@ par
 ```
 
 
-### Reference
+#### Reference
 
 ```text
 bibitem
@@ -111,7 +113,7 @@ footnote
 label
 ```
 
-### Document
+#### Document
 
 ```text
 hide
@@ -125,7 +127,7 @@ abstract
 ```
 
 
-### Links
+#### Links
 
 ```text
 link
@@ -135,14 +137,14 @@ ulink
 cslink
 ```
 
-### Scripta
+#### Scripta
 
 ```text
 tags
 ```
 
 
-### Character, LaTeX
+#### Character, LaTeX
 
 ```text
 dollarSign
@@ -160,5 +162,17 @@ mdash
 ndash
 ```
 
+### Verbatim Elements
+
+Under construction
+
+```text
+-- Render.Block
+renderVerbatimBlock : 
+   Int -> Accumulator -> Settings -> 
+   ExpressionBlock -> Element MarkupMsg
+```
 
 ## TeX Environments and L0 Blocks
+
+Under construction

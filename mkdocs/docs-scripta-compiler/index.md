@@ -13,7 +13,7 @@ The markup languages supported are
 The compiler
 provides interactive, real-time editing with error recovery for 
 these languages.
-See the [introductin](/docs-scripta-compiler/introduction/) and [overview](/docs-scripta-compiler/overview/) for more information.  See also
+See the [introduction](/docs-scripta-compiler/introduction/) and [overview](/docs-scripta-compiler/overview/) for more information.  See also
 this [conference talk at Lambda Days](https://www.youtube.com/watch?v=AE_QzSIsmMI)
 for an outline of the error recovery strategy.
 

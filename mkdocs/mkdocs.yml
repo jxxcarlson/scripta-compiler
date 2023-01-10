@@ -4,15 +4,13 @@ docs_dir: 'docs-scripta-compiler'
 
 theme: readthedocs
 
-
 nav:
   - Home: 'index.md'
-  - Introduction: 'introduction.md'
-  - Overview: 'overview.md'
-  - Data structures: 'dataStructures.md'
-  - Common code: 'common-code.md'
+  - 'introduction.md'
+  - 'overview.md'
+  - 'dataStructures.md'
+  - 'common-code.md'
   - 'synchronization.md'
+  - 'render.md'
   - 'l0.md'
   - 'lx.md'
-  - Rendering: 'render.md'
-  - Mkdocs: 'mkdocs.md'
