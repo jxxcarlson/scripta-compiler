@@ -106,6 +106,7 @@ updateFunctions lang =
     , lineNumber = \pb -> pb.lineNumber -- PrimitiveBlock -> Maybe Int
     , pLineNumber = Parser.Block.getLineNumber
     , changeLineNumber = changeLineNumber
+    , setLineNumber = Parser.Block.setLineNumber
     , chunkLevel = chunkLevel -- PrimitiveBlock -> Bool
     , diffPostProcess = identity
     , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk

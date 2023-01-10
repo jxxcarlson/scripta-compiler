@@ -25,6 +25,7 @@ type alias UpdateFunctions chunk parsedChunk acc =
     , chunkLevel : chunk -> Int
     , lineNumber : chunk -> Int
     , pLineNumber : parsedChunk -> Int
+    , setLineNumber : Int -> parsedChunk -> parsedChunk
     , changeLineNumber : Int -> parsedChunk -> parsedChunk
     , diffPostProcess : Compiler.Differ.DiffRecord chunk -> Compiler.Differ.DiffRecord chunk
     , chunkParser : chunk -> parsedChunk
@@ -82,13 +83,28 @@ a differential idList. This last step is perhaps unnecessary. To investigate.
 -}
 update :
     UpdateFunctions chunk parsedChunk acc
-    -> EditRecord chunk parsedChunk accumulator
+    -> EditRecord chunk parsedChunk acc -- accumulator
     -> String
     -> EditRecord chunk parsedChunk acc
 update f editRecord sourceText =
     let
         newChunks =
             f.chunker sourceText
+
+        newLineNumbers =
+            List.map f.lineNumber newChunks
+
+        renumber : List Int -> List parsedChunk -> List parsedChunk
+        renumber lineNumbers chunks =
+            List.map2 f.setLineNumber lineNumbers chunks
+
+        renumberIf : Compiler.Differ.DiffRecord chunk -> List parsedChunk -> List parsedChunk
+        renumberIf dr chunks =
+            if dr.middleSegmentInSource == [] && dr.middleSegmentInTarget == [] && dr.commonSuffix == [] then
+                renumber newLineNumbers chunks
+
+            else
+                chunks
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
@@ -97,6 +113,7 @@ update f editRecord sourceText =
         parsed_ : List parsedChunk
         parsed_ =
             differentialParser f.lineNumber f.pLineNumber f.changeLineNumber f.chunkParser diffRecord editRecord
+                |> renumberIf diffRecord
 
         tree_ : List (Tree parsedChunk)
         tree_ =
