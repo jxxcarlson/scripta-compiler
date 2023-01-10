@@ -158,7 +158,8 @@ Module `Compiler.DifferForest` is designed to diff lists with an
 implicit forest structure (list of trees) defined by a
 function `level: p -> Int`. In the resulting `DiffRecord`,
 the prefix, suffix, and middle segments all
-represent subforests.
+represent subforests.  The `diff` function in this 
+module is used to diff primitive blocks in the compiler.
 
 ```text
 diff : (p -> p -> Bool) 

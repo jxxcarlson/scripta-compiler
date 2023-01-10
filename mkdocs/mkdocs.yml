@@ -11,7 +11,6 @@ nav:
   - Overview: 'overview.md'
   - Data structures: 'dataStructures.md'
   - Common code: 'common-code.md'
-  - 'differential-compiler.md'
   - 'synchronization.md'
   - 'l0.md'
   - 'lx.md'
