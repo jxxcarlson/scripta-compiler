@@ -1,5 +1,6 @@
 module Compiler.DifferentialParser exposing
     ( EditRecord
+    , changeLineNumber
     , chunkLevel
     , chunker
     , diffPostProcess
@@ -102,6 +103,9 @@ updateFunctions : Language -> Compiler.AbstractDifferentialParser.UpdateFunction
 updateFunctions lang =
     { chunker = chunker lang -- String -> List PrimitiveBlock
     , chunkEq = Parser.PrimitiveBlock.eq -- PrimitiveBlock -> PrimitiveBlock -> Bool
+    , lineNumber = \pb -> pb.lineNumber -- PrimitiveBlock -> Maybe Int
+    , pLineNumber = Parser.Block.getLineNumber
+    , changeLineNumber = changeLineNumber
     , chunkLevel = chunkLevel -- PrimitiveBlock -> Bool
     , diffPostProcess = identity
     , chunkParser = toExprBlock lang --  PrimitiveBlock -> parsedChunk
@@ -109,6 +113,11 @@ updateFunctions lang =
     , getMessages = Markup.messagesFromForest -- : List parsedChunk -> List String
     , accMaker = Compiler.Acc.transformAccumulate -- : Scripta.Language.Language -> Forest parsedChunk -> (acc, Forest parsedChunk)
     }
+
+
+changeLineNumber : Int -> Parser.Block.ExpressionBlock -> Parser.Block.ExpressionBlock
+changeLineNumber delta ((Parser.Block.ExpressionBlock { lineNumber }) as block) =
+    Parser.Block.setLineNumber (lineNumber + delta) block
 
 
 diffPostProcess : Compiler.Differ.DiffRecord PrimitiveBlock -> Compiler.Differ.DiffRecord PrimitiveBlock

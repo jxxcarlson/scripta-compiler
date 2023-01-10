@@ -3,6 +3,7 @@ module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions
 import Compiler.Acc
 import Compiler.Differ
 import Compiler.DifferForest
+import Parser.Block
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 
@@ -22,6 +23,9 @@ type alias UpdateFunctions chunk parsedChunk acc =
     { chunker : String -> List chunk
     , chunkEq : chunk -> chunk -> Bool
     , chunkLevel : chunk -> Int
+    , lineNumber : chunk -> Int
+    , pLineNumber : parsedChunk -> Int
+    , changeLineNumber : Int -> parsedChunk -> parsedChunk
     , diffPostProcess : Compiler.Differ.DiffRecord chunk -> Compiler.Differ.DiffRecord chunk
     , chunkParser : chunk -> parsedChunk
     , forestFromBlocks : List parsedChunk -> List (Tree parsedChunk)
@@ -88,19 +92,11 @@ update f editRecord sourceText =
 
         diffRecord : Compiler.Differ.DiffRecord chunk
         diffRecord =
-            --  diffPostProcess will renumber the blocks in the common suffix
             Compiler.DifferForest.diff f.chunkEq f.chunkLevel editRecord.chunks newChunks |> f.diffPostProcess
-
-        newChunks_ =
-            -- diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonPrefix
-            -- diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonSuffix
-            -- TODO: the below is a BAD solution.  It forces an update of the commonSuffix, but we need a real solution
-            -- TODO: that just involves modifying the line numbers of the common soffux
-            diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget
 
         parsed_ : List parsedChunk
         parsed_ =
-            differentialParser f.chunkParser diffRecord editRecord
+            differentialParser f.lineNumber f.pLineNumber f.changeLineNumber f.chunkParser diffRecord editRecord
 
         tree_ : List (Tree parsedChunk)
         tree_ =
@@ -121,11 +117,14 @@ update f editRecord sourceText =
 
 
 differentialParser :
-    (chunk -> parsedChunk)
+    (chunk -> Int)
+    -> (parsedChunk -> Int)
+    -> (Int -> parsedChunk -> parsedChunk)
+    -> (chunk -> parsedChunk)
     -> Compiler.Differ.DiffRecord chunk
     -> EditRecord chunk parsedChunk acc
     -> List parsedChunk
-differentialParser parser diffRecord editRecord =
+differentialParser lineNumber pLineNumber pChangeLineNumber parser diffRecord editRecord =
     let
         ii =
             List.length diffRecord.commonPrefix
@@ -133,16 +132,43 @@ differentialParser parser diffRecord editRecord =
         it =
             List.length diffRecord.commonSuffix
 
+        leadingLineIndexOfCommonSuffix =
+            diffRecord.commonSuffix
+                |> List.head
+                |> Maybe.map lineNumber
+                |> Debug.log "!! leadingLineIndexOfCommonSuffix"
+
         initialSegmentParsed =
             List.take ii editRecord.parsed
 
-        terminalSegmentParsed =
+        terminalSegmentParsed_ =
             takeLast it editRecord.parsed
+
+        leadingLineIndexOfCommonSuffixParsed =
+            terminalSegmentParsed_
+                |> List.head
+                |> Maybe.map pLineNumber
+
+        delta =
+            Maybe.map2 (-) leadingLineIndexOfCommonSuffix leadingLineIndexOfCommonSuffixParsed
 
         middleSegmentParsed =
             List.map parser diffRecord.middleSegmentInTarget
+
+        newTerminalSegmentParsed =
+            case delta of
+                Nothing ->
+                    terminalSegmentParsed_
+
+                Just delta_ ->
+                    List.map (pChangeLineNumber delta_) terminalSegmentParsed_
+
+        leadingLineIndexOfNewTerminaSegmentParsed =
+            newTerminalSegmentParsed
+                |> List.head
+                |> Maybe.map pLineNumber
     in
-    initialSegmentParsed ++ middleSegmentParsed ++ terminalSegmentParsed
+    initialSegmentParsed ++ middleSegmentParsed ++ newTerminalSegmentParsed
 
 
 takeLast : Int -> List a -> List a
