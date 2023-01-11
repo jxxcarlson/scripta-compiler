@@ -1,4 +1,4 @@
-module Render.Block exposing (render, renderVerbatimBlock)
+module Render.Block exposing (compress, render, renderVerbatimBlock, textWidth)
 
 import Bool.Extra
 import Compiler.ASTTools as ASTTools
@@ -816,7 +816,7 @@ charDict =
         , ( "X", 2.0 )
         , ( "Y", 2.0 )
         , ( "Z", 2.0 )
-        , ( "$", -0.1 )
+        , ( "$", 1.0 )
         ]
 
 
@@ -834,17 +834,20 @@ charWidth c =
     Dict.get c charDict |> Maybe.withDefault 1.0
 
 
-
--- \\[a-zA-Z]*
+compress string =
+    string
+        ++ " "
+        |> Utility.userReplace "\\\\[a-z].*[^a-zA-Z0-9]" (\_ -> "a")
+        |> Utility.userReplace "\\[A-Z].*[^a-zA-Z0-9]" (\_ -> "A")
+        |> String.trim
 
 
 textWidth : String -> Float
 textWidth str_ =
     let
+        -- \\[a-z]*([^a-z])
         str =
-            str_
-                |> Utility.userReplace "\\[a-z]*^[a-zA-Z0-9]" (\_ -> "a")
-                |> Utility.userReplace "\\[A-Z]*^[a-zA-Z0-9]" (\_ -> "A")
+            str_ |> String.words |> List.map compress |> String.join " "
 
         letters =
             String.split "" str
@@ -872,7 +875,7 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
                 |> List.map (List.map String.trim)
 
         effectiveFontWidth_ =
-            7.0
+            9.0
 
         maxRowSize : Maybe Int
         maxRowSize =
