@@ -766,16 +766,24 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
         lines =
             getVerbatimContent block |> String.split "\\\\"
 
-        linesAsCells : List (List String)
-        linesAsCells =
+        cellsAsStrings_ : List (List String)
+        cellsAsStrings_ =
             List.map (String.split "&") lines
+                |> List.map (List.map String.trim)
 
         fontWidth_ =
-            12
+            11
+
+        maxRowSize : Maybe Int
+        maxRowSize =
+            List.map List.length cellsAsStrings_ |> List.maximum
+
+        cellsAsStrings =
+            List.filter (\row_ -> Just (List.length row_) == maxRowSize) cellsAsStrings_
 
         columnWidths : List Int
         columnWidths =
-            List.map (List.map String.length) linesAsCells
+            List.map (List.map String.length) cellsAsStrings
                 |> List.Extra.transpose
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
                 |> List.map (\w -> fontWidth_ * w)
@@ -785,34 +793,39 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
 
         parsedCells : List (List (List Expr))
         parsedCells =
-            List.map (List.map (MicroLaTeX.Parser.Expression.parse 0 >> Tuple.first)) linesAsCells
+            List.map (List.map (MicroLaTeX.Parser.Expression.parse 0 >> Tuple.first)) cellsAsStrings
 
+        renderer : Expr -> Element MarkupMsg
         renderer =
             Render.Elm.render count acc settings
 
-        row : List (Element MarkupMsg) -> Element MarkupMsg
-        row list =
-            Element.row [ Element.spacing 8, Element.width (Element.px 80) ] list
+        tableCell : Int -> List (Element MarkupMsg) -> Element MarkupMsg
+        tableCell colWidth list =
+            Element.row [ Element.paddingXY 8 8, Element.width (Element.px colWidth) ] list
 
-        --renderedCells : List (List (Element MarkupMsg))
-        renderedCells =
-            List.map (List.map (List.map renderer >> row)) parsedCells
+        renderCell : Int -> List Expr -> Element MarkupMsg
+        renderCell colWidth =
+            List.map renderer >> tableCell colWidth
 
-        renderedRows =
-            List.map row renderedCells
+        renderRow : List Int -> List (List Expr) -> Element MarkupMsg
+        renderRow colWidths cells =
+            List.map2 renderCell colWidths cells |> Element.row []
+
+        renderTable : List Int -> List (List (List Expr)) -> List (Element MarkupMsg)
+        renderTable colWidths cells =
+            let
+                f : List (List Expr) -> Element MarkupMsg
+                f =
+                    renderRow colWidths
+            in
+            List.map (renderRow colWidths) cells
     in
     Element.column
         [ Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
         , sendLineNumberOnClick lineNumber
         , idAttribute lineNumber
         ]
-        (case List.head args of
-            Just arg ->
-                renderedRows
-
-            Nothing ->
-                renderedRows
-        )
+        (renderTable columnWidths parsedCells)
 
 
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
