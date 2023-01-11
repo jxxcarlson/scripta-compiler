@@ -1126,6 +1126,7 @@ verbatimBlockNames =
     , "verse"
     , "mathmacros"
     , "textmacros"
+    , "tabular"
     , "hide"
     , "docinfo"
     , "datatable"

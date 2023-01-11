@@ -14,6 +14,7 @@ import Html
 import Html.Attributes
 import List.Extra
 import Maybe.Extra
+import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Parser.Utility
@@ -25,6 +26,7 @@ import Render.Math
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Utility
+import Scripta.Language
 import String.Extra
 
 
@@ -202,6 +204,7 @@ verbatimDict =
         , ( "code", renderCode )
         , ( "verse", renderVerse )
         , ( "verbatim", renderVerbatim )
+        , ( "tabular", renderTabular )
         , ( "hide", renderNothing )
         , ( "texComment", renderNothing )
         , ( "docinfo", renderNothing )
@@ -754,6 +757,61 @@ renderCode count acc settings ((ExpressionBlock { lineNumber, args }) as block) 
 
             Nothing ->
                 List.map (renderVerbatimLine "plain") (String.lines (String.trim (getVerbatimContent block)))
+        )
+
+
+renderTabular : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
+    let
+        lines =
+            getVerbatimContent block |> String.split "\\\\"
+
+        linesAsCells : List (List String)
+        linesAsCells =
+            List.map (String.split "&") lines
+
+        fontWidth_ =
+            12
+
+        columnWidths : List Int
+        columnWidths =
+            List.map (List.map String.length) linesAsCells
+                |> List.Extra.transpose
+                |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
+                |> List.map (\w -> fontWidth_ * w)
+
+        totalWidth =
+            List.sum columnWidths
+
+        parsedCells : List (List (List Expr))
+        parsedCells =
+            List.map (List.map (MicroLaTeX.Parser.Expression.parse 0 >> Tuple.first)) linesAsCells
+
+        renderer =
+            Render.Elm.render count acc settings
+
+        row : List (Element MarkupMsg) -> Element MarkupMsg
+        row list =
+            Element.row [ Element.spacing 8, Element.width (Element.px 80) ] list
+
+        --renderedCells : List (List (Element MarkupMsg))
+        renderedCells =
+            List.map (List.map (List.map renderer >> row)) parsedCells
+
+        renderedRows =
+            List.map row renderedCells
+    in
+    Element.column
+        [ Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
+        , sendLineNumberOnClick lineNumber
+        , idAttribute lineNumber
+        ]
+        (case List.head args of
+            Just arg ->
+                renderedRows
+
+            Nothing ->
+                renderedRows
         )
 
 
