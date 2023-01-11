@@ -28,6 +28,7 @@ import Render.Settings exposing (Settings)
 import Render.Utility
 import Scripta.Language
 import String.Extra
+import Utility
 
 
 
@@ -760,9 +761,103 @@ renderCode count acc settings ((ExpressionBlock { lineNumber, args }) as block) 
         )
 
 
+charDict : Dict String Float
+charDict =
+    Dict.fromList
+        [ ( "a", 1.0 )
+        , ( "b", 1.0 )
+        , ( "c", 1.0 )
+        , ( "d", 1.0 )
+        , ( "e", 1.0 )
+        , ( "f", 1.0 )
+        , ( "g", 1.0 )
+        , ( "h", 1.0 )
+        , ( "i", 1.0 )
+        , ( "j", 1.0 )
+        , ( "k", 1.0 )
+        , ( "l", 1.0 )
+        , ( "m", 1.0 )
+        , ( "n", 1.0 )
+        , ( "o", 1.0 )
+        , ( "p", 1.0 )
+        , ( "q", 1.0 )
+        , ( "r", 1.0 )
+        , ( "s", 1.0 )
+        , ( "t", 1.0 )
+        , ( "u", 1.0 )
+        , ( "v", 1.0 )
+        , ( "w", 1.0 )
+        , ( "x", 1.0 )
+        , ( "y", 1.0 )
+        , ( "z", 1.0 )
+        , ( "A", 2.0 )
+        , ( "B", 2.0 )
+        , ( "C", 2.0 )
+        , ( "D", 2.0 )
+        , ( "E", 2.0 )
+        , ( "F", 2.0 )
+        , ( "G", 2.0 )
+        , ( "H", 2.0 )
+        , ( "I", 2.0 )
+        , ( "J", 2.0 )
+        , ( "K", 2.0 )
+        , ( "L", 2.0 )
+        , ( "M", 2.0 )
+        , ( "N", 2.0 )
+        , ( "O", 2.0 )
+        , ( "P", 2.0 )
+        , ( "Q", 2.0 )
+        , ( "R", 2.0 )
+        , ( "S", 2.0 )
+        , ( "T", 2.0 )
+        , ( "U", 2.0 )
+        , ( "V", 2.0 )
+        , ( "W", 2.0 )
+        , ( "X", 2.0 )
+        , ( "Y", 2.0 )
+        , ( "Z", 2.0 )
+        , ( "$", -0.1 )
+        ]
+
+
+formatDict : Dict String (Element.Attribute msg)
+formatDict =
+    Dict.fromList
+        [ ( "l", Element.alignLeft )
+        , ( "r", Element.alignRight )
+        , ( "c", Element.centerX )
+        ]
+
+
+charWidth : String -> Float
+charWidth c =
+    Dict.get c charDict |> Maybe.withDefault 1.0
+
+
+
+-- \\[a-zA-Z]*
+
+
+textWidth : String -> Float
+textWidth str_ =
+    let
+        str =
+            str_
+                |> Utility.userReplace "\\[a-z]*^[a-zA-Z0-9]" (\_ -> "a")
+                |> Utility.userReplace "\\[A-Z]*^[a-zA-Z0-9]" (\_ -> "A")
+
+        letters =
+            String.split "" str
+    in
+    letters |> List.map charWidth |> List.sum
+
+
 renderTabular : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
     let
+        formatString =
+            String.split "" (List.head args |> Maybe.withDefault "") |> Debug.log "!!, formatString"
+
         lines =
             getVerbatimContent block |> String.split "\\\\"
 
@@ -771,8 +866,8 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
             List.map (String.split "&") lines
                 |> List.map (List.map String.trim)
 
-        fontWidth_ =
-            11
+        effectiveFontWidth_ =
+            7.0
 
         maxRowSize : Maybe Int
         maxRowSize =
@@ -783,10 +878,10 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
 
         columnWidths : List Int
         columnWidths =
-            List.map (List.map String.length) cellsAsStrings
+            List.map (List.map textWidth) cellsAsStrings
                 |> List.Extra.transpose
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
-                |> List.map (\w -> fontWidth_ * w)
+                |> List.map ((\w -> effectiveFontWidth_ * w) >> round)
 
         totalWidth =
             List.sum columnWidths
@@ -801,7 +896,7 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
 
         tableCell : Int -> List (Element MarkupMsg) -> Element MarkupMsg
         tableCell colWidth list =
-            Element.row [ Element.paddingXY 8 8, Element.width (Element.px colWidth) ] list
+            Element.row [ Element.paddingXY 12 8, Element.width (Element.px colWidth) ] list
 
         renderCell : Int -> List Expr -> Element MarkupMsg
         renderCell colWidth =
