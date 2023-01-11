@@ -855,8 +855,13 @@ textWidth str_ =
 renderTabular : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
     let
+        formatString : List String
         formatString =
-            String.split "" (List.head args |> Maybe.withDefault "") |> Debug.log "!!, formatString"
+            String.split "" (List.head args |> Maybe.withDefault "")
+
+        formatList : List (Element.Attribute msg)
+        formatList =
+            List.map (\c -> Dict.get c formatDict |> Maybe.withDefault Element.centerX) formatString
 
         lines =
             getVerbatimContent block |> String.split "\\\\"
@@ -883,6 +888,27 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
                 |> List.map (\column -> List.maximum column |> Maybe.withDefault 1)
                 |> List.map ((\w -> effectiveFontWidth_ * w) >> round)
 
+        fix colWidths fmtList =
+            let
+                m =
+                    List.length columnWidths
+
+                n =
+                    List.length fmtList
+            in
+            case compare m n of
+                LT ->
+                    List.repeat m Element.centerX
+
+                EQ ->
+                    fmtList
+
+                GT ->
+                    List.repeat m Element.centerX
+
+        extendedFormatList =
+            List.map2 (\x y -> ( x, y )) columnWidths (fix columnWidths formatList)
+
         totalWidth =
             List.sum columnWidths
 
@@ -894,33 +920,34 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
         renderer =
             Render.Elm.render count acc settings
 
-        tableCell : Int -> List (Element MarkupMsg) -> Element MarkupMsg
-        tableCell colWidth list =
-            Element.row [ Element.paddingXY 12 8, Element.width (Element.px colWidth) ] list
+        tableCell : ( Int, Element.Attribute MarkupMsg ) -> List (Element MarkupMsg) -> Element MarkupMsg
+        tableCell ( colWidth, fmt ) list =
+            Element.el [ Element.width (Element.px (colWidth + 18)) ]
+                (Element.row [ Element.paddingXY 12 8, fmt ] list)
 
-        renderCell : Int -> List Expr -> Element MarkupMsg
-        renderCell colWidth =
-            List.map renderer >> tableCell colWidth
+        renderCell : ( Int, Element.Attribute MarkupMsg ) -> List Expr -> Element MarkupMsg
+        renderCell ( colWidth, fmt ) =
+            List.map renderer >> tableCell ( colWidth, fmt )
 
-        renderRow : List Int -> List (List Expr) -> Element MarkupMsg
-        renderRow colWidths cells =
-            List.map2 renderCell colWidths cells |> Element.row []
+        renderRow : List ( Int, Element.Attribute MarkupMsg ) -> List (List Expr) -> Element MarkupMsg
+        renderRow formats cells =
+            List.map2 renderCell formats cells |> Element.row []
 
-        renderTable : List Int -> List (List (List Expr)) -> List (Element MarkupMsg)
-        renderTable colWidths cells =
+        renderTable : List ( Int, Element.Attribute MarkupMsg ) -> List (List (List Expr)) -> List (Element MarkupMsg)
+        renderTable formats cells =
             let
                 f : List (List Expr) -> Element MarkupMsg
                 f =
-                    renderRow colWidths
+                    renderRow formats
             in
-            List.map (renderRow colWidths) cells
+            List.map (renderRow formats) cells
     in
     Element.column
         [ Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
         , sendLineNumberOnClick lineNumber
         , idAttribute lineNumber
         ]
-        (renderTable columnWidths parsedCells)
+        (renderTable extendedFormatList parsedCells)
 
 
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
