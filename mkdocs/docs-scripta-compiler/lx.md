@@ -1,13 +1,16 @@
 # MicroLaTeX
 
 The MicroLaTeX parser first transforms source
-into a list of primitive LaTeX blocks, then 
-by mapping the parser for the internal
+into a list of 
+[primitive LaTeX blocks](#primite-blocks) using
+a [shift-reduce parser with error recovery](#primitive-block-parser).
+It then maps the parser for the internal
 language over this list, into a list of expression blocks.
 
 
-## Primitive Blocks 
+## Data Structures 
 
+### Primitive Blocks
 
 A primitve LaTeX block is a 13-field record as displayed
 below.  
@@ -96,13 +99,19 @@ args. (XX: improve this discussion)
         | Filled
     ```
    
-It is used in parsing source text into blocks and 
-is needed to handle nested blocks.
+    It is used by the primitive block parser and 
+    is needed to handle nested blocks.
 
 
 
 
-Lists of lines of text are parsed into lists 
+
+
+## Primitive Block Parser
+
+The parser is defined in 
+module `Parser.PrimitiveLaTeXBlock`.
+Lists of lines of text are parsed into lists
 of primitive blocks by the function
 
 ```
@@ -112,11 +121,47 @@ parse lines =
     lines |> parseLoop |> .blocks
 ```
 
-### Parser
+The strategy is to examine each line in turn,
+committing the current block if its mathching end 
+tag is found, otherwise pushing it onto a stack of blocks.
+All blocks are moved from the stack to the committed list
+when the "root" or first block on the stack 
+as well as all of its children are closed. If the stack is nonempty after all
+blocks have been consumed, there has been a syntax error, and
+so the error recovery procedure is invoked. The strategy is to close 
+the root block on the stack with an
+error message, then reparse after skipping over the root block.
+Error recovery always
+terminates and provides an indication of the nature of the error.
 
-The parser is defined in 
-module `Parser.PrimitiveLaTeXBlock` 
-by functions
+### Data structure
+
+```text
+-- Parser.PrimtiiveLaTeXBlock
+-- 14 fields
+type alias State =
+    { blocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
+    , holdingStack : List PrimitiveLaTeXBlock
+    , labelStack : List Label
+    , lines : List String
+    , sourceText : String
+    , firstBlockLine : Int
+    , indent : Int
+    , level : Int
+    , lineNumber : Int
+    , position : Int
+    , verbatimClassifier : Maybe Classification
+    , count : Int
+    , label : String
+    }
+```
+
+1. The `blocks` field holds the committed blocks — the eventual output
+of the parser.
+2. The `stack` field holds
+
+### Main parsing functions
 
 
 ```text
