@@ -41,13 +41,21 @@ type alias PrimitiveLaTeXBlock =
     }
 
 
+type alias PrimitiveBlockStack =
+    List PrimitiveLaTeXBlock
+
+
+type alias CommittedBlocks =
+    List PrimitiveLaTeXBlock
+
+
 type alias PrimitiveBlockError =
     { error : String }
 
 
 type alias State =
-    { blocks : List PrimitiveLaTeXBlock
-    , stack : List PrimitiveLaTeXBlock
+    { blocks : CommittedBlocks
+    , stack : PrimitiveBlockStack
     , holdingStack : List PrimitiveLaTeXBlock
     , labelStack : List Label
     , lines : List String
@@ -57,7 +65,7 @@ type alias State =
     , level : Int
     , lineNumber : Int
     , position : Int
-    , verbatimClassifier : Maybe Classification
+    , blockClassification : Maybe Classification
     , count : Int
     , label : String
     }
@@ -74,10 +82,10 @@ type Status
 
 
 type alias ParserOutput =
-    { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock, holdingStack : List PrimitiveLaTeXBlock }
+    { blocks : CommittedBlocks, stack : PrimitiveBlockStack, holdingStack : List PrimitiveLaTeXBlock }
 
 
-parse : List String -> List PrimitiveLaTeXBlock
+parse : List String -> CommittedBlocks
 parse lines =
     lines |> parseLoop |> .blocks
 
@@ -112,7 +120,7 @@ init lines =
     , level = -1
     , lineNumber = -1
     , position = 0
-    , verbatimClassifier = Nothing
+    , blockClassification = Nothing
     , count = -1
     , label = "0, START"
     }
@@ -143,9 +151,9 @@ nextStep state_ =
                 --_ =
                 --    Debug.log "LINE" ( state.lineNumber, currentLine.content, ( ClassifyBlock.classify currentLine.content state.verbatimClassifier, state.verbatimClassifier, state.level ) )
             in
-            case ClassifyBlock.classify currentLine.content state.verbatimClassifier of
+            case ClassifyBlock.classify currentLine.content state.blockClassification of
                 CBeginBlock label ->
-                    Loop (state |> beginBlock (CBeginBlock label) currentLine)
+                    Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
 
                 CEndBlock label ->
                     -- TODO: changed, review
@@ -159,7 +167,7 @@ nextStep state_ =
                     -- Loop (state |> handleMathBlock currentLine)
                     case List.head state.labelStack of
                         Nothing ->
-                            Loop (state |> beginBlock CMathBlockDelim currentLine)
+                            Loop (state |> dispatchBeginBlock CMathBlockDelim currentLine)
 
                         Just label ->
                             if label.classification == CMathBlockDelim then
@@ -167,7 +175,7 @@ nextStep state_ =
                                 state |> endBlock CMathBlockDelim currentLine
 
                             else
-                                Loop (state |> beginBlock CMathBlockDelim currentLine)
+                                Loop (state |> dispatchBeginBlock CMathBlockDelim currentLine)
 
                 CVerbatimBlockDelim ->
                     Loop (state |> handleVerbatimBlock currentLine)
@@ -183,64 +191,61 @@ nextStep state_ =
 -- HANDLERS
 
 
+dispatchBeginBlock : Classification -> Line -> State -> State
+dispatchBeginBlock classifier line state =
+    case List.Extra.uncons state.stack of
+        -- stack is empty; begin block
+        Nothing ->
+            beginBlock classifier line state
+
+        -- stack is not empty; change status of stack top if need be, then begin block
+        Just ( block, rest ) ->
+            beginBlock classifier line { state | stack = changeStatusOfStackTop block rest state }
+
+
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            classifyBlock classifier line state
-
-        Just ( block, rest ) ->
-            classifyBlock classifier line { state | stack = fillBlockOnStack block rest state }
-
-
-classifyBlock : Classification -> Line -> State -> State
-classifyBlock classifier line state =
-    case state.verbatimClassifier of
-        Nothing ->
-            beginBlock2 classifier line state
-
+    case state.blockClassification of
         Just _ ->
             state
 
+        Nothing ->
+            let
+                newBlockClassifier =
+                    case classifier of
+                        CBeginBlock name ->
+                            if List.member name verbatimBlockNames then
+                                Just classifier
 
-beginBlock2 : Classification -> Line -> State -> State
-beginBlock2 classifier line state =
-    let
-        newVerbatimClassifier =
-            case classifier of
-                CBeginBlock name ->
-                    if List.member name verbatimBlockNames then
-                        Just classifier
+                            else
+                                Nothing
 
-                    else
-                        Nothing
+                        _ ->
+                            Nothing
 
-                _ ->
-                    Nothing
+                level =
+                    state.level + 1
 
-        level =
-            state.level + 1
+                newBlock =
+                    blockFromLine level line |> elaborate line
 
-        newBlock =
-            blockFromLine level line |> elaborate line
+                labelStack =
+                    case List.Extra.uncons state.labelStack of
+                        Nothing ->
+                            state.labelStack
 
-        labelStack =
-            case List.Extra.uncons state.labelStack of
-                Nothing ->
-                    state.labelStack
-
-                Just ( label, rest_ ) ->
-                    { label | status = Filled } :: rest_
-    in
-    { state
-        | lineNumber = line.lineNumber
-        , verbatimClassifier = newVerbatimClassifier
-        , firstBlockLine = line.lineNumber
-        , indent = line.indent
-        , level = level
-        , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack
-        , stack = newBlock :: state.stack
-    }
+                        Just ( label, rest_ ) ->
+                            { label | status = Filled } :: rest_
+            in
+            { state
+                | lineNumber = line.lineNumber
+                , blockClassification = newBlockClassifier
+                , firstBlockLine = line.lineNumber
+                , indent = line.indent
+                , level = level
+                , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack
+                , stack = newBlock :: state.stack
+            }
 
 
 handleSpecial : Classification -> Line -> State -> State
@@ -250,7 +255,7 @@ handleSpecial classifier line state =
             handleSpecial_ classifier line state
 
         Just ( block, rest ) ->
-            handleSpecial_ classifier line { state | stack = fillBlockOnStack block rest state }
+            handleSpecial_ classifier line { state | stack = changeStatusOfStackTop block rest state }
 
 
 handleSpecial_ : Classification -> Line -> State -> State
@@ -311,8 +316,14 @@ handleSpecial_ classifier line state =
     }
 
 
-fillBlockOnStack : PrimitiveLaTeXBlock -> List PrimitiveLaTeXBlock -> State -> List PrimitiveLaTeXBlock
-fillBlockOnStack block rest state =
+{-|
+
+    This function changes the status of the block on top of the
+    stack to Filled if status = Started.
+
+-}
+changeStatusOfStackTop : PrimitiveLaTeXBlock -> PrimitiveBlockStack -> State -> PrimitiveBlockStack
+changeStatusOfStackTop block rest state =
     if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
         state.stack
 
@@ -322,40 +333,13 @@ fillBlockOnStack block rest state =
                 List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
 
             newBlock =
+                -- set the status to Filled and grab lines from state.lines to fill the content field of the block
                 { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
         in
         newBlock :: rest
 
     else
         state.stack
-
-
-
---
---{-| update stack
----}
---fillBlockOnStack : State -> List PrimitiveLaTeXBlock
---fillBlockOnStack state =
---    case List.Extra.uncons state.stack of
---        Nothing ->
---            state.stack
---
---        Just ( block, rest ) ->
---            if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
---                state.stack
---
---            else if (List.head state.labelStack |> Maybe.map .status) == Just Started then
---                let
---                    firstBlockLine =
---                        List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
---
---                    newBlock =
---                        { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
---                in
---                newBlock :: rest
---
---            else
---                state.stack
 
 
 endBlock : Classification -> Line -> State -> Step State State
@@ -371,7 +355,7 @@ endBlock classification currentLine state =
 endBlock1 : Classification -> Line -> State -> State
 endBlock1 classification currentLine state =
     -- TODO: changed, review
-    case state.verbatimClassifier of
+    case state.blockClassification of
         Nothing ->
             endBlock2 classification currentLine state
 
@@ -393,14 +377,14 @@ endBlock2 classifier line state =
     -- TODO: changed, review
     case List.head state.labelStack of
         Nothing ->
-            { state | verbatimClassifier = Nothing }
+            { state | blockClassification = Nothing }
 
         Just label ->
             if ClassifyBlock.match label.classification classifier && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line { state | verbatimClassifier = Nothing }
+                endBlockOnMatch (Just label) classifier line { state | blockClassification = Nothing }
 
             else
-                endBlockOnMismatch label classifier line { state | verbatimClassifier = Nothing }
+                endBlockOnMismatch label classifier line { state | blockClassification = Nothing }
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
@@ -515,7 +499,7 @@ endBlockOnMatch labelHead classifier line state =
                     -- TODO. I think the change below is OK because (referring to line above),
                     -- when fillBlockOnStack is invoked, it uses the current state, hence
                     -- the values block and rest as defined in Just (block, rest) ->
-                    , stack = List.drop 1 (fillBlockOnStack block rest state)
+                    , stack = List.drop 1 (changeStatusOfStackTop block rest state)
                     , labelStack = List.drop 1 state.labelStack
                     , level = state.level - 1
                 }
@@ -629,7 +613,7 @@ plainText state currentLine =
             Loop (handleComment currentLine state)
 
         else
-            Loop (beginBlock CPlainText currentLine state)
+            Loop (dispatchBeginBlock CPlainText currentLine state)
 
     else
         Loop state
@@ -1002,7 +986,7 @@ recoverFromError state =
                         , holdingStack = []
                         , labelStack = []
                         , lineNumber = lineNumber
-                        , verbatimClassifier = Nothing
+                        , blockClassification = Nothing
                     }
 
 
