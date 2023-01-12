@@ -53,7 +53,7 @@ diffSuite =
         , diffTest "a3-a1" (Just 7) a3 a1
         , diffTest "a1-a4" (Just 9) a1 a4
         , diffTest "a4-a1" (Just 7) a4 a1
-        , Test.only <| diffTest "a5-a1" (Just 7) a5 a1
+        , diffTest "a5-a1" (Just 7) a5 a1
         , noChangeTest "a5-a1, no change" a5 a1
         , noChangeTest "a1-a5, no change" a1 a5
         , diffTest "a1-a5" (Just 11) a1 a5
