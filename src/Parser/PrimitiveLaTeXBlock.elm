@@ -127,13 +127,24 @@ init lines =
     This is the driver function for the parser's functional loop.
 
       - Increment state.lineNumber.
+
       - If the input (state.lines) has been consumed and
             - the stack is empty, return Done state
             - the stack is non empty, return recoverFromError state
       - Let the current raw line be the string at index state.lineNumber of state.lines.
-        Compute a new state as a function that raw line and the current state.
-            -
-            -
+      - Classify the raw line, a value of type Classification:
+
+            type Classification
+                = CBeginBlock String
+                | CEndBlock String
+                | CSpecialBlock LXSpecial
+                | CMathBlockDelim
+                | CVerbatimBlockDelim
+                | CPlainText
+                | CEmpty
+
+      - Invoke a handler based on the classification that returns a value
+        of type Step State State
 
 -}
 nextStep : State -> Step State State
