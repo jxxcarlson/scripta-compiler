@@ -3,7 +3,7 @@ module Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parse, parseLoo
 {-|
 
     The 'parser' function transforms a list of strings into a list of primitive blocks
-    for LaTeX, making use of an error recovery stategy in the case of syntax errors,
+    for LaTeX, making use of an error recovery strategy in the case of syntax errors,
     e.g., unterminated blocks.
 
     The strategy is to examine each line in turn, building up a stack of blocks,
@@ -126,11 +126,14 @@ nextStep state_ =
     in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
+            -- no more input, stack empty,so end the parser loop
             if List.isEmpty state.stack then
                 Done state
 
             else
-                Loop (fixAndRewind state)
+                -- no more input, but stack is empty, so there is an error:
+                -- invoke the error recovery procedure
+                Loop (recoverFromError state)
 
         Just rawLine ->
             let
@@ -184,14 +187,14 @@ beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
     case List.Extra.uncons state.stack of
         Nothing ->
-            beginBlock1 classifier line state
+            classifyBlock classifier line state
 
-        Just _ ->
-            beginBlock1 classifier line { state | stack = fillBlockOnStack state }
+        Just ( block, rest ) ->
+            classifyBlock classifier line { state | stack = fillBlockOnStack block rest state }
 
 
-beginBlock1 : Classification -> Line -> State -> State
-beginBlock1 classifier line state =
+classifyBlock : Classification -> Line -> State -> State
+classifyBlock classifier line state =
     case state.verbatimClassifier of
         Nothing ->
             beginBlock2 classifier line state
@@ -246,8 +249,8 @@ handleSpecial classifier line state =
         Nothing ->
             handleSpecial_ classifier line state
 
-        Just _ ->
-            handleSpecial_ classifier line { state | stack = fillBlockOnStack state }
+        Just ( block, rest ) ->
+            handleSpecial_ classifier line { state | stack = fillBlockOnStack block rest state }
 
 
 handleSpecial_ : Classification -> Line -> State -> State
@@ -308,30 +311,51 @@ handleSpecial_ classifier line state =
     }
 
 
-{-| update stack
--}
-fillBlockOnStack : State -> List PrimitiveLaTeXBlock
-fillBlockOnStack state =
-    case List.Extra.uncons state.stack of
-        Nothing ->
-            state.stack
+fillBlockOnStack : PrimitiveLaTeXBlock -> List PrimitiveLaTeXBlock -> State -> List PrimitiveLaTeXBlock
+fillBlockOnStack block rest state =
+    if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
+        state.stack
 
-        Just ( block, rest ) ->
-            if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
-                state.stack
+    else if (List.head state.labelStack |> Maybe.map .status) == Just Started then
+        let
+            firstBlockLine =
+                List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
 
-            else if (List.head state.labelStack |> Maybe.map .status) == Just Started then
-                let
-                    firstBlockLine =
-                        List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
+            newBlock =
+                { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
+        in
+        newBlock :: rest
 
-                    newBlock =
-                        { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
-                in
-                newBlock :: rest
+    else
+        state.stack
 
-            else
-                state.stack
+
+
+--
+--{-| update stack
+---}
+--fillBlockOnStack : State -> List PrimitiveLaTeXBlock
+--fillBlockOnStack state =
+--    case List.Extra.uncons state.stack of
+--        Nothing ->
+--            state.stack
+--
+--        Just ( block, rest ) ->
+--            if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
+--                state.stack
+--
+--            else if (List.head state.labelStack |> Maybe.map .status) == Just Started then
+--                let
+--                    firstBlockLine =
+--                        List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
+--
+--                    newBlock =
+--                        { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
+--                in
+--                newBlock :: rest
+--
+--            else
+--                state.stack
 
 
 endBlock : Classification -> Line -> State -> Step State State
@@ -487,7 +511,11 @@ endBlockOnMatch labelHead classifier line state =
                     | holdingStack = newBlock :: state.holdingStack
 
                     -- blocks = newBlock :: state.blocks
-                    , stack = List.drop 1 (fillBlockOnStack state)
+                    -- , stack = List.drop 1 (fillBlockOnStack state)
+                    -- TODO. I think the change below is OK because (referring to line above),
+                    -- when fillBlockOnStack is invoked, it uses the current state, hence
+                    -- the values block and rest as defined in Just (block, rest) ->
+                    , stack = List.drop 1 (fillBlockOnStack block rest state)
                     , labelStack = List.drop 1 state.labelStack
                     , level = state.level - 1
                 }
@@ -915,8 +943,8 @@ handleVerbatimBlock line state =
 -- ERROR RECOVERY
 
 
-fixAndRewind : State -> State
-fixAndRewind state =
+recoverFromError : State -> State
+recoverFromError state =
     case List.Extra.unconsLast state.stack of
         Nothing ->
             state
