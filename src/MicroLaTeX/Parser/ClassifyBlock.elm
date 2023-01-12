@@ -72,24 +72,15 @@ classifierParser =
         ]
 
 
-classify : String -> Maybe Classification -> Classification
-classify str verbatimClassif_ =
+classify : String -> Classification
+classify str =
     let
         str_ =
             String.trimLeft str
     in
     case Parser.run classifierParser str_ of
-        Ok classif ->
-            case verbatimClassif_ of
-                Nothing ->
-                    classif
-
-                Just verbatimClassif ->
-                    if match verbatimClassif classif then
-                        classif
-
-                    else
-                        CPlainText
+        Ok classificationOfLine ->
+            classificationOfLine
 
         Err _ ->
             if str == "" then

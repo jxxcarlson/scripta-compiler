@@ -158,7 +158,7 @@ nextStep state_ =
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
             in
-            case ClassifyBlock.classify currentLine.content state.blockClassification of
+            case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
                     Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
 
@@ -1169,7 +1169,7 @@ verbatimBlockNames =
 
 getBlockTypeAndLabel : String -> Maybe Classification -> ( PrimitiveBlockType, Maybe String )
 getBlockTypeAndLabel str verbatimClassification =
-    case ClassifyBlock.classify str verbatimClassification of
+    case ClassifyBlock.classify str of
         CBeginBlock label ->
             if List.member label verbatimBlockNames then
                 ( PBVerbatim, Just label )
