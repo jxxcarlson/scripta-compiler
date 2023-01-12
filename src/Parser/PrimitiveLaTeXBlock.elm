@@ -122,6 +122,20 @@ init lines =
     }
 
 
+{-|
+
+    This is the driver function for the parser's functional loop.
+
+      - Increment state.lineNumber.
+      - If the input (state.lines) has been consumed and
+            - the stack is empty, return Done state
+            - the stack is non empty, return recoverFromError state
+      - Let the current raw line be the string at index state.lineNumber of state.lines.
+        Compute a new state as a function that raw line and the current state.
+            -
+            -
+
+-}
 nextStep : State -> Step State State
 nextStep state_ =
     let
@@ -143,9 +157,6 @@ nextStep state_ =
             let
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
-
-                --_ =
-                --    Debug.log "LINE" ( state.lineNumber, currentLine.content, ( ClassifyBlock.classify currentLine.content state.verbatimClassifier, state.verbatimClassifier, state.level ) )
             in
             case ClassifyBlock.classify currentLine.content state.blockClassification of
                 CBeginBlock label ->
@@ -156,7 +167,7 @@ nextStep state_ =
                     endBlock (CEndBlock label) currentLine state
 
                 CSpecialBlock label ->
-                    Loop <| handleSpecial (CSpecialBlock label) currentLine state
+                    Loop <| handleSpecialBlock (CSpecialBlock label) currentLine state
 
                 CMathBlockDelim ->
                     -- TODO: changed, review
@@ -199,13 +210,20 @@ dispatchBeginBlock classifier line state =
             beginBlock classifier line { state | stack = changeStatusOfStackTop block rest state }
 
 
+{-|
+
+    1. Modify the classifier if need be to account for verbatim blocks
+
+    2. Increase the block level, then construct a new block based on the
+       new level and the current line; push this block onto the stack.
+
+    3. If the labelStack is nonempty, set the status of the top label to Filled.
+
+    4. Update the state with the results of these computations.
+
+-}
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
-    --case state.blockClassification of
-    --    Just _ ->
-    --        state
-    --
-    --    Nothing ->
     let
         newBlockClassifier =
             case classifier of
@@ -244,8 +262,8 @@ beginBlock classifier line state =
     }
 
 
-handleSpecial : Classification -> Line -> State -> State
-handleSpecial classifier line state =
+handleSpecialBlock : Classification -> Line -> State -> State
+handleSpecialBlock classifier line state =
     case List.Extra.uncons state.stack of
         Nothing ->
             handleSpecial_ classifier line state
