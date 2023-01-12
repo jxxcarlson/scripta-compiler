@@ -1,24 +1,49 @@
 module Render.Utility exposing
     ( elementAttribute
     , getArg
+    , getVerbatimContent
     , highlightElement
     , hspace
+    , idAttribute
     , internalLink
     , keyValueDict
     , makeId
+    , sendLineNumberOnClick
     , vspace
     )
 
 import Compiler.ASTTools
 import Dict exposing (Dict)
+import Either
 import Element exposing (paddingEach)
 import Element.Background as Background
 import Element.Events as Events
 import Html.Attributes
 import List.Extra
 import Maybe.Extra
+import Parser.Block
 import Parser.Expr
 import Render.Msg exposing (MarkupMsg(..))
+
+
+getVerbatimContent : Parser.Block.ExpressionBlock -> String
+getVerbatimContent (Parser.Block.ExpressionBlock { content }) =
+    case content of
+        Either.Left str ->
+            str
+
+        Either.Right _ ->
+            ""
+
+
+sendLineNumberOnClick : Int -> Element.Attribute MarkupMsg
+sendLineNumberOnClick lineNumber =
+    Events.onClick (SendLineNumber (String.fromInt lineNumber))
+
+
+idAttribute : Int -> Element.Attribute msg
+idAttribute k =
+    elementAttribute "id" (String.fromInt k)
 
 
 getArg : String -> Int -> List String -> String

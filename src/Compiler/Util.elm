@@ -47,23 +47,13 @@ middle list =
     list |> List.drop 1 |> dropLast
 
 
-userReplace : String -> (Regex.Match -> String) -> String -> String
-userReplace userRegex replacer string =
-    case Regex.fromString userRegex of
-        Nothing ->
-            string
-
-        Just regex ->
-            Regex.replace regex replacer string
-
-
 transformLabel : String -> String
 transformLabel str =
     let
         normalize m =
             m |> List.map (Maybe.withDefault "") |> String.join "" |> String.trim
     in
-    userReplace "\\[label(.*)\\]" (\m -> "\\label{" ++ (m.submatches |> normalize) ++ "}") str
+    Utility.userReplace "\\[label(.*)\\]" (\m -> "\\label{" ++ (m.submatches |> normalize) ++ "}") str
 
 
 {-| Apply a parser zero or more times and return a list of the results.
