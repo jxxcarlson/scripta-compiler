@@ -173,6 +173,32 @@ renderVerbatimBlock :
    ExpressionBlock -> Element MarkupMsg
 ```
 
-## TeX Environments and L0 Blocks
+## Verbatim Blocks
+
+
+```text
+-- Render.Block and Parser.PrimitiveLaTeXBlock
+-- 21 blocks
+equation
+aligned
+math
+code
+verbatim
+verse
+mathmacros
+textmacros
+tabular
+hide
+docinfo
+datatable
+chart
+svg
+quiver
+image
+tikz
+load-files
+include
+iframe
+```
 
 Under construction

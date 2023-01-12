@@ -194,6 +194,11 @@ blockDict =
         ]
 
 
+
+-- IMPORTANT NOTE: all of the verbatim block names listed below
+-- must be present in Parser.PrimitiveLaTeXBlock.verbatimNames
+
+
 verbatimDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg)
 verbatimDict =
     Dict.fromList
@@ -203,7 +208,7 @@ verbatimDict =
         , ( "code", renderCode )
         , ( "verse", renderVerse )
         , ( "verbatim", renderVerbatim )
-        , ( "tabular", Render.Tabular.renderTabular )
+        , ( "tabular", Render.Tabular.render )
         , ( "hide", renderNothing )
         , ( "texComment", renderNothing )
         , ( "docinfo", renderNothing )
