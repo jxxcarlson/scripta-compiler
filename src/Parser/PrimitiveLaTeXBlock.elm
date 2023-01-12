@@ -41,21 +41,13 @@ type alias PrimitiveLaTeXBlock =
     }
 
 
-type alias PrimitiveBlockStack =
-    List PrimitiveLaTeXBlock
-
-
-type alias CommittedBlocks =
-    List PrimitiveLaTeXBlock
-
-
 type alias PrimitiveBlockError =
     { error : String }
 
 
 type alias State =
-    { committedBlocks : CommittedBlocks
-    , stack : PrimitiveBlockStack
+    { committedBlocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
     , holdingStack : List PrimitiveLaTeXBlock
     , labelStack : List Label
     , lines : List String
@@ -72,7 +64,11 @@ type alias State =
 
 
 type alias Label =
-    { classification : ClassifyBlock.Classification, level : Int, status : Status, lineNumber : Int }
+    { classification : ClassifyBlock.Classification
+    , level : Int
+    , status : Status
+    , lineNumber : Int
+    }
 
 
 type Status
@@ -82,10 +78,10 @@ type Status
 
 
 type alias ParserOutput =
-    { blocks : CommittedBlocks, stack : PrimitiveBlockStack, holdingStack : List PrimitiveLaTeXBlock }
+    { blocks : List PrimitiveLaTeXBlock, stack : List PrimitiveLaTeXBlock, holdingStack : List PrimitiveLaTeXBlock }
 
 
-parse : List String -> CommittedBlocks
+parse : List String -> List PrimitiveLaTeXBlock
 parse lines =
     lines |> parseLoop |> .blocks
 
@@ -205,47 +201,47 @@ dispatchBeginBlock classifier line state =
 
 beginBlock : Classification -> Line -> State -> State
 beginBlock classifier line state =
-    case state.blockClassification of
-        Just _ ->
-            state
+    --case state.blockClassification of
+    --    Just _ ->
+    --        state
+    --
+    --    Nothing ->
+    let
+        newBlockClassifier =
+            case classifier of
+                CBeginBlock name ->
+                    if List.member name verbatimBlockNames then
+                        Just classifier
 
-        Nothing ->
-            let
-                newBlockClassifier =
-                    case classifier of
-                        CBeginBlock name ->
-                            if List.member name verbatimBlockNames then
-                                Just classifier
+                    else
+                        Nothing
 
-                            else
-                                Nothing
+                _ ->
+                    Nothing
 
-                        _ ->
-                            Nothing
+        level =
+            state.level + 1
 
-                level =
-                    state.level + 1
+        newBlock =
+            blockFromLine level line |> elaborate line
 
-                newBlock =
-                    blockFromLine level line |> elaborate line
+        labelStack =
+            case List.Extra.uncons state.labelStack of
+                Nothing ->
+                    state.labelStack
 
-                labelStack =
-                    case List.Extra.uncons state.labelStack of
-                        Nothing ->
-                            state.labelStack
-
-                        Just ( label, rest_ ) ->
-                            { label | status = Filled } :: rest_
-            in
-            { state
-                | lineNumber = line.lineNumber
-                , blockClassification = newBlockClassifier
-                , firstBlockLine = line.lineNumber
-                , indent = line.indent
-                , level = level
-                , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack
-                , stack = newBlock :: state.stack
-            }
+                Just ( label, rest_ ) ->
+                    { label | status = Filled } :: rest_
+    in
+    { state
+        | lineNumber = line.lineNumber
+        , blockClassification = newBlockClassifier
+        , firstBlockLine = line.lineNumber
+        , indent = line.indent
+        , level = level
+        , labelStack = { classification = classifier, level = level, status = Started, lineNumber = line.lineNumber } :: labelStack
+        , stack = newBlock :: state.stack
+    }
 
 
 handleSpecial : Classification -> Line -> State -> State
@@ -322,7 +318,7 @@ handleSpecial_ classifier line state =
     stack to Filled if status = Started.
 
 -}
-changeStatusOfStackTop : PrimitiveLaTeXBlock -> PrimitiveBlockStack -> State -> PrimitiveBlockStack
+changeStatusOfStackTop : PrimitiveLaTeXBlock -> List PrimitiveLaTeXBlock -> State -> List PrimitiveLaTeXBlock
 changeStatusOfStackTop block rest state =
     if (List.head state.labelStack |> Maybe.map .status) == Just Filled then
         state.stack

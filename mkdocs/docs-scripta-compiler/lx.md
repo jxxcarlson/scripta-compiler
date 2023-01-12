@@ -157,6 +157,17 @@ type alias State =
     }
 ```
 
+where
+
+```text
+type alias Label =
+    { classification : ClassifyBlock.Classification
+    , level : Int
+    , status : Status
+    , lineNumber : Int
+    }
+```
+
 1. The `blocks` field holds the committed blocks — the eventual output
 of the parser.
 2. The `stack` field holds
