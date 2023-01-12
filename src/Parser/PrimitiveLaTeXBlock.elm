@@ -54,7 +54,7 @@ type alias PrimitiveBlockError =
 
 
 type alias State =
-    { blocks : CommittedBlocks
+    { committedBlocks : CommittedBlocks
     , stack : PrimitiveBlockStack
     , holdingStack : List PrimitiveLaTeXBlock
     , labelStack : List Label
@@ -97,7 +97,7 @@ parseLoop lines =
 
 finalize : State -> ParserOutput
 finalize state =
-    { blocks = state.blocks |> List.reverse, stack = state.stack, holdingStack = state.holdingStack }
+    { blocks = state.committedBlocks |> List.reverse, stack = state.stack, holdingStack = state.holdingStack }
 
 
 {-|
@@ -109,7 +109,7 @@ finalize state =
 -}
 init : List String -> State
 init lines =
-    { blocks = []
+    { committedBlocks = []
     , stack = []
     , holdingStack = []
     , labelStack = []
@@ -442,7 +442,7 @@ endBlockOnMismatch label_ classifier line state =
 resolveIfStackEmpty : State -> State
 resolveIfStackEmpty state =
     if state.stack == [] then
-        { state | blocks = state.holdingStack ++ state.blocks, holdingStack = [] }
+        { state | committedBlocks = state.holdingStack ++ state.committedBlocks, holdingStack = [] }
 
     else
         state
@@ -460,7 +460,7 @@ finishBlock lastLine state =
                     { block | status = Finished } |> addSource lastLine
             in
             { state
-                | blocks = updatedBlock :: state.blocks
+                | committedBlocks = updatedBlock :: state.committedBlocks
                 , stack = List.drop 1 state.stack
                 , labelStack = List.drop 1 state.labelStack
             }
@@ -477,7 +477,7 @@ endBlockOnMatch labelHead classifier line state =
 
         Just ( block, rest ) ->
             if (labelHead |> Maybe.map .status) == Just Filled then
-                { state | level = state.level - 1, blocks = ({ block | status = Finished } |> addSource line.content) :: state.blocks, stack = rest } |> resolveIfStackEmpty
+                { state | level = state.level - 1, committedBlocks = ({ block | status = Finished } |> addSource line.content) :: state.committedBlocks, stack = rest } |> resolveIfStackEmpty
 
             else
                 let
@@ -890,7 +890,7 @@ handleMathBlock line state =
                                 newBlock =
                                     { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished } |> addSource "$$"
                             in
-                            { state | blocks = newBlock :: state.blocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
+                            { state | committedBlocks = newBlock :: state.committedBlocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 
 
 handleVerbatimBlock line state =
@@ -920,7 +920,7 @@ handleVerbatimBlock line state =
                                 newBlock =
                                     { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished } |> addSource line.content
                             in
-                            { state | blocks = newBlock :: state.blocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
+                            { state | committedBlocks = newBlock :: state.committedBlocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 
 
 
@@ -981,7 +981,7 @@ recoverFromError state =
                                 |> addSource ""
                     in
                     { state
-                        | blocks = newBlock :: state.blocks
+                        | committedBlocks = newBlock :: state.committedBlocks
                         , stack = []
                         , holdingStack = []
                         , labelStack = []
