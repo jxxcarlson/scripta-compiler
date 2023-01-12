@@ -24,6 +24,7 @@ import Parser.Settings
 import Render.Utility
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
+import Utility
 
 
 indentationQuantum =
@@ -449,14 +450,14 @@ updateWithOrdinarySectionBlock accumulator name content level id =
         titleWords =
             case content of
                 Left str ->
-                    [ Compiler.Util.compressWhitespace str ]
+                    [ Utility.compressWhitespace str ]
 
                 Right expr ->
-                    List.map Compiler.ASTTools.getText expr |> Maybe.Extra.values |> List.map Compiler.Util.compressWhitespace
+                    List.map Compiler.ASTTools.getText expr |> Maybe.Extra.values |> List.map Utility.compressWhitespace
 
         sectionTag =
             -- TODO: the below is a bad solution
-            titleWords |> List.map (String.toLower >> Compiler.Util.compressWhitespace >> Compiler.Util.removeNonAlphaNum >> String.replace " " "-") |> String.join ""
+            titleWords |> List.map (String.toLower >> Utility.compressWhitespace >> Utility.removeNonAlphaNum >> String.replace " " "-") |> String.join ""
 
         headingIndex =
             Vector.increment (String.toInt level |> Maybe.withDefault 0) accumulator.headingIndex

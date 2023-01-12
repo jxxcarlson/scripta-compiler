@@ -1,6 +1,5 @@
 module Compiler.Util exposing
-    ( compressWhitespace
-    , depth
+    ( depth
     , dropLast
     , eraseItem
     , getBracketedItem
@@ -13,7 +12,6 @@ module Compiler.Util exposing
     , many
     , middle
     , normalizedWord
-    , removeNonAlphaNum
     , size
     , transformLabel
     )
@@ -22,6 +20,7 @@ import Parser exposing ((|.), (|=), Parser, Step(..), loop, map, oneOf, spaces, 
 import Regex
 import Scripta.Language exposing (Language(..))
 import Tree exposing (Tree)
+import Utility
 
 
 normalizedWord : List String -> String
@@ -29,10 +28,8 @@ normalizedWord words =
     words
         |> List.map
             (String.toLower
-                -->> compressWhitespace
-                >> removeNonAlphaNum
+                >> Utility.removeNonAlphaNum
             )
-        -- >> String.replace " " "-")
         |> String.join "-"
 
 
@@ -67,16 +64,6 @@ transformLabel str =
             m |> List.map (Maybe.withDefault "") |> String.join "" |> String.trim
     in
     userReplace "\\[label(.*)\\]" (\m -> "\\label{" ++ (m.submatches |> normalize) ++ "}") str
-
-
-compressWhitespace : String -> String
-compressWhitespace string =
-    userReplace "\\s\\s+" (\m -> " ") string
-
-
-removeNonAlphaNum : String -> String
-removeNonAlphaNum string =
-    userReplace "[^a-zA-Z0-9 ]" (\_ -> "") string
 
 
 {-| Apply a parser zero or more times and return a list of the results.

@@ -158,6 +158,45 @@ like the one coming from a single-line paragraph with text
 block with name "section", args ["1"], and content ["Introduction"].
 This is to coerce parsed MiniLaTeX source to our standard model.
 
+## Verbatim Blocks
+
+If a block is to be treated as a verbatim block,
+its name must appear in 
+
+```text
+Parser.LaTeXBlock.verbatimBlockNames : List String
+```
+
+
+
+**Note.** What's the deal with `Parser.Common.verbatimBlockNames`?
+
+
+```text
+verbatimBlockNames =
+    [ "equation"
+    , "aligned"
+    , "math"
+    , "code"
+    , "verbatim"
+    , "verse"
+    , "mathmacros"
+    , "textmacros"
+    , "tabular"
+    , "hide"
+    , "docinfo"
+    , "datatable"
+    , "chart"
+    , "svg"
+    , "quiver"
+    , "image"
+    , "tikz"
+    , "load-files"
+    , "include"
+    , "iframe"
+    ]
+
+```
 
 ## Tests
 
