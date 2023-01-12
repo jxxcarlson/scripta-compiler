@@ -147,7 +147,7 @@ renderTabular count acc settings ((ExpressionBlock { lineNumber, args }) as bloc
         fix colWidths fmtList =
             let
                 m =
-                    List.length columnWidths
+                    List.length colWidths
 
                 n =
                     List.length fmtList
