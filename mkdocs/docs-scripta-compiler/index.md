@@ -13,18 +13,21 @@ The markup languages supported are
 The compiler
 provides interactive, real-time editing with error recovery for 
 these languages.
-See the [introduction](/docs-scripta-compiler/introduction/) and [overview](/docs-scripta-compiler/overview/) for more information.  See also
-this [conference talk at Lambda Days](https://www.youtube.com/watch?v=AE_QzSIsmMI)
-for an outline of the error recovery strategy.
 
 
-For a very simple use of the Scripta compiler without error
-recovery, see
-[Scripta-example1](https://jxxcarlson.github.io/scripta-compiler-example1).
-For its use in a real web app (with error recovery), see
-[Scripta.io](https://scripta.io).  Here is 
-[documentation for both apps as well as Scripta Desktop](https://jxxcarlson.github.io/docs-scripta-app).
 
+**Demos**
+- [Scripta-example1](https://jxxcarlson.github.io/app/scripta-compiler-demo/)
+- [Scripta.io](https://scripta.io)
+
+**Docs and Videos**
+
+- [Compiler documentation](/docs-scripta-compiler/introduction/)
+- [Web & Deskop App](https://jxxcarlson.github.io/docs-scripta-app)
+- [Conference talk at Lambda Days](https://www.youtube.com/watch?v=AE_QzSIsmMI)
+— an outline of the error recovery strategy.
+
+[Source code](https://github.com/jxxcarlson/scripta-compiler)
 
 This project has been partially supported by the 
 Simons Foundation.  We thank them for their generosity.
