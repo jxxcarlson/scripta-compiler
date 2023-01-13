@@ -226,6 +226,15 @@ It operates as follows:
     of type Step State State
 ```
 
+New blocks are constructed by
+
+```text
+blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
+```
+
+This function calls `getBlockTypeAndLabel` .... XX
+
+
 
 
 

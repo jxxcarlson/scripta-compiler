@@ -21,7 +21,6 @@ import List.Extra
 import MicroLaTeX.Parser.ClassifyBlock as ClassifyBlock exposing (Classification(..), LXSpecial(..))
 import MicroLaTeX.Parser.Line
 import Parser.Line as Line exposing (Line, PrimitiveBlockType(..))
-import Scripta.Language exposing (Language(..))
 
 
 type alias PrimitiveLaTeXBlock =
@@ -168,6 +167,9 @@ nextStep state_ =
             let
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
+
+                _ =
+                    Debug.log "CLASS" (ClassifyBlock.classify currentLine.content)
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
@@ -240,7 +242,7 @@ beginBlock classifier line state =
             case classifier of
                 CBeginBlock name ->
                     if List.member name verbatimBlockNames then
-                        Just classifier
+                        Just classifier |> Debug.log ("beginBlock, " ++ line.content)
 
                     else
                         Nothing
@@ -436,6 +438,7 @@ endBlockOnMismatch label_ classifier line state =
                         newBlock =
                             { block
                                 | content =
+                                    --- TODO: WTF!?
                                     if List.member name verbatimBlockNames then
                                         getContent label_.classification line state |> List.reverse
 
@@ -1064,7 +1067,7 @@ printErr block =
 print : PrimitiveLaTeXBlock -> String
 print block =
     [ "BLOCK:"
-    , "Type: " ++ Line.showBlockType block.blockType
+    , "Type: " ++ Line.showBlockType (block.blockType |> Debug.log "BLOCK TYPE")
     , "Name: " ++ showName block.name
     , "Level: " ++ String.fromInt block.level
     , "Status: " ++ showStatus block.status
@@ -1183,7 +1186,7 @@ getBlockTypeAndLabel str verbatimClassification =
     case ClassifyBlock.classify str of
         CBeginBlock label ->
             if List.member label verbatimBlockNames then
-                ( PBVerbatim, Just label )
+                ( PBVerbatim, Just label ) |> Debug.log "HOHOHO!"
 
             else
                 ( PBOrdinary, Just label )

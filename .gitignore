@@ -6,4 +6,5 @@ node_modules/
 **/*/main.js
 src/TestStuff2.elm
 mkdocs/site/
-CLI/foo.txt
+CLI/*.txt
+macros.txt
