@@ -167,9 +167,6 @@ nextStep state_ =
             let
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
-
-                _ =
-                    Debug.log "CLASS" (ClassifyBlock.classify currentLine.content)
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
@@ -242,7 +239,7 @@ beginBlock classifier line state =
             case classifier of
                 CBeginBlock name ->
                     if List.member name verbatimBlockNames then
-                        Just classifier |> Debug.log ("beginBlock, " ++ line.content)
+                        Just classifier
 
                     else
                         Nothing
@@ -1067,7 +1064,7 @@ printErr block =
 print : PrimitiveLaTeXBlock -> String
 print block =
     [ "BLOCK:"
-    , "Type: " ++ Line.showBlockType (block.blockType |> Debug.log "BLOCK TYPE")
+    , "Type: " ++ Line.showBlockType block.blockType
     , "Name: " ++ showName block.name
     , "Level: " ++ String.fromInt block.level
     , "Status: " ++ showStatus block.status
@@ -1138,8 +1135,7 @@ blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
 blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) =
     let
         ( blockType, label ) =
-            -- TODO: the Nothing argument
-            getBlockTypeAndLabel line.content Nothing
+            getBlockTypeAndLabel line.content
     in
     { indent = indent
     , lineNumber = lineNumber
@@ -1181,12 +1177,12 @@ verbatimBlockNames =
     ]
 
 
-getBlockTypeAndLabel : String -> Maybe Classification -> ( PrimitiveBlockType, Maybe String )
-getBlockTypeAndLabel str verbatimClassification =
+getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
+getBlockTypeAndLabel str =
     case ClassifyBlock.classify str of
         CBeginBlock label ->
             if List.member label verbatimBlockNames then
-                ( PBVerbatim, Just label ) |> Debug.log "HOHOHO!"
+                ( PBVerbatim, Just label )
 
             else
                 ( PBOrdinary, Just label )
