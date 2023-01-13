@@ -675,7 +675,7 @@ elaborate line pb =
     else
         let
             ( name, args_ ) =
-                MicroLaTeX.Parser.Line.getNameAndArgs2 line
+                MicroLaTeX.Parser.Line.getNameAndArgString line
 
             namedArgs =
                 getKVData args_
@@ -963,7 +963,7 @@ recoverFromError state =
                 Nothing ->
                     state
 
-                Just ( topLabel, remainingLabels ) ->
+                Just ( topLabel, _ ) ->
                     let
                         firstLineNumber =
                             topLabel.lineNumber
@@ -974,15 +974,20 @@ recoverFromError state =
                         provisionalContent =
                             case topLabel.status of
                                 Filled ->
+                                    -- the block is Filled, so its content is already set
                                     block.content
 
                                 _ ->
+                                    -- the block is not filled, so we grab it content from state.lines
                                     slice (firstLineNumber + 1) lastLineNumber state.lines
 
                         content =
+                            -- remove blank lines
+                            -- TODO: is this the right thing to do?
                             List.Extra.takeWhile (\item -> item /= "") provisionalContent
 
                         revisedContent =
+                            -- drop the last line if it is "\\end{...}"
                             case List.Extra.last content of
                                 Nothing ->
                                     content
@@ -995,9 +1000,12 @@ recoverFromError state =
                                         content
 
                         lineNumber =
+                            -- set the line number to be just past the current block
                             firstLineNumber + List.length content + 1
 
                         newBlock =
+                            -- set the content of the block, declare it to be finished,
+                            -- and add and error message
                             { block
                                 | content = revisedContent
                                 , status = Finished

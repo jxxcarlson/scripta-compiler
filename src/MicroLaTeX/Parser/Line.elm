@@ -1,8 +1,8 @@
 module MicroLaTeX.Parser.Line exposing
     ( Line
     , classify
+    , getNameAndArgString
     , getNameAndArgs
-    , getNameAndArgs2
     , isEmpty
     , isNonEmptyBlank
     , prefixLength
@@ -72,6 +72,7 @@ prefixParser position lineNumber =
         |= Parser.getSource
 
 
+getNameAndArgs : { a | content : String } -> ( Maybe String, List String )
 getNameAndArgs line =
     let
         normalizedLine =
@@ -92,7 +93,8 @@ getNameAndArgs line =
     ( name, Compiler.Util.getBracketedItems normalizedLine )
 
 
-getNameAndArgs2 line =
+getNameAndArgString : Line -> ( Maybe String, Maybe String )
+getNameAndArgString line =
     let
         normalizedLine =
             String.trim line.content
