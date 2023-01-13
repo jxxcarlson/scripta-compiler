@@ -118,7 +118,7 @@ microLaTeXDemo =
 
 \\section{Images}
 
-\\image{\\image{https://www.nps.gov/cuva/learn/nature/images/20060507-Yellow-Warbler5-c-Jim-Schmidt.JPG?maxwidth=1200&autorotate=false width:400}}
+\\image{https://www.birdsandblooms.com/wp-content/uploads/2018/10/BNBbyc18_patricia-warren.jpg width:400}
 
 \\section{Math}
 
