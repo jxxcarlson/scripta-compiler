@@ -6,6 +6,6 @@ scripts:
 
   view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/docs-scripta-compiler/
 
-  site-stats: cat docs-scripta-compiler/*.md | wc -w
+  site-stats: cat docs-scripta-compiler/*.md | wc -wl
   
   

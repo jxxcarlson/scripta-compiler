@@ -128,11 +128,7 @@ All blocks are moved from the stack to the committed list
 when the "root" or first block on the stack 
 as well as all of its children are closed. If the stack is nonempty after all
 blocks have been consumed, there has been a syntax error, and
-so the error recovery procedure is invoked. The strategy is to close 
-the root block on the stack with an
-error message, then reparse after skipping over the root block.
-Error recovery always
-terminates and provides an indication of the nature of the error.
+so the [error recovery procedure](#error-recovery) is invoked. 
 
 ### Data structure
 
@@ -210,7 +206,9 @@ It operates as follows:
   - If the input (state.lines) has been consumed and
         - the stack is empty, return Done state
         - the stack is non empty, return recoverFromError state
+        
   - Let the current raw line be the string at index state.lineNumber of state.lines.
+  
   - Classify the raw line, a value of type Classification:
 
         type Classification
@@ -226,49 +224,39 @@ It operates as follows:
     of type Step State State
 ```
 
-New blocks are constructed by
+New blocks are constructed by `nextStep` using
 
 ```text
 blockFromLine : Int -> Line -> PrimitiveLaTeXBlock
 ```
 
-This function makes the call `getBlockTypeAndLabel line.content` 
-to determine the `blockType` and `label`, which it does via
+The primitive block type (`PBVerbatim`, `PBOrdinary`, `PBParagraph`)
+and the label (in the case of the first two variants) is determined
+by examining the contents of the line.  For example, if the 
+line is `"\begin{equation}"` then the primitive block type
+is `PBVerbatim` and the label is `"equation"`.  The label is used
+to run the parser loop; when a block is committed, the label is
+used to form the `name: Maybe String` field of the primitive block.
+This field is `Nothing` in the case of `PBParagraph` and is a `Just String`
+in the case of the other two block types.
+
+
+### Error recovery
+
+Recall that error recovery is invoked when the stack
+is nonempty after all input has been consumed.
+The recovery strategy is to commit
+the root block on the stack, setting the `error` field
+to `missingTagError block`,  then reparse 
+the input starting from the line immediately
+after that of the offending block.  Consequently
+error recovery is guaranteed to terminate and also
+to deal with additional errors.  Error recovery 
+is handled by
 
 ```text
-getBlockTypeAndLabel : String -> ( PrimitiveBlockType, Maybe String )
-getBlockTypeAndLabel str =
-    case ClassifyBlock.classify str of
-        CBeginBlock label ->
-            if List.member label verbatimBlockNames then
-                ( PBVerbatim, Just label ) |> Debug.log "HOHOHO!"
-
-            else
-                ( PBOrdinary, Just label )
-
-        CMathBlockDelim ->
-            ( PBVerbatim, Just "math" )
-
-        CVerbatimBlockDelim ->
-            ( PBVerbatim, Just "code" )
-
-        _ ->
-            ( PBParagraph, Nothing )
+recoverFromError : State -> State
 ```
-
-For instance, in processing the data
-listed below, the `ClassifyBlock.classify str` call produces
-`(PBVerbatim, "verse")`
-
-```text
-\begin{verse}
-one
-  two
-    three
-\end{verse}
-```
-
-
 
 ## Transform
 
@@ -367,10 +355,10 @@ and benchmarking.  All use Albert Dahlin's
 package and can be run using velociraptor (command: `vr`).
 Some examples:
 
-- vr lxparse lxtest/a1.txt
+- vr lxpb lxtest/a1.txt
 
-- vr rt foo.txt
+- vr rt foo.txt         
 
-- vr bench init 100 bench/harmonic.tex
+- vr bench init 100 bench/harmonic.tex 
 
 
