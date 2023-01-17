@@ -47,7 +47,6 @@ renderTree count accumulator settings tree =
             Tree.label tree
     in
     if List.member blockName Parser.Settings.numberedBlockNames then
-        -- Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravelFlat) tree)
         Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree)
 
     else
@@ -61,23 +60,6 @@ getMessages syntaxTree =
         |> List.concat
         |> List.map BlockUtil.getMessages
         |> List.concat
-
-
-{-| Comment on this! Get better name.
--}
-unravelFlat : Language -> Tree (Element MarkupMsg) -> Element MarkupMsg
-unravelFlat lang tree =
-    let
-        children =
-            Tree.children tree
-    in
-    if List.isEmpty children then
-        Tree.label tree
-
-    else
-        Element.column []
-            --  Render.Settings.leftIndentation,
-            (Tree.label tree :: List.map (unravel lang) children)
 
 
 unravel : Language -> Tree (Element MarkupMsg) -> Element MarkupMsg
