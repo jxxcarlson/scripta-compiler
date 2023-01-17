@@ -41,10 +41,6 @@ renderTree count accumulator settings tree =
         blockName =
             Parser.Block.getName (Tree.label tree)
                 |> Maybe.withDefault "---"
-
-        root : ExpressionBlock
-        root =
-            Tree.label tree
     in
     if List.member blockName Parser.Settings.numberedBlockNames then
         Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree)
@@ -72,9 +68,14 @@ unravel lang tree =
         Tree.label tree
 
     else
+        let
+            root : Element MarkupMsg
+            root =
+                Tree.label tree
+        in
         Element.column []
             --  Render.Settings.leftIndentation,
-            [ Tree.label tree
+            [ root
             , Element.column
                 [ Element.paddingEach
                     { top = Render.Settings.topMarginForChildren
