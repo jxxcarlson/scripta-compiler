@@ -5,7 +5,7 @@ scripts:
 
   lxerr: elm-cli run --debug src/LXPBErr.elm
 
-  l0pab: elm-cli run --debug src/L0PB.elm
+  l0pb: elm-cli run --debug src/L0PB.elm
   # Example: vr l0parse l0test/datatable.txt
   # Test the L0 block parser
 
