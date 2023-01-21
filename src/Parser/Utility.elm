@@ -1,4 +1,12 @@
-module Parser.Utility exposing (getKeyedParagraph, getLeadingBlanks, l0TitleParser, leadingBlanks, microLaTeXTitleParser, parseItem, parseTitle)
+module Parser.Utility exposing
+    ( getKeyedParagraph
+    , getLeadingBlanks
+    , l0TitleParser
+    , leadingBlanks
+    , microLaTeXTitleParser
+    , parseItem
+    , parseTitle
+    )
 
 import Parser exposing ((|.), (|=), Parser)
 import Scripta.Language exposing (Language(..))

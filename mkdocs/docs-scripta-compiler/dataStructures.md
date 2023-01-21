@@ -113,7 +113,63 @@ If $a = b$ then $b = a$
 
 This should produce `args = ["X", "Y"]`
 
+
+### Coercion and Pseudoblocks
+
+
+Certain constructs such as `\image{https://yadayada.org/sparrow.jpg width:300}` or
+`\item foo bar ...` look to be syntactically part of 
+the surface internal language of MicroLaTeX.  However, 
+in source text they alway appear with an empty line above and 
+below and so are parsed as an anonymous (paragraph)
+block.  They must be coerced into being an ordinary or 
+verbatim block, e.g.,
+
+```text
+{ name = "image"
+, blockType = PBVerbatim
+, properties = Dict.fromList [("width", "200")]
+, content = ["image{https://yadayada.org/sparrow.jpg"]
+...
+}
+```
+
+or 
+
+```text
+{ name = "image"
+, blockType = PBOrdinary
+, content = ["foo bar ..."]
+...
+}
+```
+
+This coercion is accomplished by functions in module `MicroLaTeX.Parser.Transform`, 
+e.g.,
+
+
+```text
+-- module MicroLaTeX.Parser.Transform
+handlePseudoBlockWithContent : String -> Maybe String -> PrimitiveBlock -> PrimitiveBlock
+handlePseudoBlockWithContent name maybeArg block = ...
+
+handleImage : PrimitiveBlock -> PrimitiveBlock
+```
+
+The names of these elements must appear in the `pseudoBlockNamesWithContent`
+list:
+
+```text
+-- module MicroLaTeX.Parser.Transform
+pseudoBlockNamesWithContent =
+    [ "title", "section", "subsection", "subsubsection"
+    , "subheading", "setcounter", "contents", "endnotes", "image" ]
+
+```
+
+
 ## Expressions
+
 
 ```text
 -- Parser.Expr

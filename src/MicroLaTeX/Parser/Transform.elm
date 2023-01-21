@@ -1,14 +1,15 @@
-module MicroLaTeX.Parser.Transform exposing (macroArg, pseudoBlockNamesWithContent, transform)
+module MicroLaTeX.Parser.Transform exposing (handleImage, macroArg, pseudoBlockNamesWithContent, transform)
 
 import Compiler.Util
 import Dict exposing (Dict)
+import MicroLaTeX.Parser.Line
 import Parser as P
 import Parser.Line exposing (PrimitiveBlockType(..))
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
 
 
 pseudoBlockNamesWithContent =
-    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter", "contents", "endnotes" ]
+    [ "title", "section", "subsection", "subsubsection", "subheading", "setcounter", "contents", "endnotes", "image" ]
 
 
 sectionDict : Dict String String
@@ -84,7 +85,7 @@ transform block =
                             Nothing
             in
             if List.member name pseudoBlockNamesWithContent then
-                handlePseudoBlockWithContent block name arg
+                handlePseudoBlockWithContent name arg block
 
             else
                 block
@@ -98,8 +99,8 @@ macroArg macroName str =
     String.replace ("\\" ++ macroName ++ "{") "" str |> String.dropRight 1
 
 
-handlePseudoBlockWithContent : PrimitiveBlock -> String -> Maybe String -> PrimitiveBlock
-handlePseudoBlockWithContent block name maybeArg =
+handlePseudoBlockWithContent : String -> Maybe String -> PrimitiveBlock -> PrimitiveBlock
+handlePseudoBlockWithContent name maybeArg block =
     case maybeArg of
         Nothing ->
             { block
@@ -110,22 +111,47 @@ handlePseudoBlockWithContent block name maybeArg =
             }
 
         Just arg ->
-            case Dict.get name sectionDict of
-                Nothing ->
-                    { block
-                        | content = [ arg ] --("| " ++ macroName) :: [ str ]
-                        , name = Just name
-                        , args = [ arg ]
-                        , blockType = PBOrdinary
-                    }
+            if name == "image" then
+                handleImage block
 
-                Just val ->
-                    { block
-                        | content = [ arg ] -- ("| section " ++ val) :: [ str ]
-                        , args = val :: []
-                        , name = Just "section"
-                        , blockType = PBOrdinary
-                    }
+            else
+                case Dict.get name sectionDict of
+                    Nothing ->
+                        { block
+                            | content = [ arg ] --("| " ++ macroName) :: [ str ]
+                            , name = Just name
+                            , args = [ arg ]
+                            , blockType = PBOrdinary
+                        }
+
+                    Just val ->
+                        { block
+                            | content = [ arg ] -- ("| section " ++ val) :: [ str ]
+                            , args = val :: []
+                            , name = Just "section"
+                            , blockType = PBOrdinary
+                        }
+
+
+handleImage block =
+    let
+        words =
+            List.head block.content
+                |> Maybe.withDefault "???"
+                |> String.replace "\\image{" ""
+                |> String.replace "}" ""
+                |> String.words
+
+        ( _, properties ) =
+            Parser.PrimitiveBlock.argsAndProperties (List.drop 1 words)
+    in
+    { block
+        | blockType = PBVerbatim
+        , args = []
+        , name = Just "image"
+        , properties = properties
+        , content = List.take 1 words
+    }
 
 
 normalize : List String -> List String

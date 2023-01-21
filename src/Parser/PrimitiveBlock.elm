@@ -1,6 +1,6 @@
 module Parser.PrimitiveBlock exposing
     ( PrimitiveBlock, empty, parse
-    , elaborate, eq, length, listLength, parse_, print, toPrimitiveBlock
+    , argsAndProperties, elaborate, eq, length, listLength, parse_, print, toPrimitiveBlock
     )
 
 {-| The main function is
@@ -422,6 +422,21 @@ createBlock state currentLine =
     }
 
 
+argsAndProperties : List String -> ( List String, Dict String String )
+argsAndProperties words =
+    let
+        args =
+            cleanArgs words
+
+        namedArgs =
+            List.drop (List.length args) words
+
+        properties =
+            namedArgs |> prepareList |> prepareKVData
+    in
+    ( words, properties )
+
+
 elaborate : Line -> PrimitiveBlock -> PrimitiveBlock
 elaborate line pb =
     if pb.content == [ "" ] then
@@ -433,14 +448,8 @@ elaborate line pb =
                 -- TODO: note this change: it needs to be verified
                 Line.getNameAndArgs L0Lang line
 
-            args =
-                cleanArgs args_
-
-            namedArgs =
-                List.drop (List.length args) args_
-
-            properties =
-                namedArgs |> prepareList |> prepareKVData
+            ( args, properties ) =
+                argsAndProperties args_
 
             content =
                 if pb.blockType == PBVerbatim then

@@ -1,5 +1,7 @@
 module LXPB exposing (program)
 
+import MicroLaTeX.Parser.Transform
+import Parser.PrimitiveBlock
 import Parser.PrimitiveLaTeXBlock exposing (PrimitiveLaTeXBlock, parseLoop)
 import Posix.IO as IO exposing (IO, Process)
 import Posix.IO.File as File
@@ -22,7 +24,19 @@ program process =
 
                         blockString =
                             "\n----------------\nBLOCKS\n----------------\n\n"
-                                ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.blocks |> String.join "\n\n")
+                                ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.blocks
+                                        |> String.join "\n\n"
+                                   )
+
+                        blockString2 =
+                            let
+                                primitiveBlocks =
+                                    parsed.blocks |> List.map (Parser.PrimitiveBlock.toPrimitiveBlock >> MicroLaTeX.Parser.Transform.transform)
+                            in
+                            "\n----------------\nBLOCKS (Transformed)\n----------------\n\n"
+                                ++ (List.map Parser.PrimitiveBlock.print primitiveBlocks
+                                        |> String.join "\n\n"
+                                   )
 
                         holdingStackString =
                             "\n\n----------------\nHOLDING STACK\n----------------\n\n"
@@ -33,7 +47,7 @@ program process =
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.stack |> String.join "\n\n")
                                 ++ "\n----------------\n"
                     in
-                    IO.do (Proc.print (blockString ++ holdingStackString ++ stackString)) <|
+                    IO.do (Proc.print (blockString ++ blockString2 ++ holdingStackString ++ stackString)) <|
                         \_ ->
                             IO.return ()
 
