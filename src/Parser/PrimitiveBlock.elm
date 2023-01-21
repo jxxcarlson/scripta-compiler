@@ -351,7 +351,7 @@ commitBlock state currentLine =
                             block_
 
                         PBOrdinary ->
-                            { block_ | content = dropLast block_.content }
+                            { block_ | content = dropLast block_.content } |> adjustBlock
 
                         PBVerbatim ->
                             { block_ | content = dropLast block_.content }
@@ -373,6 +373,21 @@ commitBlock state currentLine =
                 , inVerbatim = state.isVerbatimLine currentLine.content
                 , currentBlock = currentBlock
             }
+
+
+adjustBlock : PrimitiveBlock -> PrimitiveBlock
+adjustBlock block =
+    if block.name == Just "section" && block.args == [] then
+        { block | args = [ "1" ] }
+
+    else if block.name == Just "subsection" && block.args == [] then
+        { block | args = [ "2" ] }
+
+    else if block.name == Just "subsubsection" && block.args == [] then
+        { block | args = [ "3" ] }
+
+    else
+        block
 
 
 createBlock : State -> Line -> State
