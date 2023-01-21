@@ -58,6 +58,60 @@ In the case of
 MicroLaTeX, there are two additional fields,
 `level: Int` and `status: Status`.
 
+### Example (L0)
+
+Consider the block 
+
+```text
+| theorem (Magnus Axelsson) note:this is a joke temperature:22
+If $a = b$ then $b = a$.
+```
+
+There "(Magnus Axelsson) note:this is a joke temperature:22"
+is the argument string.  This string is a sequences
+of words.  Normal words do not contain the ":" character.
+Words of the form *a:b*, where *a* is normal are key-value
+words, representing key-value pairs.  Normal words must
+precede key-value words.  The former make up the 
+argument list, whereas the latter define the entries
+of the property dictionary.  Thus we have
+
+
+```text
+args = ["(Magnus", "Axellson)"]
+properties = Dict.fromList [("note", "this is a joke"), ("temperature", "22")]
+```
+
+Arguments and properties are treated the same for 
+verbatim blocks as for ordinary blocks.  
+
+### Example (MicroLaTeX)
+
+Below is a LaTeX environment with an LaTeX optional argument.  In this 
+case the args list is empty and their are three key-value pairs
+in the properties dictiononary
+
+```text
+\begin{theorem}[foo:1, hoho:a b c, bar:2]
+If $a = b$ then $b = a$
+\end{theorem}
+```
+
+```text
+args = []
+properties = Dict.fromList [("bar", "2"), ("foo", "1"), ("hoho", "a b c"]
+```
+
+At the moment, environments with normal arguemnts are not handled, e.g.,
+
+
+```text
+\begin{theorem}{X}{Y}[foo:1, hoho:a b c, bar:2]
+If $a = b$ then $b = a$
+\end{theorem}
+```
+
+This should produce `args = ["X", "Y"]`
 
 ## Expressions
 
