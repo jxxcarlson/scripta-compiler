@@ -170,9 +170,6 @@ nextStep state_ =
 
                 class =
                     ClassifyBlock.classify currentLine.content
-
-                _ =
-                    Debug.log "((lineNr,level), content, class)" ( ( state.lineNumber, state.level ), currentLine.content, class )
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
@@ -387,34 +384,18 @@ endBlock1 classification currentLine state =
     -- TODO: changed, review
     case state.blockClassification of
         Nothing ->
-            let
-                _ =
-                    Debug.log "endBlock1, BR" 1
-            in
             endBlock2 classification currentLine state
 
         Just blockClassification_ ->
             case blockClassification_ of
                 CBeginBlock _ ->
                     if ClassifyBlock.match blockClassification_ classification then
-                        let
-                            _ =
-                                Debug.log "endBlock1, BR" 2
-                        in
                         endBlock2 classification currentLine state
 
                     else
-                        let
-                            _ =
-                                Debug.log "endBlock1, BR" 3
-                        in
                         state
 
                 _ ->
-                    let
-                        _ =
-                            Debug.log "endBlock1, BR" 4
-                    in
                     state
 
 
@@ -423,58 +404,31 @@ endBlock2 classifier line state =
     -- TODO: changed, review
     case List.head state.labelStack of
         Nothing ->
-            let
-                _ =
-                    Debug.log "endBlock2, BR" 1
-            in
             { state | blockClassification = Nothing, level = state.level - 1 }
 
         Just label ->
             if ClassifyBlock.match label.classification classifier && state.level == label.level then
-                let
-                    _ =
-                        Debug.log "endBlock2, BR" 2
-                in
                 endBlockOnMatch (Just label) classifier line { state | blockClassification = Nothing }
 
             else
-                let
-                    _ =
-                        Debug.log "endBlock2, BR" 3
-                in
                 endBlockOnMismatch label classifier line { state | blockClassification = Nothing }
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
 endBlockOnMismatch label_ classifier line state =
-    let
-        _ =
-            Debug.log "endBlock, mismatch" ( state.level, line )
-    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: ???
-            let
-                _ =
-                    Debug.log "endBlock, mismatch, BR" 1
-            in
             state
 
         Just ( block, rest ) ->
             case List.Extra.uncons state.labelStack of
                 Nothing ->
-                    let
-                        _ =
-                            Debug.log "endBlock, mismatch, BR" 2
-                    in
                     -- TODO: ???
                     state
 
                 Just ( label, _ ) ->
                     let
-                        _ =
-                            Debug.log "endBlock, mismatch, BR" 3
-
                         error =
                             getError label classifier
 
@@ -503,7 +457,7 @@ endBlockOnMismatch label_ classifier line state =
                     in
                     { state
                         | holdingStack = newBlock :: state.holdingStack
-                        , level = state.level - 1 |> Debug.log "endBlock, mismatch, BR 3, level"
+                        , level = state.level - 1
 
                         -- blocks = newBlock :: state.blocks
                         , stack = rest
@@ -544,10 +498,6 @@ finishBlock lastLine state =
 -}
 endBlockOnMatch : Maybe Label -> Classification -> Line -> State -> State
 endBlockOnMatch labelHead classifier line state =
-    let
-        _ =
-            Debug.log "endBlock, match" ( state.level, line )
-    in
     case List.Extra.uncons state.stack of
         Nothing ->
             -- TODO: error state!
@@ -910,14 +860,6 @@ nextKVStep state =
 
 
 emptyLine currentLine state =
-    let
-        _ =
-            Debug.log "emptyLine, ((lineNr, stackL), level, label)"
-                ( ( state.lineNumber, List.length state.stack )
-                , state.level
-                , List.head state.labelStack |> Maybe.map .classification
-                )
-    in
     case List.head state.labelStack |> Maybe.map .classification of
         Just CPlainText ->
             Loop <| endBlock2 CPlainText currentLine state
