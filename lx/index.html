@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://jxxcarlson.github.io/docs-scripta-compiler/lx/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>MicroLaTeX - Scripta Compiler Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "MicroLaTeX";
+        var mkdocs_page_input_path = "lx.md";
+        var mkdocs_page_url = "/docs-scripta-compiler/lx/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Scripta Compiler Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../dataStructures/">Data Structures</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../common-code/">Common Code</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../synchronization/">Synchronization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../render/">Rendering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../l0/">L0</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">MicroLaTeX</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#data-structures">Data Structures</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#primitive-blocks">Primitive Blocks</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#primitive-block-parser">Primitive Block Parser</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#data-structure">Data structure</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#main-parsing-functions">Main parsing functions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#the-nextstep-function">The nextStep function</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#error-recovery">Error recovery</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#transform">Transform</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#verbatim-blocks">Verbatim Blocks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tests">Tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-tools">Command line tools</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Scripta Compiler Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>MicroLaTeX</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="microlatex">MicroLaTeX</h1>
+<p>The MicroLaTeX parser first transforms source
+into a list of 
+<a href="#primite-blocks">primitive LaTeX blocks</a> using
+a <a href="#primitive-block-parser">shift-reduce parser with error recovery</a>.
+It then maps the parser for the internal
+language over this list, into a list of expression blocks.</p>
+<h2 id="data-structures">Data Structures</h2>
+<h3 id="primitive-blocks">Primitive Blocks</h3>
+<p>A primitve LaTeX block is a 13-field record as displayed
+below.  </p>
+<pre><code>-- Parser.PrimitiveLaTeXBlock
+type alias PrimitiveLaTeXBlock =
+    { indent : Int
+    , lineNumber : Int
+    , position : Int
+    , level : Int
+    , content : List String
+    , firstLine : String
+    , name : Maybe String
+    , args : List String
+    , properties : Dict String String
+    , sourceText : String
+    , blockType : PrimitiveBlockType
+    , status : Status
+    , error : Maybe PrimitiveBlockError
+    }
+
+</code></pre>
+<ol>
+<li>
+<p>When the source text is parsed into a list of 
+blocks, it is grouped into lists of strings in the 
+<code>content</code> field. </p>
+</li>
+<li>
+<p>The content is also stored as a string
+in the <code>sourceText</code> field.  This is to facilitate 
+synchronization of source text and rendered text.
+The source text field is carried into the final
+syntax tree (forest of expression blocks).  Consequently,
+if a piece source text is selected, the syntax tree
+can can be searched, the matching element can be
+located and then used to highlight the corresponding
+part of the rendered text.</p>
+</li>
+<li>
+<p>The <code>indent</code> field is the number of spaces of indentation
+of the first line of the block; <code>lineNumber</code> is the
+line number of the first line of the text in the source
+string; <code>position</code> is its character position in that 
+string.  The <code>level</code> field is the depth of the block
+in the eventual tree structure.</p>
+</li>
+<li>
+<p>Blocks may be un-named, as in the case of paragraph,
+or named, in the case of a LaTeX environment.  This
+information is stored in the <code>name</code> field.  For example,
+the name of the block <code>\begin{theorem} ... \end{theorem}</code>
+is <code>Just "theorem"</code></p>
+</li>
+<li>
+<p>The <code>firstline</code> field is the first line of a block,
+i.e., its header. If the header of a 
+block is "\begin{theorem}[Pythagoras]", then
+its name is "theorem" and <code>args</code> is the list <code>["Pythagoras]</code>.
+If we had <code>"\begin{theorem}[Pythagoras, foo:bar]"</code> (XX)
+then <code>args</code> is still ["Pythagoras"], and <code>properties</code> is
+a dictionary with one key, "foo", whose value is "bar". 
+Thus <code>args</code> is a list of unnamed args and <code>properties</code>
+is a dictionary of key-value pairs derived from the named
+args. (XX: improve this discussion)</p>
+</li>
+<li>
+<p>The <code>blockType</code> field has type</p>
+<p><code>type PrimitiveBlockType
+    = PBVerbatim
+    | PBOrdinary
+    | PBParagraph</code></p>
+<p>It describes the type of block — unnamed, environment
+like "theorem" in which the body of the block is parsed,
+or environment like "equation" where it is passed 
+verbatim to the renderer.</p>
+</li>
+<li>
+<p>The <code>status</code> field has type </p>
+<p><code>type Status
+    = Finished
+    | Started
+    | Filled</code></p>
+<p>It is used by the primitive block parser and 
+is needed to handle nested blocks.</p>
+</li>
+</ol>
+<h2 id="primitive-block-parser">Primitive Block Parser</h2>
+<p>The parser is defined in 
+module <code>Parser.PrimitiveLaTeXBlock</code>.
+Lists of lines of text are parsed into lists
+of primitive blocks by the function</p>
+<pre><code>-- Parser.PrimitiveLaTeXBlock
+parse : List String -&gt; List PrimitiveLaTeXBlock
+parse lines =
+    lines |&gt; parseLoop |&gt; .blocks
+</code></pre>
+<p>The strategy is to examine each line in turn,
+committing the current block if its mathching end 
+tag is found, otherwise pushing it onto a stack of blocks.
+All blocks are moved from the stack to the committed list
+when the "root" or first block on the stack 
+as well as all of its children are closed. If the stack is nonempty after all
+blocks have been consumed, there has been a syntax error, and
+so the <a href="#error-recovery">error recovery procedure</a> is invoked. </p>
+<h3 id="data-structure">Data structure</h3>
+<pre><code class="language-text">-- Parser.PrimtiiveLaTeXBlock
+-- 14 fields
+type alias State =
+    { blocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
+    , holdingStack : List PrimitiveLaTeXBlock
+    , labelStack : List Label
+    , lines : List String
+    , sourceText : String
+    , firstBlockLine : Int
+    , indent : Int
+    , level : Int
+    , lineNumber : Int
+    , position : Int
+    , verbatimClassifier : Maybe Classification
+    , count : Int
+    , label : String
+    }
+</code></pre>
+<p>where</p>
+<pre><code class="language-text">type alias Label =
+    { classification : ClassifyBlock.Classification
+    , level : Int
+    , status : Status
+    , lineNumber : Int
+    }
+</code></pre>
+<ol>
+<li>The <code>blocks</code> field holds the committed blocks — the eventual output
+of the parser.</li>
+<li>The <code>stack</code> field holds</li>
+</ol>
+<h3 id="main-parsing-functions">Main parsing functions</h3>
+<pre><code class="language-text">parse : List String -&gt; List PrimitiveLaTeXBlock
+parse lines =
+    lines |&gt; parseLoop |&gt; .blocks
+</code></pre>
+<p>and</p>
+<pre><code class="language-text">parseLoop : List String -&gt; ParserOutput
+parseLoop lines =
+    loop (init lines) nextStep |&gt; finalize
+</code></pre>
+<p>where</p>
+<pre><code class="language-text">type alias ParserOutput =
+    { blocks : List PrimitiveLaTeXBlock
+    , stack : List PrimitiveLaTeXBlock
+    , holdingStack : List PrimitiveLaTeXBlock }
+</code></pre>
+<h3 id="the-nextstep-function">The nextStep function</h3>
+<p>This is the driver function for the parser's
+<a href="/docs-scripta-compiler/common-code#functional-loops/">functional loop</a>.
+It operates as follows:</p>
+<pre><code class="language-text">  - Increment state.lineNumber.
+
+  - If the input (state.lines) has been consumed and
+        - the stack is empty, return Done state
+        - the stack is non empty, return recoverFromError state
+
+  - Let the current raw line be the string at index state.lineNumber of state.lines.
+
+  - Classify the raw line, a value of type Classification:
+
+        type Classification
+            = CBeginBlock String
+            | CEndBlock String
+            | CSpecialBlock LXSpecial
+            | CMathBlockDelim
+            | CVerbatimBlockDelim
+            | CPlainText
+            | CEmpty
+
+  - Invoke a handler based on the classification that returns a value
+    of type Step State State
+</code></pre>
+<p>New blocks are constructed by <code>nextStep</code> using</p>
+<pre><code class="language-text">blockFromLine : Int -&gt; Line -&gt; PrimitiveLaTeXBlock
+</code></pre>
+<p>The primitive block type (<code>PBVerbatim</code>, <code>PBOrdinary</code>, <code>PBParagraph</code>)
+and the label (in the case of the first two variants) is determined
+by examining the contents of the line.  For example, if the 
+line is <code>"\begin{equation}"</code> then the primitive block type
+is <code>PBVerbatim</code> and the label is <code>"equation"</code>.  The label is used
+to run the parser loop; when a block is committed, the label is
+used to form the <code>name: Maybe String</code> field of the primitive block.
+This field is <code>Nothing</code> in the case of <code>PBParagraph</code> and is a <code>Just String</code>
+in the case of the other two block types.</p>
+<h3 id="error-recovery">Error recovery</h3>
+<p>Recall that error recovery is invoked when the stack
+is nonempty after all input has been consumed.
+The recovery strategy is to commit
+the root block on the stack, setting the <code>error</code> field
+to <code>missingTagError block</code>,  then reparse 
+the input starting from the line immediately
+after that of the offending block.  Consequently
+error recovery is guaranteed to terminate and also
+to deal with additional errors.  Error recovery 
+is handled by</p>
+<pre><code class="language-text">recoverFromError : State -&gt; State
+</code></pre>
+<h2 id="transform">Transform</h2>
+<p><strong>Module MicroLaTeX.Parser.Transform</strong></p>
+<p>The purpose of this function is to transform a primitive block
+like the one coming from a single-line paragraph with text
+"\section{Intro}" to an ordinary (blockType PBOrdinaryBlock)
+block with name "section", args ["1"], and content ["Introduction"].
+This is to coerce parsed MiniLaTeX source to our standard model.</p>
+<h2 id="verbatim-blocks">Verbatim Blocks</h2>
+<p>If a block is to be treated as a verbatim block,
+its name must appear in </p>
+<pre><code class="language-text">Parser.LaTeXBlock.verbatimBlockNames : List String
+</code></pre>
+<p><strong>Note.</strong> What's the deal with <code>Parser.Common.verbatimBlockNames</code>?</p>
+<pre><code class="language-text">verbatimBlockNames =
+    [ &quot;equation&quot;
+    , &quot;aligned&quot;
+    , &quot;math&quot;
+    , &quot;code&quot;
+    , &quot;verbatim&quot;
+    , &quot;verse&quot;
+    , &quot;mathmacros&quot;
+    , &quot;textmacros&quot;
+    , &quot;tabular&quot;
+    , &quot;hide&quot;
+    , &quot;docinfo&quot;
+    , &quot;datatable&quot;
+    , &quot;chart&quot;
+    , &quot;svg&quot;
+    , &quot;quiver&quot;
+    , &quot;image&quot;
+    , &quot;tikz&quot;
+    , &quot;load-files&quot;
+    , &quot;include&quot;
+    , &quot;iframe&quot;
+    ]
+
+</code></pre>
+<h2 id="tests">Tests</h2>
+<p>Test parsing of text to a list of primitive blocks:</p>
+<pre><code class="language-text">-- MicroLaTeXParserTest
+primitiveBlockRoundTripTest &quot;nested environments&quot; text1
+</code></pre>
+<p>Test the internal language:</p>
+<pre><code>-- MicroLaTeXParserTest
+roundTrip1 &quot;\\blue{\\italic{abc \\strong{def}}}&quot;
+</code></pre>
+<p>Test coercion of MicroLaTeX macros to blocks:</p>
+<pre><code class="language-text">-- TransformLaTeXTest
+test_ &quot;tags&quot; (toL0 [ &quot;\\tags{AAA}&quot; ]) [ &quot;| tags AAA &quot; ]
+</code></pre>
+<pre><code class="language-text">-- TransformTest
+test_ &quot;transform, args&quot;
+    (toPrimitiveBlocks &quot;\n\n\\section{Intro}\n\n&quot; |&gt; List.map transform |&gt; List.map .args)
+    [ [ &quot;1&quot; ] ]
+</code></pre>
+<p>where</p>
+<pre><code class="language-text">toPrimitiveBlocks = 
+  Markup.toPrimitiveBlocks MicroLaTeXLang
+
+</code></pre>
+<h2 id="command-line-tools">Command line tools</h2>
+<p>The <code>./CLI</code> folder contains various CLI tools for testing
+and benchmarking.  All use Albert Dahlin's
+<a href="https://package.elm-lang.org/packages/albertdahlin/elm-posix/latest/">elm/posix</a>
+package and can be run using velociraptor (command: <code>vr</code>).
+Some examples:</p>
+<ul>
+<li>
+<p>vr lxpb lxtest/a1.txt</p>
+</li>
+<li>
+<p>vr rt foo.txt         </p>
+</li>
+<li>
+<p>vr bench init 100 bench/harmonic.tex </p>
+</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../l0/" class="btn btn-neutral float-left" title="L0"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../l0/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

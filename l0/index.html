@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://jxxcarlson.github.io/docs-scripta-compiler/l0/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>L0 - Scripta Compiler Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "L0";
+        var mkdocs_page_input_path = "l0.md";
+        var mkdocs_page_url = "/docs-scripta-compiler/l0/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Scripta Compiler Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../dataStructures/">Data Structures</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../common-code/">Common Code</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../synchronization/">Synchronization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../render/">Rendering</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">L0</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#parsing-expresssions">Parsing Expresssions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#reducibility">Reducibility</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../lx/">MicroLaTeX</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Scripta Compiler Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>L0</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="l0">L0</h1>
+<p>(( Under construction! ))</p>
+<h2 id="parsing-expresssions">Parsing Expresssions</h2>
+<p>Recall that we use the same type for  L0 expressions as we do
+for MicroLaTeX and XMarkdown:</p>
+<pre><code class="language-text">-- Parser.Expr
+type Expr
+    = Fun String (List Expr) Meta
+    | Text String Meta
+    | Verbatim String String Meta
+</code></pre>
+<p>The parser for expressions uses the shift-reduce strategy
+and is implemented as a 
+<a href="/docs-scripta-compiler/common-code#functional-loops/">functional loop</a> with state
+where the state is given by</p>
+<pre><code>-- L0.Parser.Expression
+type alias State =
+    { step : Int
+    , tokens : List Token
+    , numberOfTokens : Int
+    , tokenIndex : Int
+    , committed : List Expr
+    , stack : List Token
+    , messages : List String
+    , lineNumber : Int
+    }
+</code></pre>
+<p>with driving function <code>State -&gt; Step State State</code>
+defined by</p>
+<pre><code>-- L0.Parser.Expression
+nextStep : State -&gt; Step State State
+nextStep state =
+    case getToken state of
+        Nothing -&gt;
+            if stackIsEmpty state then
+                Done state
+
+            else
+                recoverFromError state
+
+        Just token -&gt;
+            state
+                |&gt; advanceTokenIndex
+                |&gt; pushOrCommit token
+                |&gt; reduceState
+                |&gt; (\st -&gt; { st | step = st.step + 1 })
+                |&gt; Loop
+</code></pre>
+<p>The <code>reduceState</code> function asks whether the stack
+is reducible using the function  <code>isReducible</code> discussed
+below.  If it is, it reduces the stack using
+<code>reduceStack</code>, returning the updated state.  If not,
+the state is passed on unchanged.</p>
+<pre><code>-- L0.Parser.Expression
+reduceState : State -&gt; State
+reduceState state =
+    if tokensAreReducible state then
+        { state | stack = [], committed = reduceStack state ++ state.committed }
+
+    else
+        state
+</code></pre>
+<h3 id="reducibility">Reducibility</h3>
+<pre><code>-- L0.Parser.Match:
+isReducible : List Symbol -&gt; Bool
+isReducible symbols_ =
+    let
+        symbols =
+            List.filter (\sym -&gt; sym /= WS) symbols_
+    in
+    case symbols of
+        M :: rest -&gt;
+            List.head (List.reverse rest) == Just M
+
+        C :: rest -&gt;
+            List.head (List.reverse rest) == Just C
+
+        L :: ST :: rest -&gt;
+            case List.head (List.reverse rest) of
+                Just R -&gt;
+                    hasReducibleArgs (dropLast rest)
+
+                _ -&gt;
+                    False
+
+        _ -&gt;
+            False
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../render/" class="btn btn-neutral float-left" title="Rendering"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../lx/" class="btn btn-neutral float-right" title="MicroLaTeX">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../render/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../lx/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

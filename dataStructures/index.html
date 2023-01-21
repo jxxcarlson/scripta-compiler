@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://jxxcarlson.github.io/docs-scripta-compiler/dataStructures/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Data Structures - Scripta Compiler Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Data Structures";
+        var mkdocs_page_input_path = "dataStructures.md";
+        var mkdocs_page_url = "/docs-scripta-compiler/dataStructures/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Scripta Compiler Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Data Structures</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#primitive-blocks">Primitive Blocks</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#example-l0">Example (L0)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#example-microlatex">Example (MicroLaTeX)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#coercion-and-pseudoblocks">Coercion and Pseudoblocks</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#expressions">Expressions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#expression-blocks">Expression Blocks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#edit-records">Edit records</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#diff-records">Diff Records</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#diffing-a-forest">Diffing a Forest</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#accumulator">Accumulator</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../common-code/">Common Code</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../synchronization/">Synchronization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../render/">Rendering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../l0/">L0</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../lx/">MicroLaTeX</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Scripta Compiler Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Data Structures</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="data-structures">Data Structures</h1>
+<p>The primary data structures of the parser are</p>
+<ol>
+<li>Primitive Blocks (<code>PrimitiveBlock</code>)</li>
+<li>Expressions (<code>Expr</code>)</li>
+<li>Expression blocks (<code>ExpressionBlock</code>)</li>
+<li>Accumulator (<code>Accumulator</code>)</li>
+</ol>
+<p>The parser first breaks source text into primitive
+blocks (1), then maps the internal language parser over 
+a list of primitive blocks to produce expression
+blocks (3).  Finally, the function
+<a href="#accumulator">transformAccumulate</a> is mapped over the list 
+of expression blocks, simultaneously collecting
+information such as cross-references and updating
+the list of expression blocks with that information</p>
+<h2 id="primitive-blocks">Primitive Blocks</h2>
+<p>Blocks have the rather elaborate type listed below.<br />
+This complex structure is necessary for interactive
+real-time editing with error recovery.  By real-time we mean
+that the rendered text is updated "instantaneously"
+in the browser as the user types in text.  By interactive,
+we mean (for example) that click on the rendered text
+brings the associated source text into view while
+simultaneously highlighting it.  In addition, if the
+user selects a block of source text and presses
+ctrl-S (S for 'sync'), the corresponding rendered text
+is brought into view and highlighted.</p>
+<p>In the case of L0 and XMarkdown, a primitive
+block is defined by</p>
+<pre><code>-- Parser.PrimitiveBlock
+type alias PrimitiveBlock =
+{ indent : Int
+, lineNumber : Int
+, position : Int
+, content : List String
+, name : Maybe String
+, args : List String
+, properties : Dict String String
+, sourceText : String
+, blockType : PrimitiveBlockType
+, error : Maybe { error : String }
+}
+</code></pre>
+<p>In the case of
+MicroLaTeX, there are two additional fields,
+<code>level: Int</code> and <code>status: Status</code>.</p>
+<h3 id="example-l0">Example (L0)</h3>
+<p>Consider the block </p>
+<pre><code class="language-text">| theorem (Magnus Axelsson) note:this is a joke temperature:22
+If $a = b$ then $b = a$.
+</code></pre>
+<p>There "(Magnus Axelsson) note:this is a joke temperature:22"
+is the argument string.  This string is a sequences
+of words.  Normal words do not contain the ":" character.
+Words of the form <em>a:b</em>, where <em>a</em> is normal are key-value
+words, representing key-value pairs.  Normal words must
+precede key-value words.  The former make up the 
+argument list, whereas the latter define the entries
+of the property dictionary.  Thus we have</p>
+<pre><code class="language-text">args = [&quot;(Magnus&quot;, &quot;Axellson)&quot;]
+properties = Dict.fromList [(&quot;note&quot;, &quot;this is a joke&quot;), (&quot;temperature&quot;, &quot;22&quot;)]
+</code></pre>
+<p>Arguments and properties are treated the same for 
+verbatim blocks as for ordinary blocks.  </p>
+<h3 id="example-microlatex">Example (MicroLaTeX)</h3>
+<p>Below is a LaTeX environment with an LaTeX optional argument.  In this 
+case the args list is empty and their are three key-value pairs
+in the properties dictiononary</p>
+<pre><code class="language-text">\begin{theorem}[foo:1, hoho:a b c, bar:2]
+If $a = b$ then $b = a$
+\end{theorem}
+</code></pre>
+<pre><code class="language-text">args = []
+properties = Dict.fromList [(&quot;bar&quot;, &quot;2&quot;), (&quot;foo&quot;, &quot;1&quot;), (&quot;hoho&quot;, &quot;a b c&quot;]
+</code></pre>
+<p>At the moment, environments with normal arguemnts are not handled, e.g.,</p>
+<pre><code class="language-text">\begin{theorem}{X}{Y}[foo:1, hoho:a b c, bar:2]
+If $a = b$ then $b = a$
+\end{theorem}
+</code></pre>
+<p>This should produce <code>args = ["X", "Y"]</code></p>
+<h3 id="coercion-and-pseudoblocks">Coercion and Pseudoblocks</h3>
+<p>Certain constructs such as <code>\image{https://yadayada.org/sparrow.jpg width:300}</code> or
+<code>\item foo bar ...</code> look to be syntactically part of 
+the surface internal language of MicroLaTeX.  However, 
+in source text they alway appear with an empty line above and 
+below and so are parsed as an anonymous (paragraph)
+block.  They must be coerced into being an ordinary or 
+verbatim block, e.g.,</p>
+<pre><code class="language-text">{ name = &quot;image&quot;
+, blockType = PBVerbatim
+, properties = Dict.fromList [(&quot;width&quot;, &quot;200&quot;)]
+, content = [&quot;image{https://yadayada.org/sparrow.jpg&quot;]
+...
+}
+</code></pre>
+<p>or </p>
+<pre><code class="language-text">{ name = &quot;image&quot;
+, blockType = PBOrdinary
+, content = [&quot;foo bar ...&quot;]
+...
+}
+</code></pre>
+<p>This coercion is accomplished by functions in module <code>MicroLaTeX.Parser.Transform</code>, 
+e.g.,</p>
+<pre><code class="language-text">-- module MicroLaTeX.Parser.Transform
+handlePseudoBlockWithContent : String -&gt; Maybe String -&gt; PrimitiveBlock -&gt; PrimitiveBlock
+handlePseudoBlockWithContent name maybeArg block = ...
+
+handleImage : PrimitiveBlock -&gt; PrimitiveBlock
+</code></pre>
+<p>The names of these elements must appear in the <code>pseudoBlockNamesWithContent</code>
+list:</p>
+<pre><code class="language-text">-- module MicroLaTeX.Parser.Transform
+pseudoBlockNamesWithContent =
+    [ &quot;title&quot;, &quot;section&quot;, &quot;subsection&quot;, &quot;subsubsection&quot;
+    , &quot;subheading&quot;, &quot;setcounter&quot;, &quot;contents&quot;, &quot;endnotes&quot;, &quot;image&quot; ]
+
+</code></pre>
+<h2 id="expressions">Expressions</h2>
+<pre><code class="language-text">-- Parser.Expr
+type Expr
+    = Fun String (List Expr) Meta
+    | Text String Meta
+    | Verbatim String String Meta
+</code></pre>
+<h2 id="expression-blocks">Expression Blocks</h2>
+<pre><code>-- Parser.Block
+type ExpressionBlock
+    = ExpressionBlock
+        { name : Maybe String
+        , args : List String
+        , properties : Dict String String
+        , indent : Int
+        , lineNumber : Int
+        , numberOfLines : Int
+        , id : String
+        , tag : String
+        , blockType : BlockType
+        , content : Either String (List Expr)
+        , messages : List String
+        , sourceText : String
+        , error : Maybe { error : String }
+        }
+</code></pre>
+<h2 id="edit-records">Edit records</h2>
+<p><strong>Module:</strong> Compiler.AbstractDifferentialCompiler</p>
+<p>To manage differential compilation, one uses
+<em>EditRecords</em>.  The main idea is to keep track 
+of the current list of primitive blocks (<code>List chunk</code>)
+and the current parse structure (<code>tree</code>).  When an
+edit is made, the source is parsed into primitive
+blocks and the new and old lists are compared, producing
+a <em>diff record</em> which shows which blocks have been
+changed.  The changed blocks are parsed,
+then incorporated into the current list of 
+expression blocks (<code>List parsedChunk</code>).  </p>
+<pre><code>type alias EditRecord chunk parsedChunk accumulator =
+    { chunks : List chunk
+    , parsed : List parsedChunk
+    , tree : List (Tree parsedChunk)
+    , accumulator : accumulator
+    , lang : Language
+    , messages : List String
+    , initialData : InitialData
+    }
+</code></pre>
+<p>Orchestration of the process outlined above
+is conducted by the <code>update</code> function listed
+below.  </p>
+<pre><code class="language-text">-- Compiler.AbstractDifferentialParser
+update :
+    UpdateFunctions chunk parsedChunk acc
+    -&gt; String
+    -&gt; EditRecord chunk parsedChunk acc
+    -&gt; EditRecord chunk parsedChunk acc
+</code></pre>
+<p>The first argument is a record that holds the 
+functions needed in any concrete instantiation
+of the <code>update</code> function, e.g, the field</p>
+<pre><code class="language-text">setLineNumber : Int -&gt; parsedChunk -&gt; parsedChunk
+</code></pre>
+<p>used in renumbering parsed chunks.</p>
+<p>XX: more on keeping the line numbers up-to-data.</p>
+<h2 id="diff-records">Diff Records</h2>
+<p><strong>Module:</strong> Compiler.Differ</p>
+<p>Let u and v be two lists of things of type <code>p</code>. Write them as
+u = axb, v = ayb, where a is the greatest common prefix
+and b is the greatest common suffix. Return DiffRecord a b x y.
+The type parameter can be anything: characters, strings, 
+primitive blocks, etc.  In the example below, <code>p = Char</code>.</p>
+<pre><code class="language-text">type alias DiffRecord p =
+    { commonPrefix : List p
+    , commonSuffix : List p
+    , middleSegmentInSource : List p
+    , middleSegmentInTarget : List p
+    }
+</code></pre>
+<p><strong>Example</strong></p>
+<pre><code class="language-text">&gt; import Compiler.Differ exposing(..)
+&gt; a = &quot;abcxyzdef&quot; |&gt; String.split &quot;&quot;
+[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;x&quot;,&quot;y&quot;,&quot;z&quot;,&quot;d&quot;,&quot;e&quot;,&quot;f&quot;]
+    : List String
+&gt; b = &quot;abcXYZdef&quot; |&gt; String.split &quot;&quot;
+[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;X&quot;,&quot;Y&quot;,&quot;Z&quot;,&quot;d&quot;,&quot;e&quot;,&quot;f&quot;]
+    : List String
+&gt; diff a b
+{  commonPrefix = [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]
+ , commonSuffix = [&quot;d&quot;,&quot;e&quot;,&quot;f&quot;],
+ , middleSegmentInSource = [&quot;x&quot;,&quot;y&quot;,&quot;z&quot;]
+ , middleSegmentInTarget = [&quot;X&quot;,&quot;Y&quot;,&quot;Z&quot;] }
+</code></pre>
+<h2 id="diffing-a-forest">Diffing a Forest</h2>
+<p><strong>Module:</strong> <code>Compiler.DifferForest</code></p>
+<p>The <code>diff</code> function in this module 
+is designed to diff lists with an
+implicit forest structure (list of trees) defined by a
+function <code>level: p -&gt; Int</code>. In the resulting <code>DiffRecord</code>,
+the prefix, suffix, and middle segments all
+represent subforests.  The <code>diff</code> function in this 
+module is used to diff primitive blocks in the compiler.</p>
+<pre><code class="language-text">diff : (p -&gt; p -&gt; Bool) 
+       -&gt; (p -&gt; Int) 
+       -&gt; List p 
+       -&gt; List p 
+       -&gt; DiffRecord p
+diff eq level u v =
+</code></pre>
+<p>The function <code>eq: p -&gt; p -&gt; Bool</code> tests for equality
+... XX: more detail.  In the case of primitive blocks ...
+important that line numbers be properly computed
+in the common suffix ...</p>
+<p>To illustrate
+the main issue, consider the lists <code>u</code> and <code>v</code> (below). These
+have an indentation structure like an outline for
+an article, and so define the structure
+of a forest. In the example
+below, the leaf <code>jkl</code> in the tree with root <code>def</code> is
+changed to <code>JKL</code>.</p>
+<pre><code class="language-text">    u:
+    ----
+    abc
+    def
+      ghi
+      jkl
+      mno
+    pqr
+
+    v:
+    ----
+    abc
+    def
+      ghi
+      JKL
+      mno
+    pqr
+</code></pre>
+<p>In this example the diff record represents the following structure:</p>
+<pre><code class="language-text">    commonPrefix:
+    ----
+    abc
+
+    middleSegmentInSource:
+    ---
+    def
+      ghi
+      jkl
+      mno
+
+    middleSegmentInTarget:
+    ---
+    def
+      ghi
+      JKL
+      mno
+
+    commonSuffix:
+    ---
+    pqr
+</code></pre>
+<p>XX, Expand on this, explain it:</p>
+<pre><code>        -- IMPORTANT: taking y from v, the second argument
+        -- ensures that the line numbers in the common suffix
+        -- are correct
+</code></pre>
+<h2 id="accumulator">Accumulator</h2>
+<p><strong>Module:</strong> <code>Compiler.Acc</code></p>
+<p>The <code>Accumulator</code> type
+is used to collect, build up, 
+and apply auxiliary information about the text.
+For example, the <code>headingIndex</code> stores the current
+section number, where "current" refers to the 
+the current section of the document as the 
+accumulator-building function walks through
+the current parse forest.  As it does, it simultaneously
+(1) updates the accumulator and (2) applies new "patches" 
+of the accumulator to the parse forest.  </p>
+<p>This process is managed by
+function <code>transformAccumulateTree</code> which is called every time 
+the parser pipeline runs.  For this reason one does not have
+to recompile to have up-to-date cross-references, etc., as
+in standard LaTeX.</p>
+<pre><code class="language-text">transformAccumulate : 
+        InitialAccumulatorData 
+        -&gt; Forest ExpressionBlock 
+        -&gt; ( Accumulator, Forest ExpressionBlock )
+</code></pre>
+<p>Type definition:</p>
+<pre><code class="language-text">-- Compiler.Acc
+type alias Accumulator =
+    { language : Language
+    , headingIndex : Vector
+    , documentIndex : Vector
+    , counter : Dict String Int
+    , blockCounter : Int
+    , itemVector : Vector -- Used for section numbering
+    , numberedItemDict : Dict String { level : Int, index : Int }
+    , numberedBlockNames : List String
+    , inList : Bool
+    , reference : Dict String { id : String, numRef : String }
+    , terms : Dict String TermLoc
+    , footnotes : Dict String TermLoc
+    , footnoteNumbers : Dict String Int
+    , mathMacroDict : Parser.MathMacro.MathMacroDict
+    , textMacroDict : Dict String Macro
+    , keyValueDict : Dict String String
+    , qAndAList : List ( String, String )
+    , qAndADict : Dict String String
+    }
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../common-code/" class="btn btn-neutral float-right" title="Common Code">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../common-code/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

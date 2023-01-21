@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://jxxcarlson.github.io/docs-scripta-compiler/differential-compiler/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Differential Compilation - Scripta Compiler Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Differential Compilation";
+        var mkdocs_page_input_path = "differential-compiler.md";
+        var mkdocs_page_url = "/docs-scripta-compiler/differential-compiler/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Scripta Compiler Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../introduction/">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../dataStructures/">Data Structures</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../common-code/">Common Code</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../synchronization/">Synchronization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../render/">Rendering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../l0/">L0</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../lx/">MicroLaTeX</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Scripta Compiler Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Differential Compilation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="differential-compilation">Differential Compilation</h1>
+<p>Differential compilation is an optimization used to speed up
+recompilation of large inputs.  Since parsing is the most
+expensive part of the compiler pipeline, the idea is
+to only re-parse what has been changed after an edit.</p>
+<h2 id="differ">Differ</h2>
+<p>We use an extremely primitive strategy.
+Let u and v be two lists of things of type <code>p</code>. Write them as
+u = axb, v = ayb, where a is the greatest common prefix
+and b is the greatest common suffix. 
+Return DiffRecord a b x y.  This operation is carried
+out by </p>
+<pre><code class="language-text">-- Compiler.Differ
+diff : List p -&gt; List p -&gt; DiffRecord p
+</code></pre>
+<p>where</p>
+<pre><code class="language-text">-- Compiler.Differ
+type alias DiffRecord p =
+    { commonPrefix : List p
+    , commonSuffix : List p
+    , middleSegmentInSource : List p
+    , middleSegmentInTarget : List p
+    }
+</code></pre>
+<p>A <code>DiffRecord</code> can be used to transform a list 
+using function <code>differentialTransform</code> and 
+a function <code>transform: p -&gt; q</code>.</p>
+<pre><code class="language-text">-- Compiler.Differ
+differentialTransform : (p -&gt; q) -&gt; DiffRecord p -&gt; List q -&gt; List q
+</code></pre>
+<h2 id="differforest">DifferForest</h2>
+<p>Module <code>Compiler.DifferForest</code> is designed to diff lists with an 
+implicit forest structure (list of trees) defined by a 
+function <code>level: p -&gt; Int</code>. In the resulting <code>DiffRecord</code>,
+the prefix, suffix, and middle segments all 
+represent subforests.</p>
+<p>To illustrate
+the main issue, consider the lists <code>u</code> and <code>v</code> (below). These
+have an indentation structure like an outline for
+an article, and so define the structure
+of a forest. Here the leaf <code>jkl</code> in the tree with root <code>def</code> is
+changed to <code>JKL</code>. </p>
+<pre><code class="language-text">    u:
+    ----
+    abc
+    def
+      ghi
+      jkl
+      mno
+    pqr
+
+    v:
+    ----
+    abc
+    def
+      ghi
+      JKL
+      mno
+    pqr
+</code></pre>
+<p>The resuting diff record represents the following structure:</p>
+<pre><code class="language-text">    commonPrefix:
+    ----
+    abc
+
+    middleSegmentInSource:
+    ---
+    def
+      ghi
+      jkl
+      mno
+
+    middleSegmentInTarget:
+    ---
+    def
+      ghi
+      JKL
+      mno
+
+    commonSuffix:  
+    ---
+    pqr
+</code></pre>
+<h2 id="abstract-differential-parser">Abstract Differential Parser</h2>
+<pre><code class="language-text">diffRecord.commonPrefix ++ diffRecord.middleSegmentInTarget ++ diffRecord.commonSuffix
+</code></pre>
+<h2 id="differential-parsing-in-scripta">Differential Parsing in Scripta</h2>
+<p>In Scripta, differential parsing takes place
+at the level of primitive blocks, as indicated in
+the <a href="/docs-scripta-compiler/overview#flowchart">flowchart</a>.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
