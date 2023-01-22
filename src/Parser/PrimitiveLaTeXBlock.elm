@@ -684,7 +684,21 @@ elaborate line pb =
                 getKVData args_
 
             simpleArgs =
-                getArgs args_
+                case name of
+                    Nothing ->
+                        -- not a \begin{??} ... \end{??} block
+                        getArgs args_
+
+                    Just name_ ->
+                        -- is a \begin{??} ... \end{??} block
+                        let
+                            prefix =
+                                "\\begin{" ++ name_ ++ "}"
+
+                            adjustedLine =
+                                String.replace prefix "" line.content
+                        in
+                        Compiler.Util.getBracedItems adjustedLine
 
             properties =
                 namedArgs |> prepareList |> prepareKVData

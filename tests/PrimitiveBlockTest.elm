@@ -21,14 +21,13 @@ testBlock label source =
 
 suite : Test
 suite =
-    Test.only <|
-        describe "PrimitiveLaTeXBlock parser ... levels"
-            [ testBlock "x1" x1
-            , testBlock "x2" x2
-            , testBlock "x3" x3
-            , testBlock "x4" x4
-            , testBlock "x5" x5
-            ]
+    describe "PrimitiveLaTeXBlock parser ... levels"
+        [ testBlock "x1" x1
+        , testBlock "x2" x2
+        , testBlock "x3" x3
+        , testBlock "x4" x4
+        , testBlock "x5" x5
+        ]
 
 
 x1 =

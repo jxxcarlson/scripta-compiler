@@ -2,6 +2,7 @@ module Compiler.Util exposing
     ( depth
     , dropLast
     , eraseItem
+    , getBracedItems
     , getBracketedItem
     , getBracketedItems
     , getItem
@@ -167,6 +168,16 @@ getBracketedItem str =
             Nothing
 
 
+getBracedItems : String -> List String
+getBracedItems str =
+    case Parser.run (many bracedItemParser) str of
+        Ok val ->
+            val
+
+        Err _ ->
+            []
+
+
 {-|
 
     > eraseItem MicroLaTeXLang "foo" "bar" "... whatever\\foo{bar}\n, whatever else ..."
@@ -266,6 +277,16 @@ bracketedItemParser =
 parenthesizedItemParser : Parser String
 parenthesizedItemParser =
     itemParser "(" ")"
+
+
+bracedItemParser : Parser String
+bracedItemParser =
+    itemParser "{" "}"
+
+
+bracedItemsParser : Parser (List String)
+bracedItemsParser =
+    many bracedItemParser
 
 
 itemParser : String -> String -> Parser String

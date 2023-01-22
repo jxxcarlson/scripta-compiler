@@ -494,6 +494,9 @@ exportBlock settings ((ExpressionBlock { blockType, name, args, content }) as bl
                         Just "code" ->
                             str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
 
+                        Just "tabular" ->
+                            str |> fixChars |> (\s -> "\\begin{tabular}{" ++ String.join " " args ++ "}\n" ++ s ++ "\n\\end{tabular}")
+
                         Just "verbatim" ->
                             str |> fixChars |> (\s -> "\\begin{verbatim}\n" ++ s ++ "\n\\end{verbatim}")
 

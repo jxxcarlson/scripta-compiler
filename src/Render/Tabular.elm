@@ -19,7 +19,7 @@ render count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
     let
         formatString : List String
         formatString =
-            String.split "" (List.head args |> Maybe.withDefault "")
+            String.words (List.head args |> Maybe.withDefault "")
 
         formatList : List (Element.Attribute msg)
         formatList =
