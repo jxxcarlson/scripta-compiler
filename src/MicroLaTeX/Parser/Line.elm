@@ -16,7 +16,7 @@ import Parser exposing ((|.), (|=), Parser)
 
 {-|
 
-    - ident:      the number of blanks before the first non-blank
+    - indent:     the number of blanks before the first non-blank
     - prefix:     the string of blanks preceding the first non-blank
     - content:    the original string with the prefix removed
     - lineNumber: the line number in the source text

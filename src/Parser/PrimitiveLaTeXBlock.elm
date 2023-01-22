@@ -191,8 +191,7 @@ nextStep state_ =
 
                         Just label ->
                             if label.classification == CMathBlockDelim then
-                                -- Loop state
-                                state |> endBlock CMathBlockDelim currentLine
+                                state |> endBlockOnMatch (Just label) CMathBlockDelim currentLine |> Loop
 
                             else
                                 Loop (state |> dispatchBeginBlock CMathBlockDelim currentLine)
@@ -408,7 +407,12 @@ endBlock2 classifier line state =
 
         Just label ->
             if ClassifyBlock.match label.classification classifier && state.level == label.level then
-                endBlockOnMatch (Just label) classifier line { state | blockClassification = Nothing }
+                case classifier of
+                    CMathBlockDelim ->
+                        endBlockOnMismatch label classifier line { state | blockClassification = Nothing }
+
+                    _ ->
+                        endBlockOnMatch (Just label) classifier line { state | blockClassification = Nothing }
 
             else
                 endBlockOnMismatch label classifier line { state | blockClassification = Nothing }
@@ -451,7 +455,7 @@ endBlockOnMismatch label_ classifier line state =
                                     else
                                         block.args
                                 , status = Finished
-                                , error = error
+                                , error = Just { error = "... terminate this block" }
                             }
                                 |> addSource line.content
                     in
@@ -887,6 +891,9 @@ emptyLine currentLine state =
 
             else
                 Loop state
+
+        Just (CSpecialBlock LXPseudoBlock) ->
+            Loop <| endBlock2 (CSpecialBlock LXItem) currentLine state
 
         Just (CSpecialBlock LXItem) ->
             Loop <| endBlock2 (CSpecialBlock LXItem) currentLine state

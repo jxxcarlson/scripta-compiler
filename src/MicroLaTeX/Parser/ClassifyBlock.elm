@@ -54,6 +54,7 @@ classificationString classification =
 type LXSpecial
     = LXItem
     | LXNumbered
+    | LXPseudoBlock
     | LXOrdinaryBlock String
     | LXVerbatimBlock String
 
@@ -68,6 +69,7 @@ classifierParser =
         , ordinaryBlockParser
         , verbatimBlockParser
         , itemParser
+        , pseudoBlockParser
         , numberedParser
         ]
 
@@ -122,6 +124,20 @@ itemParser : Parser Classification
 itemParser =
     Parser.succeed (CSpecialBlock LXItem)
         |. Parser.symbol "\\item"
+
+
+pseudoBlockParser : Parser Classification
+pseudoBlockParser =
+    Parser.succeed (CSpecialBlock LXItem)
+        |. Parser.oneOf
+            [ Parser.symbol "\\section"
+            , Parser.symbol "\\subsection"
+            , Parser.symbol "\\subsubsection"
+            , Parser.symbol "\\image"
+            , Parser.symbol "\\title"
+            , Parser.symbol "\\contents"
+            , Parser.symbol "\\setcounter"
+            ]
 
 
 numberedParser : Parser Classification
