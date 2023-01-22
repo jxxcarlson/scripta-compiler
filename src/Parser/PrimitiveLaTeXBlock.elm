@@ -167,9 +167,6 @@ nextStep state_ =
             let
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
-
-                class =
-                    ClassifyBlock.classify currentLine.content
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
@@ -177,7 +174,7 @@ nextStep state_ =
 
                 CEndBlock label ->
                     -- TODO: changed, review
-                    endBlock (CEndBlock label |> Debug.log "CEndBlock") currentLine state
+                    endBlock (CEndBlock label) currentLine state
 
                 CSpecialBlock label ->
                     Loop <| handleSpecialBlock (CSpecialBlock label) currentLine state
@@ -369,43 +366,23 @@ changeStatusOfStackTop block rest state =
 
 
 {-| We arrive here only from clause CEndBlock of function nextStep.
-The classication is that of the current line, e.g. 'CEndBlock "theorem"'
+The classification is that of the current line, e.g. 'CEndBlock "theorem"'
 -}
 endBlock : Classification -> Line -> State -> Step State State
 endBlock classification currentLine state =
     -- TODO: changed, review
-    case state.blockClassification of
-        Nothing ->
-            Loop <| endBlock1 classification currentLine state
-
-        Just blockClassification_ ->
-            case blockClassification_ of
-                CBeginBlock _ ->
-                    if ClassifyBlock.match blockClassification_ classification then
-                        Loop <| endBlock1 classification currentLine state
-
-                    else
-                        Loop state
-
-                _ ->
-                    Loop state
-
-
-endBlock1 : Classification -> Line -> State -> State
-endBlock1 classification line state =
-    -- TODO: changed, review
     case List.head state.labelStack of
         Nothing ->
-            { state | blockClassification = Nothing, level = state.level - 1 }
+            Loop <| { state | level = state.level - 1 }
 
         Just label ->
             if ClassifyBlock.match label.classification classification && state.level == label.level then
                 -- the current classification agrees with the one on top of the stack
-                endBlockOnMatch (Just label) classification line { state | blockClassification = Nothing }
+                Loop <| endBlockOnMatch (Just label) classification currentLine { state | blockClassification = Nothing }
 
             else
                 -- the current classification disagrees with the one on top of the stack
-                endBlockOnMismatch label classification line { state | blockClassification = Nothing }
+                Loop <| endBlockOnMismatch label classification currentLine { state | blockClassification = Nothing }
 
 
 endBlockOnMismatch : Label -> Classification -> Line -> State -> State
@@ -423,18 +400,28 @@ endBlockOnMismatch label_ classifier line state =
 
                 Just ( label, _ ) ->
                     let
-                        error =
-                            getError label classifier
-
                         name =
                             block.name |> Maybe.withDefault "--"
+
+                        fixIfEquation lines =
+                            if
+                                List.member block.name [ Just "equation", Just "aligned" ]
+                                    && Maybe.map (String.left 2) (List.head lines)
+                                    == Just "\\e"
+                                    || Maybe.map (String.left 1) (List.head lines)
+                                    == Just "\\"
+                            then
+                                List.drop 1 lines
+
+                            else
+                                lines
 
                         newBlock =
                             { block
                                 | content =
                                     --- TODO: WTF!?
                                     if List.member name verbatimBlockNames then
-                                        getContent label_.classification line state |> List.reverse
+                                        getContent label_.classification line state |> fixIfEquation |> List.reverse
 
                                     else
                                         getContent label_.classification line state |> List.reverse
@@ -445,15 +432,13 @@ endBlockOnMismatch label_ classifier line state =
                                     else
                                         block.args
                                 , status = Finished
-                                , error = Just { error = "... terminate this block" }
+                                , error = Just { error = "— missing or mismatched \\end{..}" }
                             }
                                 |> addSource line.content
                     in
                     { state
                         | holdingStack = newBlock :: state.holdingStack
                         , level = state.level - 1
-
-                        -- blocks = newBlock :: state.blocks
                         , stack = rest
                         , labelStack = List.drop 1 state.labelStack
                     }
@@ -870,37 +855,38 @@ nextKVStep state =
 emptyLine currentLine state =
     case List.head state.labelStack of
         Nothing ->
+            -- { state | blockClassification = Nothing, level = state.level - 1 }
             Loop (resetLevelIfStackIsEmpty state)
 
         Just label ->
-            case label.classification |> Debug.log "emptyLine, stack label" of
+            case label.classification of
                 CPlainText ->
-                    Loop <| endBlock1 CPlainText currentLine state
+                    endBlock CPlainText currentLine state
 
                 CMathBlockDelim ->
                     Loop <| endBlockOnMismatch label CMathBlockDelim currentLine state
 
                 CBeginBlock name ->
                     if List.member name [ "equation", "aligned" ] then
-                        Loop <| endBlock1 (CEndBlock name) currentLine state
+                        Loop <| endBlockOnMismatch label (CBeginBlock name) currentLine state
 
                     else
                         Loop state
 
                 CSpecialBlock LXPseudoBlock ->
-                    Loop <| endBlock1 (CSpecialBlock LXItem) currentLine state
+                    endBlock (CSpecialBlock LXItem) currentLine state
 
                 CSpecialBlock LXItem ->
-                    Loop <| endBlock1 (CSpecialBlock LXItem) currentLine state
+                    endBlock (CSpecialBlock LXItem) currentLine state
 
                 CSpecialBlock LXNumbered ->
-                    Loop <| endBlock1 (CSpecialBlock LXNumbered) currentLine state
+                    endBlock (CSpecialBlock LXNumbered) currentLine state
 
                 CSpecialBlock (LXOrdinaryBlock name) ->
-                    Loop <| endBlock1 (CSpecialBlock (LXOrdinaryBlock name)) currentLine state
+                    endBlock (CSpecialBlock (LXOrdinaryBlock name)) currentLine state
 
                 CSpecialBlock (LXVerbatimBlock name) ->
-                    Loop <| endBlock1 (CSpecialBlock (LXVerbatimBlock name)) currentLine state
+                    endBlock (CSpecialBlock (LXVerbatimBlock name)) currentLine state
 
                 CEndBlock _ ->
                     Loop (resetLevelIfStackIsEmpty state)
