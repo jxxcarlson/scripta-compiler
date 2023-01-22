@@ -85,8 +85,8 @@ transformST data ast =
 {-| Note that function transformAccumulate operates on initialized accumulator.
 -}
 transformAccumulate : InitialAccumulatorData -> Forest ExpressionBlock -> ( Accumulator, Forest ExpressionBlock )
-transformAccumulate data ast =
-    List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init data, [] ) ast
+transformAccumulate data forest =
+    List.foldl (\tree ( acc_, ast_ ) -> transformAccumulateTree tree acc_ |> mapper ast_) ( init data, [] ) forest
         |> (\( acc_, ast_ ) -> ( acc_, List.reverse ast_ ))
 
 
