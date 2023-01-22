@@ -432,7 +432,16 @@ endBlockOnMismatch label_ classifier line state =
                                     else
                                         block.args
                                 , status = Finished
-                                , error = Just { error = "— missing or mismatched \\end{..}" }
+                                , error =
+                                    case ( label.classification, classifier ) of
+                                        ( CBeginBlock a, CEndBlock b ) ->
+                                            Just { error = "Mismatched \\begin & \\end tags: " ++ a ++ " ≠ " ++ b }
+
+                                        ( CBeginBlock a, _ ) ->
+                                            Just { error = "Missing \\end{" ++ a ++ "}" }
+
+                                        _ ->
+                                            Just { error = "— something is messed up" }
                             }
                                 |> addSource line.content
                     in
