@@ -142,8 +142,19 @@ handleImage block =
                 |> String.replace "}" ""
                 |> String.words
 
-        ( _, properties ) =
+        ( _, properties_ ) =
             Parser.PrimitiveBlock.argsAndProperties (List.drop 1 words)
+
+        properties =
+            properties_
+
+        --case Dict.get "caption" properties_ of
+        --    Just _ ->
+        --        properties_
+        --
+        --    Nothing ->
+        --        -- Make sure that there is a caption entry
+        --        Dict.insert "caption" " " properties_
     in
     { block
         | blockType = PBVerbatim

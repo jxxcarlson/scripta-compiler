@@ -55,8 +55,11 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
 
         label =
             case caption of
-                "" ->
+                "*" ->
                     "Figure " ++ getFigureLabel properties
+
+                "none" ->
+                    ""
 
                 _ ->
                     "Figure " ++ getFigureLabel properties ++ ". " ++ caption
@@ -204,7 +207,7 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
 
                 desc =
                     case qArgs.caption of
-                        "" ->
+                        "*" ->
                             "Figure " ++ getFigureLabel properties
 
                         _ ->

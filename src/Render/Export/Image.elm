@@ -76,7 +76,7 @@ normalizeUrl_ url_ =
 
 
 exportCenteredFigure url options caption =
-    if caption == "" then
+    if caption == "none" then
         [ "\\imagecenter{", url, "}{" ++ options ++ "}" ] |> String.join ""
 
     else
@@ -84,7 +84,8 @@ exportCenteredFigure url options caption =
 
 
 exportWrappedFigure placement url options caption =
-    [ "\\imagefloat{", url, "}{" ++ options ++ "}{" ++ caption ++ "}{" ++ placement ++ "}" ] |> String.join ""
+    [ "\\imagefloat{", url, "}{" ++ options ++ "}{" ++ caption ++ "}{" ++ placement ++ "}" ]
+        |> String.join ""
 
 
 type alias ImageParameters =
@@ -207,7 +208,7 @@ imageParameters3 settings (ExpressionBlock { content, args, properties }) =
             url
 
         caption =
-            Dict.get "caption" properties |> Maybe.withDefault ""
+            Dict.get "caption" properties |> Maybe.withDefault "" |> String.replace ":" ""
 
         displayWidth =
             settings.width
