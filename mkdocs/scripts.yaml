@@ -8,4 +8,4 @@ scripts:
 
   site-stats: cat docs-scripta-compiler/*.md | wc -wl
   
-  
+  serve: mkdocs serve -a localhost:4008
