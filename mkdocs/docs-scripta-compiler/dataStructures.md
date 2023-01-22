@@ -381,36 +381,22 @@ XX, Expand on this, explain it:
 
 **Module:** `Compiler.Acc`
 
-The `Accumulator` type
-is used to collect, build up, 
-and apply auxiliary information about the text.
-For example, the `headingIndex` stores the current
-section number, where "current" refers to the 
-the current section of the document as the 
-accumulator-building function walks through
-the current parse forest.  As it does, it simultaneously
-(1) updates the accumulator and (2) applies new "patches" 
-of the accumulator to the parse forest.  
-
-This process is managed by
-function `transformAccumulateTree` which is called every time 
-the parser pipeline runs.  For this reason one does not have
-to recompile to have up-to-date cross-references, etc., as
-in standard LaTeX.
-
+The `Accumulator` is a data structure that holds information
+such as `counter : Dict String Int` that holds counter
+of various kinds, e.g., there is a key for "figure" with
+value whatever the current figure number is.  The function
+`transformAccumulate` walks through the syntax forest simultaneously
+building up the `Accumulator` data structure and
+transforming the current block.  For example, when it
+encounters an image, iframe, quiver, or chart block, it advances
+the figure counter and inserts an entry in the property dictionary
+of the block with key "figure" and value the current counter.
+In this way, the rendering function has at hand all
+the information needed to render the block with a label
+like "Figure 23."
 
 ```text
-transformAccumulate : 
-        InitialAccumulatorData 
-        -> Forest ExpressionBlock 
-        -> ( Accumulator, Forest ExpressionBlock )
-```
-
-Type definition:
-
-
-```text
--- Compiler.Acc
+-- module Compiler.Acc
 type alias Accumulator =
     { language : Language
     , headingIndex : Vector
@@ -432,4 +418,17 @@ type alias Accumulator =
     , qAndADict : Dict String String
     }
 ```
+### Traversal function
 
+```text
+-- module Compiler.Acc
+transformAccumulate : InitialAccumulatorData -> Forest ExpressionBlock -> ( Accumulator, Forest ExpressionBlock )
+transformAccumulate data forest =
+```
+
+### Block updater
+
+```text
+-- module Compiler.Acc
+transformBlock : Accumulator -> ExpressionBlock -> ExpressionBlock
+```

@@ -10,7 +10,6 @@ nav:
   - 'overview.md'
   - 'dataStructures.md'
   - 'common-code.md'
-  - 'accumulator.md'
   - 'synchronization.md'
   - 'render.md'
   - 'l0.md'
