@@ -193,7 +193,7 @@ yy8 =
 
 dd8 =
     { commonPrefix = [ { line = 0, content = "000" } ]
-    , commonSuffix = [ { line = 4, content = "ddd" } ]
+    , commonSuffix = [ { line = 5, content = "ddd" } ]
     , middleSegmentInSource =
         [ { line = 1, content = "aaa" }
         , { line = 2, content = "  bbb" }

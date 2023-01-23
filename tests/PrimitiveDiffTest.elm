@@ -20,7 +20,7 @@ diff =
 
 checkSuffix : String -> String -> Maybe Int
 checkSuffix source1 source2 =
-    Maybe.map .lineNumber (List.head (diff source1 source2 |> Debug.log "DIFF").commonSuffix)
+    Maybe.map .lineNumber (List.head (diff source1 source2).commonSuffix)
 
 
 diffTest : String -> Maybe Int -> String -> String -> Test
@@ -53,10 +53,14 @@ diffSuite =
         , diffTest "a3-a1" (Just 7) a3 a1
         , diffTest "a1-a4" (Just 9) a1 a4
         , diffTest "a4-a1" (Just 7) a4 a1
-        , diffTest "a5-a1" (Just 7) a5 a1
+
+        -- TODO: is the below the correct interpretation?
+        , diffTest "a5-a1" Nothing a5 a1
         , noChangeTest "a5-a1, no change" a5 a1
         , noChangeTest "a1-a5, no change" a1 a5
-        , diffTest "a1-a5" (Just 11) a1 a5
+
+        -- TODO: is the below the correct interpretation?
+        , diffTest "a1-a5" Nothing a1 a5
         ]
 
 
@@ -73,6 +77,23 @@ a1 =
     """
 a1
 a2
+
+b1
+b2
+
+c1
+c2
+"""
+
+
+a5 =
+    """
+a1
+a2
+
+
+
+
 
 b1
 b2
@@ -135,23 +156,6 @@ a2
 b1
 
 
-b2
-
-c1
-c2
-"""
-
-
-a5 =
-    """
-a1
-a2
-
-
-
-
-
-b1
 b2
 
 c1

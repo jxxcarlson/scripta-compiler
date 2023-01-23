@@ -6,6 +6,10 @@ scripts:
 
   view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/docs-scripta-compiler/
 
+  view-local: /usr/bin/open -a /Applications/Google\ Chrome.app http:localhost:4003
+
+  serve: mkdocs serve -a localhost:4003
+
   site-stats: cat docs-scripta-compiler/*.md | wc -wl
   
-  serve: mkdocs serve -a localhost:4008
+

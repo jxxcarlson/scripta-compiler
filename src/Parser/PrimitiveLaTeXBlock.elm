@@ -435,7 +435,7 @@ endBlockOnMismatch label_ classifier line state =
                                 , error =
                                     case ( label.classification, classifier ) of
                                         ( CBeginBlock a, CEndBlock b ) ->
-                                            Just { error = "Mismatched \\begin & \\end tags: " ++ a ++ " ≠ " ++ b }
+                                            Just { error = "Mismatch: \\begin{" ++ a ++ "} ≠ \\end{" ++ b ++ "}" }
 
                                         ( CBeginBlock a, _ ) ->
                                             Just { error = "Missing \\end{" ++ a ++ "}" }
