@@ -401,7 +401,7 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
 
         ( Just name_, OrdinaryBlock _ ) ->
             -- TODO: tighten up
-            updateWithOrdinaryBlock accumulator (Just name_) content tag id indent
+            accumulator |> updateWithOrdinaryBlock (Just name_) content tag id indent
 
         -- provide for numbering of equations
         ( Just "mathmacros", VerbatimBlock [] ) ->
@@ -422,10 +422,10 @@ updateAccumulator (ExpressionBlock { name, indent, args, blockType, content, tag
 
         ( Just _, VerbatimBlock _ ) ->
             -- TODO: tighten up
-            updateWithVerbatimBlock accumulator name args tag id
+            accumulator |> updateWithVerbatimBlock name args tag id
 
         ( Nothing, Paragraph ) ->
-            updateWithParagraph accumulator Nothing content tag id
+            accumulator |> updateWithParagraph Nothing content tag id
 
         _ ->
             -- TODO: take care of numberedItemIndex
@@ -508,8 +508,8 @@ updateBibItemBlock accumulator args id =
             { accumulator | reference = Dict.insert label { id = id, numRef = "_irrelevant_" } accumulator.reference }
 
 
-updateWithOrdinaryBlock : Accumulator -> Maybe String -> Either b (List Expr) -> String -> String -> Int -> Accumulator
-updateWithOrdinaryBlock accumulator name content tag id indent =
+updateWithOrdinaryBlock : Maybe String -> Either b (List Expr) -> String -> String -> Int -> Accumulator -> Accumulator
+updateWithOrdinaryBlock name content tag id indent accumulator =
     let
         ( inList, initialNumberedVector ) =
             listData accumulator name
@@ -581,8 +581,29 @@ updateWithOrdinaryBlock accumulator name content tag id indent =
                 accumulator
 
             else if List.member name_ Parser.Settings.numberedBlockNames then
-                { accumulator | blockCounter = accumulator.blockCounter + 1 }
-                    |> updateReference tag id tag
+                --- TODO: fix thereom labels
+                let
+                    prefix =
+                        Vector.toString accumulator.headingIndex
+
+                    equationProp =
+                        if prefix == "" then
+                            getCounterAsString "equation" accumulator.counter
+
+                        else
+                            Vector.toString accumulator.headingIndex ++ "." ++ String.fromInt (accumulator.blockCounter + 1)
+
+                    level =
+                        indent // indentationQuantum
+
+                    itemVector =
+                        Vector.increment level accumulator.itemVector
+
+                    numberedItemDict =
+                        Dict.insert id { level = level, index = Vector.get level itemVector } accumulator.numberedItemDict
+                in
+                { accumulator | blockCounter = accumulator.blockCounter + 1, itemVector = itemVector, numberedItemDict = numberedItemDict }
+                    |> updateReference tag id equationProp
 
             else
                 accumulator
@@ -612,7 +633,8 @@ updateWithMathMacros content accumulator =
     { accumulator | mathMacroDict = mathMacroDict }
 
 
-updateWithVerbatimBlock accumulator name_ args tag_ id =
+updateWithVerbatimBlock : Maybe String -> List String -> String -> String -> Accumulator -> Accumulator
+updateWithVerbatimBlock name_ args tag_ id accumulator =
     let
         _ =
             ( name_, tag, id )
@@ -665,7 +687,7 @@ verbatimBlockReference isSimple headingIndex name newCounter =
         a ++ "." ++ (getCounter (reduceName name) newCounter |> String.fromInt)
 
 
-updateWithParagraph accumulator name content tag id =
+updateWithParagraph name content tag id accumulator =
     let
         ( inList, _ ) =
             listData accumulator name

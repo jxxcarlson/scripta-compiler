@@ -264,6 +264,15 @@ renderWithDefault default count acc settings exprs =
         List.map (Render.Elm.render count acc settings) exprs
 
 
+renderWithDefaultWithSize : Int -> String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
+renderWithDefaultWithSize size default count acc settings exprs =
+    if List.isEmpty exprs then
+        [ Element.el [ Font.color Render.Settings.redColor, Font.size size ] (Element.text default) ]
+
+    else
+        List.map (Render.Elm.render count acc settings) exprs
+
+
 renderWithDefault2 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault2 _ count acc settings exprs =
     List.map (Render.Elm.render count acc settings) exprs
@@ -325,7 +334,7 @@ section count acc settings ((ExpressionBlock { lineNumber, args, properties }) a
          ]
             ++ highlightAttrs lineNumber settings
         )
-        { url = Render.Utility.internalLink (settings.titlePrefix ++ "title"), label = Element.paragraph [] (sectionNumber :: renderWithDefault "| section" count acc settings exprs) }
+        { url = Render.Utility.internalLink (settings.titlePrefix ++ "title"), label = Element.paragraph [] (sectionNumber :: renderWithDefaultWithSize 18 "??" count acc settings exprs) }
 
 
 
@@ -534,7 +543,7 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
             Element.column ([ Element.spacing 8, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
                 [ Element.el [ Font.bold, Render.Utility.sendLineNumberOnClick lineNumber ] (Element.text (blockHeading name args properties))
                 , Element.paragraph [ Font.italic, Render.Utility.sendLineNumberOnClick lineNumber ]
-                    (renderWithDefault2 ("| " ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
+                    (renderWithDefault2 ("??" ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
                 ]
 
 

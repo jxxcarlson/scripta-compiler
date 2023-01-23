@@ -168,7 +168,7 @@ nextStep state_ =
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
             in
-            case ClassifyBlock.classify currentLine.content of
+            case ClassifyBlock.classify currentLine.content |> Debug.log ("CLASS " ++ (state.lineNumber |> String.fromInt)) of
                 CBeginBlock label ->
                     Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
 
@@ -441,7 +441,7 @@ endBlockOnMismatch label_ classifier line state =
                                             Just { error = "Missing \\end{" ++ a ++ "}" }
 
                                         _ ->
-                                            Just { error = "— something is messed up" }
+                                            Just { error = "— ??" }
                             }
                                 |> addSource line.content
                     in
