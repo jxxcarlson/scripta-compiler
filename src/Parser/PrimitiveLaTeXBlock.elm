@@ -168,7 +168,7 @@ nextStep state_ =
                 currentLine =
                     Line.classify (getPosition rawLine state) state.lineNumber rawLine
             in
-            case ClassifyBlock.classify currentLine.content |> Debug.log ("CLASS " ++ (state.lineNumber |> String.fromInt)) of
+            case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
                     Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
 
