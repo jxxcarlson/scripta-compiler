@@ -41,7 +41,18 @@ blockSuite =
     describe "MicroLaTeX Block Error Tests"
         [ testBlockError "missmatched tags" missmatchedTags "Mismatch: \\begin{foo} ≠ \\end{bar}"
         , testBlockError "missing end tag" missingEndTag "Missing \\end{foo}"
+        , testBlockError "missing end tag, code block" codeMissingEndTag "Missing \\end{code}\n\n"
         ]
+
+
+codeMissingEndTag =
+    """
+\\begin{code}
+abc
+
+  def
+  
+"""
 
 
 missingEndTag =
