@@ -242,7 +242,7 @@ blockFromLine lang ({ indent, lineNumber, position, prefix, content } as line) =
     , blockType = Line.getBlockType lang line.content
     , error = Nothing
     }
-        |> elaborate line
+        |> elaborate lang line
 
 
 nextStep : State -> Step State (List PrimitiveBlock)
