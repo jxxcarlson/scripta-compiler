@@ -61,6 +61,7 @@ primitiveBlock =
     describe "parse text to primitive blocks"
         [ primitiveBlockRoundTripTest "environments" text0
         , primitiveBlockRoundTripTest "nested environments" text1
+        , primitiveBlockRoundTripTest "code1" code1
         ]
 
 
@@ -102,6 +103,18 @@ ABC
 XYZ
 
 PQR
+"""
+
+
+code1 =
+    """
+\\begin{code}
+abc
+  
+  def
+  
+ghi
+\\end{code}
 """
 
 
