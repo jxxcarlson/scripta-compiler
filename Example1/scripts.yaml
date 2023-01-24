@@ -2,9 +2,11 @@ scripts:
 
   compile: elm make src/Main.elm --output=assets/main.js --optimize
 
-  update-site: cp assets/* /Users/carlson/dev/jxxcarlson.github.io/scripta-compiler-example1/
+  publish:
+    - elm make src/Main.elm --output=assets/main.js
+    - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/scripta-compiler-example1/
 
-  view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/scripta-compiler-example1
+  look: /usr/bin/open -a /Applications/Google\ Chrome.app https:jxxcarlson.github.io/scripta-compiler-example1
 
-  view-local:  /usr/bin/open -a /Applications/Firefox.app ./assets/index.html
+  look-local:  /usr/bin/open -a /Applications/Google\ Chrome.app ./assets/index.html
   
