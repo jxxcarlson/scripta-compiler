@@ -6,8 +6,12 @@ scripts:
 
   serve: npx serve ./assets -l 4002
 
-  publish: 
+  publish:
     - elm make src/Main.elm --output=assets/main.js
+    - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/app/scripta-compiler-demo
+
+  publish-o: 
+    - elm make src/Main.elm --output=assets/main.js --optimize
     - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/app/scripta-compiler-demo
 
   look-local: /usr/bin/open -a /Applications/Google\ Chrome.app /Users/carlson/dev/jxxcarlson.github.io/app/scripta-compiler-demo/index.html

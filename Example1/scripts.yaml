@@ -6,6 +6,11 @@ scripts:
     - elm make src/Main.elm --output=assets/main.js
     - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/scripta-compiler-example1/
 
+  publish-o:
+    - elm make src/Main.elm --output=assets/main.js --optimize
+    - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/scripta-compiler-example1/
+
+
   look: /usr/bin/open -a /Applications/Google\ Chrome.app https:jxxcarlson.github.io/scripta-compiler-example1
 
   look-local:  /usr/bin/open -a /Applications/Google\ Chrome.app ./assets/index.html
