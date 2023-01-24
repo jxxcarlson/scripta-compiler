@@ -153,7 +153,7 @@ update msg model =
             ( { model
                 | input = str
                 , count = model.count + 1
-                , editRecord = Scripta.API.update model.editRecord str
+                , editRecord = Scripta.API.update model.editRecord str |> Debug.log "EDIT RECORD"
               }
             , Cmd.none
             )

@@ -9,6 +9,10 @@ scripts:
   # Example: vr l0parse l0test/datatable.txt
   # Test the L0 block parser
 
+  xmpb: elm-cli run --debug src/XMPB.elm
+  # Example: xmpb foo.txt
+  # Test the XMarkdown block parser
+
   lxe: elm-cli run --debug src/LXEB.elm
   # Example: vr lxe rt/para.txt rt
   # Example: vr lxe rt/para.txt p

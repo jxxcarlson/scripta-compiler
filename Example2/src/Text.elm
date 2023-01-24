@@ -281,6 +281,7 @@ $$
 
 xMarkdown =
     """
+
 | title
 XMarkdown Visual Check
 
@@ -313,20 +314,39 @@ Some *italic* and  **bold** text.  @[blue Blue stuff.]
 
 This is a formula: $a^2 + b^2 = c^2$.
 
-## Displayed formula
+And this is a displayed formulat
 
 $$
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
 
+done in the usual TeX way:
+
+```
+ $$
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+$$
+```
 
 ## Numbered formula
+
+```
+|| equation
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+```
 
 || equation
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 
 ## Aligned equations
 
+```
+|| aligned
+\\label{foo}
+a &= b + 1 \\\\
+c &= a^2 \\\\
+ &= b^2 + 2b + 1 \\\\
+```
 
 || aligned
 \\label{foo}
@@ -337,6 +357,11 @@ c &= a^2 \\\\
 
 ## Theorems
 
+|| code
+| theorem
+There are infinitely many primes $p \\equiv 1\\ mod\\ 4$. Isn't that nice?
+
+
 | theorem
 There are infinitely many primes $p \\equiv 1\\ mod\\ 4$. Isn't that nice?
 
@@ -346,7 +371,7 @@ There are infinitely many primes $p \\equiv 1\\ mod\\ 4$. Isn't that nice?
 Some inline code `a[0] := a[0] + 1`.  A block of code:
 
 ```
-# multiplication table
+ # Multiplication table
   for x in range(1, 11):
       for y in range(1, 11):
           print('%d ** %d = %d' % (x, y, x**y)
@@ -356,13 +381,16 @@ Here is the source text:
 
 || code
 ```
-# multiplication table
+# Multiplication table
   for x in range(1, 11):
       for y in range(1, 11):
           print('%d ** %d = %d' % (x, y, x**y)
 ```
 
+
 # Bulleted Lists
+
+Levels in the list are controlled by indentation.
 
 - One
 
@@ -379,6 +407,8 @@ Here is the source text:
 
 # Numbered Lists
 
+Numbered lists are constructed in the same way,
+but with a  period `.` instead of a hyphen `-` to start a new item.
 
 . One
 
