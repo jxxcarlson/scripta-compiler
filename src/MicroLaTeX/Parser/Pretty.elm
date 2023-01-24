@@ -104,7 +104,7 @@ printOrdinaryBlock name exprs =
 
 
 printBlock : Parser.Block.ExpressionBlock -> String
-printBlock block =
+printBlock ((Parser.Block.ExpressionBlock data) as block) =
     (case Parser.Block.getBlockType block of
         Parser.Block.Paragraph ->
             (block |> Parser.Block.getContent |> printExprs) ++ "\n"
@@ -124,7 +124,12 @@ printBlock block =
                 macro name content
 
              else
-                [ beginTag name, printExprs content, endTag name ] |> String.join "\n"
+                case data.error of
+                    Nothing ->
+                        [ beginTag name, printExprs content, endTag name ] |> String.join "\n"
+
+                    Just e ->
+                        [ beginTag name, printExprs content, endTag name, "ERROR: " ++ e.error ] |> String.join "\n"
             )
                 ++ "\n"
 
