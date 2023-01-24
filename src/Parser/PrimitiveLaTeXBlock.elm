@@ -438,7 +438,8 @@ endBlockOnMismatch label_ classifier line state =
                                             Just { error = "Missing \\end{" ++ a ++ "}" }
 
                                         _ ->
-                                            Just { error = "$$" }
+                                            -- TODO: Is this the right thing to do?
+                                            Nothing
                             }
                                 |> addSource line.content
                     in
@@ -874,10 +875,13 @@ emptyLine currentLine state =
 
                 CBeginBlock name ->
                     if List.member name [ "equation", "aligned" ] then
+                        -- equation and aligned blocks are terminated if an empty line is encountered
                         Loop <| endBlockOnMismatch label (CBeginBlock name) currentLine state
 
                     else
-                        Loop state
+                        -- if the top of the labelstack is  (CBeginBlock name) and empty line
+                        -- is encounter, keep going to try to find (CEndBlock name)
+                        Loop <| state
 
                 CSpecialBlock LXPseudoBlock ->
                     endBlock (CSpecialBlock LXItem) currentLine state
@@ -1066,7 +1070,7 @@ missingTagError block =
                             "$$"
 
                         Just "code" ->
-                            "```"
+                            "code"
 
                         _ ->
                             block.name |> Maybe.withDefault "(anon)"
@@ -1127,7 +1131,7 @@ showError : Maybe PrimitiveBlockError -> String
 showError mError =
     case mError of
         Nothing ->
-            "none"
+            ""
 
         Just { error } ->
             error
