@@ -1,4 +1,4 @@
-module MicroLaTeX.Parser.Pretty exposing (idempotencyTest, print, roundTripTest, weakRoundTripTest)
+module MicroLaTeX.Parser.Pretty exposing (idempotencyTest, print, printForest, roundTripTest, weakRoundTripTest)
 
 import Compiler.DifferentialParser
 import Dict
