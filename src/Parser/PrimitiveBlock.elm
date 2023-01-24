@@ -468,7 +468,7 @@ elaborate line pb =
         let
             ( name, args_ ) =
                 -- TODO: note this change: it needs to be verified
-                Line.getNameAndArgs L0Lang line
+                Line.getNameAndArgs lang line
 
             ( args, properties ) =
                 argsAndProperties args_
