@@ -83,9 +83,16 @@ mapContentAux blockType parsed content =
 
         VerbatimBlock _ ->
             let
+                _ =
+                    Debug.log "!!Verbatim content" ( blockType, content )
+
                 content_ =
                     if blockType == VerbatimBlock [ "code" ] then
                         Left (String.replace "```" "" content)
+
+                    else if blockType == VerbatimBlock [ "math" ] then
+                        -- TODO: the below is a kludge
+                        Left (String.replace "$$" "" content)
 
                     else
                         Left content

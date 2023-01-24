@@ -33,7 +33,15 @@ transform block =
                 handleQuotation block firstLine
 
             else if block.blockType == PBVerbatim then
-                { block | name = Just "code", content = List.filter (\line -> line /= "```") block.content }
+                let
+                    _ =
+                        Debug.log "!!Transf, Name" block.name
+                in
+                if block.name == Nothing then
+                    { block | name = Just "code", content = List.filter (\line -> line /= "```") block.content }
+
+                else
+                    block
 
             else
                 block
