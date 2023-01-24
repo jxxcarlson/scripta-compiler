@@ -182,14 +182,27 @@ nextStep state_ =
             in
             case ClassifyBlock.classify currentLine.content of
                 CBeginBlock label ->
-                    Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
+                    if List.member (List.head state.labelStack |> Maybe.map .classification) [ Just <| CBeginBlock "code" ] then
+                        Loop state
+
+                    else
+                        Loop (state |> dispatchBeginBlock (CBeginBlock label) currentLine)
 
                 CEndBlock label ->
                     -- TODO: changed, review
-                    endBlock (CEndBlock label) currentLine state
+                    if List.member (state.labelStack |> List.reverse |> List.head |> Maybe.map .classification) [ Just <| CBeginBlock "code" ] then
+                        state |> endBlockOnMatch Nothing (CBeginBlock "code") currentLine |> Loop
+
+                    else
+                        endBlock (CEndBlock label) currentLine state
 
                 CSpecialBlock label ->
-                    Loop <| handleSpecialBlock (CSpecialBlock label) currentLine state
+                    -- TODO: review all the List.member clauses
+                    if List.member (List.head state.labelStack |> Maybe.map .classification) [ Just <| CBeginBlock "code" ] then
+                        Loop state
+
+                    else
+                        Loop <| handleSpecialBlock (CSpecialBlock label) currentLine state
 
                 CMathBlockDelim ->
                     -- TODO: changed, review

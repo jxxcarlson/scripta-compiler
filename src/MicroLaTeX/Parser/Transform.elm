@@ -65,9 +65,19 @@ transform block =
                 |> List.map String.trimLeft
                 |> normalize
     in
-    case normalizedContent of
-        firstLine :: _ ->
+    case ( block.blockType, normalizedContent ) of
+        ( PBVerbatim, _ ) ->
             let
+                _ =
+                    Debug.log "BR" 1
+            in
+            block
+
+        ( _, firstLine :: _ ) ->
+            let
+                _ =
+                    Debug.log "BR" 2
+
                 name =
                     if String.left 1 firstLine == "\\" then
                         String.dropLeft 1 firstLine |> String.split "{" |> List.head |> Maybe.withDefault "---"

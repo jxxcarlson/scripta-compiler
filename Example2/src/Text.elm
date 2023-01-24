@@ -109,6 +109,8 @@ I am on the Elm Slack and Github as jxxcarlson and on Twitter as @epsilon2718.
 
 microLaTeXDemo =
     """
+
+
 \\title{Demo (MicroLaTeX)}
 
 | banner
@@ -116,16 +118,22 @@ microLaTeXDemo =
 
 \\contents
 
+\\italic{You can freely edit what you see here – your edits won't be saved.
+The best way to understand how MicroLaTeX works is to compare
+the source text (left window) with the rendered text (right window).}
+
+
 \\section{Before you begin}
 
-\\italic{You can freely edit what you see here – your edits won't be saved.}
-
 There are some differences between regular LaTeX and microLaTeX.  The main one is that microLaTeX is made of blocks.  Blocks have an empty line
-above and below, as in this example:
+above and below, as in the example below — first the source text,
+then the rendered text.
 
-`$$`\\vspace{}
-`\\int_\\infty^\\infty e^{-x^2} dx = \\sqrt\\pi`\\vspace{}
-`$$`
+\\begin{code}
+$$
+\\int_\\infty^\\infty e^{-x^2} dx = \\sqrt\\pi
+$$
+\\end{code}
 
 $$
 \\int_\\infty^\\infty e^{-x^2} dx = \\sqrt\\pi
@@ -134,27 +142,56 @@ $$
 The beginning and ending tags of this display math block occupy lines
 of their own and begin at the left margin.
 
+\\italic{Imitate this example: write some math in} `$$ ... $$` HERE:
+
 
 \\section{Images}
+
+Place an image like this:
+
+\\begin{code}
+\\image{https://www.birds ... .jpg}
+\\end{code}
 
 \\image{https://www.birdsandblooms.com/wp-content/uploads/2018/10/BNBbyc18_patricia-warren.jpg width:400}
 
 \\section{Math}
 
-Pythagoras says: $a^2 + b^2 = c^2$
+Pythagoras says: $a^2 + b^2 = c^2$.  We wrote the formula
+like this: `$a^2 + b^2 = c^2$`.
 
-From calculus:
+Let's do a theorem environment.
 
-$$
+Source text
+
+\\begin{code}
+\\begin{equation}
+\\label{integral}
 \\int_0^1 x^n dx = \\frac{1}{n+1}
-$$
+\\end{equation}
+\\end{code}
+
+Rendered text
+
+\\begin{equation}
+\\label{integral}
+\\int_0^1 x^n dx = \\frac{1}{n+1}
+\\end{equation}
 
 \\section{Lists}
 
+Lets look at some lists.
+First the source text for a bulletted list:
 
-Itemized lists are as in standard LaTeX, except that
-the `\\begin{itemized} ... \\end{itemized}` construct
-is not needed. (Look at the source text for this example.)
+\\begin{code}
+\\item Bread
+
+\\item Cheese
+
+\\item Wine
+\\end{code}
+
+Then the rendered text:
 
 \\item Bread
 
@@ -162,17 +199,32 @@ is not needed. (Look at the source text for this example.)
 
 \\item Wine
 
+Note that the `\\begin{itemize} ... \\end{itemize}` construct
+is not needed.  Here is a numbered list:
 
 
-Numbered lists are written as in the next example.
-(Look at the source text to how it is done.)
+Source text:
 
+\\begin{code}
+\\numbered Olive Oil
+
+\\numbered Vinegar
+
+\\numbered Salt
+\\end{code}
+
+Rendered text:
 
 \\numbered Olive Oil
 
 \\numbered Vinegar
 
 \\numbered Salt
+
+Once again, no need for `\\begin{enumerate} ... \\end{enumerate}`.
+
+
+
 
 \\section{Notes}
 
@@ -185,6 +237,9 @@ than the one you see here.  If you click on some rendered text (right-hand windo
 the editor will bring the corresponding source text (left-hand window) into view.  If you select
 some source text and press `ctrl-S` ("S" for "sync"), the corresponding rendered text
 will be brought into view.
+
+\\item Cross references work: see formula \\eqref{integral}
+
 
 """
 

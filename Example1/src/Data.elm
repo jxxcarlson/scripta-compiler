@@ -5,7 +5,7 @@ module Data exposing (initialText)
 -}
 
 
-initialText =
+initialText2 =
     """
 \\begin{theorem}
 abc
@@ -13,7 +13,7 @@ abc
 """
 
 
-initialText1 =
+initialText =
     """
 % This is a comment
 
