@@ -4,9 +4,10 @@ scripts:
     - mkdocs build
     - cp -r * site/ /Users/carlson/dev/jxxcarlson.github.io/docs-scripta-compiler/
 
-  view-site: /usr/bin/open -a /Applications/Firefox.app https:jxxcarlson.github.io/docs-scripta-compiler/
+  look : /usr/bin/open -a /Applications/Google\ Chrome.app https:jxxcarlson.github.io/docs-scripta-compiler/
 
-  view-local: /usr/bin/open -a /Applications/Google\ Chrome.app http:localhost:4003
+  look-local: /usr/bin/open -a /Applications/Google\ Chrome.app http:localhost:4003
+
 
   serve: mkdocs serve -a localhost:4003
 
