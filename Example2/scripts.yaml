@@ -6,4 +6,6 @@ scripts:
 
   serve: npx serve ./assets -l 4002
 
-  publish: cp assets/* /Users/carlson/dev/jxxcarlson.github.io/app/scripta-compiler-demo/
+  publish: 
+    - elm make src/Main.elm --output=assets/main.js
+    - cp assets/* /Users/carlson/dev/jxxcarlson.github.io/app/scripta-compiler-demo/

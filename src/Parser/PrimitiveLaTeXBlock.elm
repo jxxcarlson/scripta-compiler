@@ -401,27 +401,24 @@ endBlockOnMismatch label_ classifier line state =
                 Just ( label, _ ) ->
                     let
                         name =
-                            block.name |> Maybe.withDefault "--"
+                            case block.name of
+                                Nothing ->
+                                    "--"
 
-                        fixIfEquation lines =
-                            if
-                                List.member block.name [ Just "equation", Just "aligned" ]
-                                    && Maybe.map (String.left 2) (List.head lines)
-                                    == Just "\\e"
-                                    || Maybe.map (String.left 1) (List.head lines)
-                                    == Just "\\"
-                            then
-                                List.drop 1 lines
+                                Just name_ ->
+                                    if List.member name_ [ "math", "equation", "aligned" ] then
+                                        "code"
 
-                            else
-                                lines
+                                    else
+                                        name_
 
                         newBlock =
                             { block
-                                | content =
+                                | name = Just name
+                                , content =
                                     --- TODO: WTF!?
                                     if List.member name verbatimBlockNames then
-                                        getContent label_.classification line state |> fixIfEquation |> List.reverse
+                                        getContent label_.classification line state |> List.reverse
 
                                     else
                                         getContent label_.classification line state |> List.reverse
@@ -441,7 +438,7 @@ endBlockOnMismatch label_ classifier line state =
                                             Just { error = "Missing \\end{" ++ a ++ "}" }
 
                                         _ ->
-                                            Just { error = "— ??" }
+                                            Just { error = "— $$ ??" }
                             }
                                 |> addSource line.content
                     in
