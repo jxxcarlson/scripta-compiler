@@ -438,7 +438,7 @@ endBlockOnMismatch label_ classifier line state =
                                             Just { error = "Missing \\end{" ++ a ++ "}" }
 
                                         _ ->
-                                            Just { error = "— $$ ??" }
+                                            Just { error = "$$" }
                             }
                                 |> addSource line.content
                     in
@@ -1071,7 +1071,7 @@ missingTagError block =
                         _ ->
                             block.name |> Maybe.withDefault "(anon)"
             in
-            Just { error = "missing or mismatched end tag (" ++ name ++ ")" }
+            Just { error = "Missing \\end{" ++ name ++ "}" }
 
 
 slice : Int -> Int -> List a -> List a

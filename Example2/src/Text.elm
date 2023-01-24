@@ -15,7 +15,7 @@ About the Scripta compiler
 [link Scripta.io https://scripta.io]
 
 
-| section 1 -
+| section -
 What it is
 
 The Scripta compiler transforms source text to HTML, where
@@ -44,7 +44,7 @@ in the rendered text, and with the following text rendered
 properly to the greatest extent possible.
 
 
-| section 1 -
+| section -
 Open source
 
 The Scripta compiler is open-source, and can be found at
@@ -58,7 +58,7 @@ interactive editing, a searchable store of documents,
 and facilities for collaboration and web publishing.
 
 
-| section 1 -
+| section -
 Code
 
 If you are interested in looking at the code, there are two
@@ -95,7 +95,7 @@ mathematical text and inline code,
 respectively.
 
 
-| section 1 -
+| section -
 Status and Roadmap
 
 The Scripta compiler is serviceable — I've used to to write
@@ -116,6 +116,25 @@ microLaTeXDemo =
 
 \\contents
 
+\\section{Before you begin}
+
+\\italic{You can freely edit what you see here – your edits won't be saved.}
+
+There are some differences between regular LaTeX and microLaTeX.  The main one is that microLaTeX is made of blocks.  Blocks have an empty line
+above and below, as in this example:
+
+`$$`\\vspace{}
+`\\int_\\infty^\\infty e^{-x^2} dx = \\sqrt\\pi`\\vspace{}
+`$$`
+
+$$
+\\int_\\infty^\\infty e^{-x^2} dx = \\sqrt\\pi
+$$
+
+The beginning and ending tags of this display math block occupy lines
+of their own and begin at the left margin.
+
+
 \\section{Images}
 
 \\image{https://www.birdsandblooms.com/wp-content/uploads/2018/10/BNBbyc18_patricia-warren.jpg width:400}
@@ -130,7 +149,43 @@ $$
 \\int_0^1 x^n dx = \\frac{1}{n+1}
 $$
 
-\\strong{Tip:} Click on a section title to go back to the table of contents.
+\\section{Lists}
+
+
+Itemized lists are as in standard LaTeX, except that
+the `\\begin{itemized} ... \\end{itemized}` construct
+is not needed. (Look at the source text for this example.)
+
+\\item Bread
+
+\\item Cheese
+
+\\item Wine
+
+
+
+Numbered lists are written as in the next example.
+(Look at the source text to how it is done.)
+
+
+\\numbered Olive Oil
+
+\\numbered Vinegar
+
+\\numbered Salt
+
+\\section{Notes}
+
+
+\\item Click on a section title to go back to the table of contents.
+
+
+\\item The editor in \\link{Scripta.io https://scripta.io} is much more capable
+than the one you see here.  If you click on some rendered text (right-hand window),
+the editor will bring the corresponding source text (left-hand window) into view.  If you select
+some source text and press `ctrl-S` ("S" for "sync"), the corresponding rendered text
+will be brought into view.
+
 """
 
 
@@ -144,7 +199,7 @@ Demo (L0)
 
 | contents
 
-| section 1
+| section
 Images
 
 || hide
@@ -153,7 +208,7 @@ Images
 [image https://www.birdsandblooms.com/wp-content/uploads/2018/10/BNBbyc18_patricia-warren.jpg width:400]
 
 
-| section 1
+| section
 Math
 
 Pythagoras says: $a^2 + b^2 = c^2$
