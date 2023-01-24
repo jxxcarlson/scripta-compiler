@@ -249,6 +249,7 @@ nextStep : State -> Step State (List PrimitiveBlock)
 nextStep state =
     case List.head state.lines of
         Nothing ->
+            -- finish up: no more lines to process
             case state.currentBlock of
                 Nothing ->
                     Done (List.reverse state.blocks)
@@ -282,8 +283,29 @@ nextStep state =
                 currentLine =
                     -- TODO: the below is wrong
                     Line.classify state.position (state.lineNumber + 1) rawLine
+
+                reportAction state_ currentLine_ =
+                    case ( state_.inBlock, isEmpty currentLine_, isNonEmptyBlank currentLine_ ) of
+                        ( False, True, _ ) ->
+                            String.fromInt state_.lineNumber ++ ": advance" ++ " ++ :: " ++ currentLine_.content
+
+                        ( False, False, True ) ->
+                            String.fromInt state_.lineNumber ++ ": advance2 (PASS)" ++ " ++ :: " ++ currentLine_.content
+
+                        ( False, False, False ) ->
+                            String.fromInt state_.lineNumber ++ ": createBlock" ++ " ++ :: " ++ currentLine_.content
+
+                        ( True, False, _ ) ->
+                            String.fromInt state_.lineNumber ++ ": addCurrentLine2" ++ " ++ :: " ++ currentLine_.content
+
+                        ( True, True, _ ) ->
+                            String.fromInt state_.lineNumber ++ ": commitBlock" ++ " ++ :: " ++ currentLine_.content
+
+                _ =
+                    Debug.log (reportAction state currentLine) 1
             in
             case ( state.inBlock, isEmpty currentLine, isNonEmptyBlank currentLine ) of
+                -- (in block, current line is empty, current line is blank but not empty)
                 -- not in a block, pass over empty line
                 ( False, True, _ ) ->
                     Loop (advance newPosition { state | label = "1, EMPTY" })
