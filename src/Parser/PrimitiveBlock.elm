@@ -301,8 +301,8 @@ nextStep state =
                         ( True, True, _ ) ->
                             String.fromInt state_.lineNumber ++ ": commitBlock" ++ " ++ :: " ++ currentLine_.content
 
-                _ =
-                    Debug.log (reportAction state currentLine) 1
+                --_ =
+                --    Debug.log (reportAction state currentLine) 1
             in
             case ( state.inBlock, isEmpty currentLine, isNonEmptyBlank currentLine ) of
                 -- (in block, current line is empty, current line is blank but not empty)
@@ -373,7 +373,7 @@ commitBlock state currentLine =
                             block_
 
                         PBOrdinary ->
-                            { block_ | content = dropLast block_.content } |> adjustBlock
+                            { block_ | content = block_.content |> dropLast } |> adjustBlock
 
                         PBVerbatim ->
                             if List.head block_.content == Just "```" then
@@ -387,7 +387,7 @@ commitBlock state currentLine =
                         ( Nothing, state.blocks )
 
                     else
-                        ( Just (blockFromLine state.lang currentLine), block :: state.blocks )
+                        ( Just (blockFromLine state.lang currentLine), (block |> Debug.log "NEW BLOCK") :: state.blocks )
             in
             { state
                 | lines = List.drop 1 state.lines
