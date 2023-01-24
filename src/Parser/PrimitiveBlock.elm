@@ -459,8 +459,8 @@ argsAndProperties words =
     ( words, properties )
 
 
-elaborate : Line -> PrimitiveBlock -> PrimitiveBlock
-elaborate line pb =
+elaborate : Language -> Line -> PrimitiveBlock -> PrimitiveBlock
+elaborate lang line pb =
     if pb.content == [ "" ] then
         pb
 
