@@ -40,7 +40,7 @@ blockSuite : Test
 blockSuite =
     describe "MicroLaTeX Block Error Tests"
         [ testBlockError "missmatched tags" missmatchedTags "Mismatch: \\begin{foo} ≠ \\end{bar}"
-        , testBlockError "missing end tag" missingEndTag "missing or mismatched end tag (foo)"
+        , testBlockError "missing end tag" missingEndTag "Missing \\end{foo}"
         ]
 
 
