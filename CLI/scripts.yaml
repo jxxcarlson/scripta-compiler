@@ -9,7 +9,7 @@ scripts:
   # Example: vr l0parse l0test/datatable.txt
   # Test the L0 block parser
 
-  rt: elm-cli run src/RoundTrip.elm
+  rt: elm-cli run --debug src/RoundTrip.elm
   # Example: vr rt rt/para.txt
 
   rs: elm-cli run src/RoundTrip2.elm
