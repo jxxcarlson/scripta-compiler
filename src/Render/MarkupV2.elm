@@ -6,9 +6,9 @@ import Element.Background
 import Element.Font as Font
 import Markup
 import Parser.Block exposing (ExpressionBlock)
-import Parser.BlockUtil as BlockUtil
 import Parser.Forest exposing (Forest)
 import Parser.Settings
+import Parser.Transform as BlockUtil
 import Render.BlockV2
 import Render.Color
 import Render.Msg exposing (MarkupMsg)

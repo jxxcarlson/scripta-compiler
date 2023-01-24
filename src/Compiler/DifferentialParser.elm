@@ -20,9 +20,9 @@ import L0.Parser.Expression
 import Markup
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock(..), ExpressionBlockData)
-import Parser.BlockUtil
 import Parser.Expr
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
+import Parser.Transform
 import Parser.Tree
 import Parser.Utility
 import Scripta.Language exposing (Language(..))
@@ -164,7 +164,7 @@ chunkLevel block =
 
 getMessages_ : List ExpressionBlock -> List String
 getMessages_ blocks =
-    List.map Parser.BlockUtil.getMessages blocks |> List.concat
+    List.map Parser.Transform.getMessages blocks |> List.concat
 
 
 update : EditRecord -> String -> EditRecord
@@ -181,29 +181,29 @@ toExprBlock : Language -> PrimitiveBlock -> ExpressionBlock
 toExprBlock lang =
     case lang of
         MicroLaTeXLang ->
-            Parser.BlockUtil.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse
+            Parser.Transform.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse
 
         L0Lang ->
-            Parser.BlockUtil.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages
+            Parser.Transform.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages
 
         PlainTextLang ->
-            Parser.BlockUtil.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] ))
+            Parser.Transform.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] ))
 
         XMarkdownLang ->
-            Parser.BlockUtil.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] ))
+            Parser.Transform.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] ))
 
 
 parserOLD : Language -> Tree PrimitiveBlock -> Tree ExpressionBlock
 parserOLD lang =
     case lang of
         MicroLaTeXLang ->
-            Tree.map (Parser.BlockUtil.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse)
+            Tree.map (Parser.Transform.toExpressionBlock MicroLaTeXLang MicroLaTeX.Parser.Expression.parse)
 
         L0Lang ->
-            Tree.map (Parser.BlockUtil.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages)
+            Tree.map (Parser.Transform.toExpressionBlock L0Lang L0.Parser.Expression.parseWithMessages)
 
         PlainTextLang ->
-            Tree.map (Parser.BlockUtil.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] )))
+            Tree.map (Parser.Transform.toExpressionBlock PlainTextLang (\_ s -> ( Markup.parsePlainText s, [] )))
 
         XMarkdownLang ->
-            Tree.map (Parser.BlockUtil.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] )))
+            Tree.map (Parser.Transform.toExpressionBlock XMarkdownLang (\i s -> ( XMarkdown.Expression.parse i s, [] )))

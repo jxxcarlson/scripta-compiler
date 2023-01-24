@@ -18,10 +18,10 @@ import Compiler.Transform
 import L0.Parser.Expression
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (ExpressionBlock)
-import Parser.BlockUtil
 import Parser.Expr exposing (Expr(..))
 import Parser.Forest exposing (Forest)
 import Parser.PrimitiveBlock exposing (PrimitiveBlock)
+import Parser.Transform
 import Parser.Tree
 import Scripta.Language exposing (Language(..))
 import Tree
@@ -48,7 +48,7 @@ parse lang sourceText =
     in
     sourceText
         |> toPrimitiveBlockForest lang
-        |> Parser.Forest.map (Parser.BlockUtil.toExpressionBlock lang parser)
+        |> Parser.Forest.map (Parser.Transform.toExpressionBlock lang parser)
 
 
 primitiveBlockToExpressionBlock : Language -> PrimitiveBlock -> ExpressionBlock
@@ -68,12 +68,12 @@ primitiveBlockToExpressionBlock lang block =
                 XMarkdownLang ->
                     \i s -> ( XMarkdown.Expression.parse i s, [] )
     in
-    Parser.BlockUtil.toExpressionBlock lang parser block
+    Parser.Transform.toExpressionBlock lang parser block
 
 
 messagesFromTree : Tree.Tree ExpressionBlock -> List String
 messagesFromTree tree =
-    List.map Parser.BlockUtil.getMessages (Tree.flatten tree) |> List.concat
+    List.map Parser.Transform.getMessages (Tree.flatten tree) |> List.concat
 
 
 messagesFromForest : Forest ExpressionBlock -> List String
