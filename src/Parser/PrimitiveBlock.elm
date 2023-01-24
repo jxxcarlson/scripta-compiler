@@ -376,7 +376,11 @@ commitBlock state currentLine =
                             { block_ | content = dropLast block_.content } |> adjustBlock
 
                         PBVerbatim ->
-                            { block_ | content = dropLast block_.content }
+                            if List.head block_.content == Just "```" then
+                                { block_ | content = List.filter (\l -> l /= "```") block_.content }
+
+                            else
+                                { block_ | content = dropLast block_.content }
 
                 ( currentBlock, newBlocks ) =
                     if block.content == [ "" ] then
