@@ -151,6 +151,18 @@ nextStep state_ =
     let
         state =
             { state_ | lineNumber = state_.lineNumber + 1, count = state_.count + 1 }
+
+        --rawLine_ =
+        --    List.Extra.getAt state.lineNumber state.lines |> Maybe.withDefault "----"
+        --
+        --currentLine_ =
+        --    Line.classify (getPosition rawLine_ state) state.lineNumber rawLine_
+        --
+        --classification =
+        --    ClassifyBlock.classify currentLine_.content
+        --
+        --_ =
+        --    Debug.log (String.fromInt state.lineNumber ++ ":: " ++ rawLine_ ++ " :") ( classification, List.map .classification state.labelStack )
     in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
@@ -187,7 +199,10 @@ nextStep state_ =
                             Loop (state |> dispatchBeginBlock CMathBlockDelim currentLine)
 
                         Just label ->
-                            if label.classification == CMathBlockDelim then
+                            if List.member label.classification [ CBeginBlock "code" ] then
+                                Loop state
+
+                            else if label.classification == CMathBlockDelim then
                                 state |> endBlockOnMatch (Just label) CMathBlockDelim currentLine |> Loop
 
                             else

@@ -62,6 +62,7 @@ primitiveBlock =
         [ primitiveBlockRoundTripTest "environments" text0
         , primitiveBlockRoundTripTest "nested environments" text1
         , primitiveBlockRoundTripTest "code1" code1
+        , primitiveBlockRoundTripTest "code2" code2
         ]
 
 
@@ -114,6 +115,18 @@ abc
   def
   
 ghi
+\\end{code}
+"""
+
+
+code2 =
+    """
+\\begin{code}
+aaa
+$$
+x^2
+$$
+bbb
 \\end{code}
 """
 

@@ -7,6 +7,14 @@ module Data exposing (initialText)
 
 initialText =
     """
+\\begin{theorem}
+abc
+
+"""
+
+
+initialText1 =
+    """
 % This is a comment
 
 \\title{Scripta Compiler: Example App}
