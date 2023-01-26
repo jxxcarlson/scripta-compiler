@@ -1,4 +1,4 @@
-# Scripta Compiler Documentationx   
+# Scripta Compiler Documentation  
 
 _(( This document is very much a work in progress. ))_
 
