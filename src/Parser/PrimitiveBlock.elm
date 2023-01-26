@@ -387,8 +387,7 @@ commitBlock state currentLine =
                         ( Nothing, state.blocks )
 
                     else
-                        ( Just (blockFromLine state.lang currentLine), block :
-                        : state.blocks )
+                        ( Just (blockFromLine state.lang currentLine), block :: state.blocks )
             in
             { state
                 | lines = List.drop 1 state.lines
