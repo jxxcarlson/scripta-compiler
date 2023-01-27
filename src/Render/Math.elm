@@ -30,8 +30,8 @@ type DisplayMode
     | DisplayMathMode
 
 
-
--- MATH
+leftPadding =
+    Element.paddingEach { left = 0, right = 0, top = 0, bottom = 0 }
 
 
 displayedMath : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -47,13 +47,6 @@ displayedMath count acc settings ((ExpressionBlock { id, error }) as block) =
                 |> List.filter (\line -> not (String.left 6 line == "[label"))
                 |> List.filter (\line -> line /= "")
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
-
-        --adjustedLines =
-        --    List.map (Expression.MathMacro.evalStr acc.mathMacroDict) filteredLines
-        --        |> List.filter (\line -> line /= "")
-        --        |> List.map (\line -> line ++ "\\\\")
-        leftPadding =
-            Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
     in
     Element.column [ leftPadding ]
         [ mathText count w id DisplayMathMode (filteredLines |> String.join "\n") ]
@@ -84,9 +77,7 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
         content =
             String.join "\n" filteredLines
 
-        leftPadding =
-            Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
-
+        -- TODO: changed 45 -> 0
         attrs =
             if id == settings.selectedId then
                 [ Events.onClick (SendLineNumber id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
@@ -138,9 +129,6 @@ aligned_ count acc settings _ id str =
             -- lines of math text to be rendered: filter stuff out
             String.lines str
                 |> List.filter (\line -> not (String.left 6 line == "[label") && not (line == ""))
-
-        leftPadding =
-            Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }
 
         attrs =
             if id == settings.selectedId then
