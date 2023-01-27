@@ -81,22 +81,7 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
                 |> List.filter (\line -> not (String.left 2 line == "$$") && not (String.left 6 line == "[label") && not (line == "end"))
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
 
-        adjustedLines =
-            -- TODO: we need a better solution than the below for not messing up
-            -- TODO internal \\begin-\\end pairs
-            List.map (Parser.MathMacro.evalStr acc.mathMacroDict) filteredLines
-                |> List.filter (\line -> line /= "")
-                |> List.map
-                    (\line ->
-                        if String.left 6 line /= "\\begin" then
-                            line ++ "\\\\"
-
-                        else
-                            line
-                    )
-
         content =
-            --String.join "\n" adjustedLines
             String.join "\n" filteredLines
 
         leftPadding =
@@ -187,7 +172,8 @@ aligned_ count acc settings _ id str =
 
 
 equationLabelPadding =
-    Element.paddingEach { left = 0, right = 18, top = 0, bottom = 0 }
+    -- Element.paddingEach { left = 0, right = 18, top = 0, bottom = 0 }
+    Element.paddingEach { left = 0, right = 0, top = 0, bottom = 0 }
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg
