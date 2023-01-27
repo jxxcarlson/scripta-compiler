@@ -12,6 +12,7 @@ module PDF exposing
 import Http
 import Json.Encode as E
 import Process
+import Render.Settings
 import Scripta.API
 import Task
 import Time
@@ -54,7 +55,7 @@ type TarFileState
     | TarFileReady
 
 
-printCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+printCmd : Time.Posix -> Render.Settings.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
 printCmd currentTime settings forest =
     Cmd.batch
         [ Process.sleep 30 |> Task.perform (always (ChangePrintingState PrintProcessing))
@@ -62,14 +63,15 @@ printCmd currentTime settings forest =
         ]
 
 
-pdfCmd1 : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+pdfCmd1 : Time.Posix -> Render.Settings.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
 pdfCmd1 currentTime settings editRecord =
     let
         imageUrls : List String
         imageUrls =
             Scripta.API.getImageUrls editRecord.tree
 
-        packageNames = Scripta.API.packageNames editRecord.tree
+        packageNames =
+            Scripta.API.packageNames editRecord.tree
 
         fileName =
             Scripta.API.fileNameForExport editRecord.tree
@@ -90,7 +92,7 @@ pdfCmd1 currentTime settings editRecord =
         ]
 
 
-pdfCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+pdfCmd : Time.Posix -> Render.Settings.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
 pdfCmd currentTime settings editRecord =
     Cmd.batch
         [ Http.request
@@ -105,21 +107,22 @@ pdfCmd currentTime settings editRecord =
         ]
 
 
-tarCmd : Time.Posix -> Scripta.API.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
+tarCmd : Time.Posix -> Render.Settings.Settings -> Scripta.API.EditRecord -> Cmd PDFMsg
 tarCmd currentTime settings editRecord =
     let
-            imageUrls : List String
-            imageUrls =
-                Scripta.API.getImageUrls editRecord.tree
+        imageUrls : List String
+        imageUrls =
+            Scripta.API.getImageUrls editRecord.tree
 
-            packageNames = Scripta.API.packageNames editRecord.tree
+        packageNames =
+            Scripta.API.packageNames editRecord.tree
 
-            fileName =
-                Scripta.API.fileNameForExport editRecord.tree
+        fileName =
+            Scripta.API.fileNameForExport editRecord.tree
 
-            contentForExport =
-                Scripta.API.prepareContentForExport currentTime settings editRecord.tree
-        in
+        contentForExport =
+            Scripta.API.prepareContentForExport currentTime settings editRecord.tree
+    in
     Cmd.batch
         [ Http.request
             { method = "POST"
@@ -153,5 +156,5 @@ encodeForPDF id content urlList packageNames =
         [ ( "id", E.string id )
         , ( "content", E.string content )
         , ( "urlList", E.list E.string urlList )
-        , ( "packageList",  E.list E.string [] )
+        , ( "packageList", E.list E.string [] )
         ]

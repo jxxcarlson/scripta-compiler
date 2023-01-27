@@ -1,7 +1,7 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport, encodeForPDF
+    , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, getBlockNames, rawExport, encodeForPDF
     , Msg, SyntaxTree
     , matchingIdsInAST
     )
@@ -185,6 +185,7 @@ makeSettings id selectedSlug scale width =
     { width = round (scale * toFloat width)
     , titleSize = 30
     , paragraphSpacing = 28
+    , display = Render.Settings.DefaultDisplay
     , showTOC = True
     , showErrorMessages = False
     , selectedId = id
@@ -229,22 +230,6 @@ banner displaySettings editRecord =
 -- EXPORT
 
 
-{-| Settings used by render
--}
-type alias Settings =
-    { paragraphSpacing : Int
-    , selectedId : String
-    , selectedSlug : Maybe String
-    , showErrorMessages : Bool
-    , showTOC : Bool
-    , titleSize : Int
-    , width : Int
-    , backgroundColor : Element.Color
-    , titlePrefix : String
-    , isStandaloneDocument : Bool
-    }
-
-
 {-| -}
 fileNameForExport : Forest ExpressionBlock -> String
 fileNameForExport ast =
@@ -269,7 +254,7 @@ packageNames syntaxTree =
 
 
 {-| -}
-prepareContentForExport : Time.Posix -> Settings -> Forest ExpressionBlock -> String
+prepareContentForExport : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> String
 prepareContentForExport currentTime settings syntaxTree =
     let
         contentForExport : String
@@ -280,13 +265,13 @@ prepareContentForExport currentTime settings syntaxTree =
 
 
 {-| -}
-rawExport : Settings -> Forest ExpressionBlock -> String
+rawExport : Render.Settings.Settings -> Forest ExpressionBlock -> String
 rawExport =
     Render.Export.LaTeX.rawExport
 
 
 {-| -}
-encodeForPDF : Time.Posix -> Settings -> Forest ExpressionBlock -> E.Value
+encodeForPDF : Time.Posix -> Render.Settings.Settings -> Forest ExpressionBlock -> E.Value
 encodeForPDF currentTime settings forest =
     let
         imageUrls : List String

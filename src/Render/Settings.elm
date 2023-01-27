@@ -1,5 +1,6 @@
 module Render.Settings exposing
-    ( Settings
+    ( Display(..)
+    , Settings
     , blueColor
     , codeColor
     , defaultSettings
@@ -20,6 +21,7 @@ import Element
 type alias Settings =
     { paragraphSpacing : Int
     , selectedId : String
+    , display : Display
     , selectedSlug : Maybe String
     , showErrorMessages : Bool
     , showTOC : Bool
@@ -29,6 +31,11 @@ type alias Settings =
     , titlePrefix : String
     , isStandaloneDocument : Bool
     }
+
+
+type Display
+    = DefaultDisplay
+    | PhoneDisplay
 
 
 defaultSettings : Settings
@@ -41,6 +48,7 @@ makeSettings id selectedSlug scale width =
     { width = round (scale * toFloat width)
     , titleSize = 30
     , paragraphSpacing = 28
+    , display = DefaultDisplay
     , showTOC = True
     , showErrorMessages = False
     , selectedId = id
