@@ -95,9 +95,21 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
     Element.column []
         [ Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
             [ Element.el attrs2 (mathText count w id DisplayMathMode content)
-            , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
+            , putLabel content properties settings.longEquationLimit
             ]
         ]
+
+
+
+-- Render.Utility.textWidth
+
+
+putLabel content properties longEquationLimit =
+    if Render.Utility.textWidth content > longEquationLimit then
+        Element.none
+
+    else
+        Element.el [ Font.size 12 ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
 
 
 getCounter : String -> Dict String Int -> String
@@ -115,7 +127,7 @@ aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as
     Element.column []
         [ Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
             [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
-            , Element.el [ Element.alignRight, Font.size 12, equationLabelPadding ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
+            , putLabel (getContent block) properties settings.longEquationLimit
             ]
         ]
 

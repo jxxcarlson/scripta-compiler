@@ -22,6 +22,7 @@ type alias Settings =
     { paragraphSpacing : Int
     , selectedId : String
     , display : Display
+    , longEquationLimit : Float
     , selectedSlug : Maybe String
     , showErrorMessages : Bool
     , showTOC : Bool
@@ -40,15 +41,16 @@ type Display
 
 defaultSettings : Settings
 defaultSettings =
-    makeSettings "" Nothing 1 600
+    makeSettings "" Nothing 1 600 100
 
 
-makeSettings : String -> Maybe String -> Float -> Int -> Settings
-makeSettings id selectedSlug scale width =
+makeSettings : String -> Maybe String -> Float -> Int -> Float -> Settings
+makeSettings id selectedSlug scale width longEquationLimit =
     { width = round (scale * toFloat width)
     , titleSize = 30
     , paragraphSpacing = 28
     , display = DefaultDisplay
+    , longEquationLimit = longEquationLimit
     , showTOC = True
     , showErrorMessages = False
     , selectedId = id

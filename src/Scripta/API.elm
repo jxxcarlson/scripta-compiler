@@ -140,6 +140,7 @@ compile displaySettings language sourceText =
 -}
 type alias DisplaySettings =
     { windowWidth : Int
+    , longEquationLimit : Float
     , counter : Int
     , selectedId : String
     , selectedSlug : Maybe String
@@ -180,12 +181,13 @@ matchingIdsInAST =
 
 
 {-| -}
-makeSettings : String -> Maybe String -> Float -> Int -> Render.Settings.Settings
-makeSettings id selectedSlug scale width =
+makeSettings : String -> Maybe String -> Float -> Int -> Float -> Render.Settings.Settings
+makeSettings id selectedSlug scale width longEquationLimit =
     { width = round (scale * toFloat width)
     , titleSize = 30
     , paragraphSpacing = 28
     , display = Render.Settings.DefaultDisplay
+    , longEquationLimit = longEquationLimit
     , showTOC = True
     , showErrorMessages = False
     , selectedId = id
@@ -198,7 +200,7 @@ makeSettings id selectedSlug scale width =
 
 renderSettings : DisplaySettings -> Render.Settings.Settings
 renderSettings ds =
-    Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
+    Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth ds.longEquationLimit
 
 
 {-| -}
