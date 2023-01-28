@@ -45,12 +45,12 @@ defaultSettings =
 
 
 makeSettings : String -> Maybe String -> Float -> Int -> Float -> Settings
-makeSettings id selectedSlug scale width longEquationLimit =
-    { width = round (scale * toFloat width)
+makeSettings id selectedSlug scale windowWidth longEquationLimit =
+    { width = round (scale * toFloat windowWidth)
     , titleSize = 30
     , paragraphSpacing = 28
     , display = DefaultDisplay
-    , longEquationLimit = longEquationLimit
+    , longEquationLimit = 0.1 * (windowWidth |> toFloat)
     , showTOC = True
     , showErrorMessages = False
     , selectedId = id

@@ -95,7 +95,7 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
     Element.column []
         [ Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
             [ Element.el attrs2 (mathText count w id DisplayMathMode content)
-            , putLabel content properties settings.longEquationLimit
+            , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
 
@@ -104,7 +104,19 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
 -- Render.Utility.textWidth
 
 
-putLabel content properties longEquationLimit =
+putLabel display content properties longEquationLimit_ =
+    let
+        longEquationLimit =
+            case display of
+                Render.Settings.DefaultDisplay ->
+                    longEquationLimit_
+
+                Render.Settings.PhoneDisplay ->
+                    0.9 * longEquationLimit_
+
+        --_ =
+        --    Debug.log "!! ((TW, LIM), (Suppress, Disp))" ( ( Render.Utility.textWidth content, longEquationLimit ), ( Render.Utility.textWidth content > longEquationLimit, display ) )
+    in
     if Render.Utility.textWidth content > longEquationLimit then
         Element.none
 
@@ -127,7 +139,7 @@ aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as
     Element.column []
         [ Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
             [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
-            , putLabel (getContent block) properties settings.longEquationLimit
+            , putLabel settings.display (getContent block) properties settings.longEquationLimit
             ]
         ]
 
