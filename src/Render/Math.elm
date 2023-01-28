@@ -180,15 +180,8 @@ aligned_ count acc settings _ id str =
         [ mathText count w id DisplayMathMode content ]
 
 
-equationLabelPadding =
-    -- Element.paddingEach { left = 0, right = 18, top = 0, bottom = 0 }
-    Element.paddingEach { left = 0, right = 0, top = 0, bottom = 0 }
-
-
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg
 mathText generation width id displayMode content =
-    -- the code 'String.replace "\\ \\" "\\\\"'
-    -- is needed because for some reason "\\\\" gets expanded to "\\ \\"
     -- TODO Track this down at the source.
     Html.Keyed.node "span"
         [ HA.style "padding-top" "14px"
