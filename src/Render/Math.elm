@@ -113,9 +113,6 @@ putLabel display content properties longEquationLimit_ =
 
                 Render.Settings.PhoneDisplay ->
                     0.9 * longEquationLimit_
-
-        --_ =
-        --    Debug.log "!! ((TW, LIM), (Suppress, Disp))" ( ( Render.Utility.textWidth content, longEquationLimit ), ( Render.Utility.textWidth content > longEquationLimit, display ) )
     in
     if Render.Utility.textWidth content > longEquationLimit then
         Element.none
