@@ -41,11 +41,11 @@ type Display
 
 defaultSettings : Settings
 defaultSettings =
-    makeSettings "" Nothing 1 600 100
+    makeSettings "" Nothing 1 600
 
 
-makeSettings : String -> Maybe String -> Float -> Int -> Float -> Settings
-makeSettings id selectedSlug scale windowWidth longEquationLimit =
+makeSettings : String -> Maybe String -> Float -> Int -> Settings
+makeSettings id selectedSlug scale windowWidth =
     { width = round (scale * toFloat windowWidth)
     , titleSize = 30
     , paragraphSpacing = 28

@@ -200,7 +200,7 @@ makeSettings id selectedSlug scale width longEquationLimit =
 
 renderSettings : DisplaySettings -> Render.Settings.Settings
 renderSettings ds =
-    Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth ds.longEquationLimit
+    Render.Settings.makeSettings ds.selectedId ds.selectedSlug ds.scale ds.windowWidth
 
 
 {-| -}
