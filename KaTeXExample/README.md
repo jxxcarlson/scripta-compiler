@@ -3,7 +3,8 @@
 
 In KaTeXExample, we show how to compile 
 a very simple language, "SimpleMarkup," 
-into Html.  SimpleMarkup has just three elements: text, inline
+into Html, rendering it in the browser
+using KaTeX.  SimpleMarkup has just three elements: text, inline
 math, and display math, as in the example in the next section.
 
 To run the code from the folder `KaTeXExample`, 
