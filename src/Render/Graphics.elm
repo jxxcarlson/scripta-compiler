@@ -282,6 +282,9 @@ imageParameters settings arguments =
                 Just "fill" ->
                     Element.fill
 
+                Just "to-edges" ->
+                    px (displayWidth + 198)
+
                 Just w_ ->
                     case String.toInt w_ of
                         Nothing ->
