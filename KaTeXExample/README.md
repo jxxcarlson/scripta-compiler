@@ -3,13 +3,17 @@
 
 In KaTeXExample, we show how to compile 
 into Html a very simple
-language that has just three elements: text, inline
+language, "SimpleMarkup," that has just three elements: text, inline
 math, and display math, as in the example below.
 
 To run the code from the folder `KaTeXExample`, 
-say `sh make.sh` and then point your browser to 
+say `sh make.sh` and then point your browser at 
 `./assets/index.html`
 
+## SimpleMarkup
+
+Here is an example that tells you everything you 
+need to know about SimpleMarkup:
 
 ```text
 Pythagoras says that $a^2 + b^2 = c^2$. In calculus class, we all learned that
