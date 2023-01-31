@@ -1,7 +1,7 @@
 module Expression exposing (Expr(..), exprListParser, parse)
 
 import Html exposing (Html)
-import MathJax
+import KaTeXExample
 import Parser exposing ((|.), (|=), Parser)
 
 
@@ -18,10 +18,10 @@ render expr =
             Html.text str
 
         InlineMath str ->
-            MathJax.inline str
+            KaTeXExample.inline str
 
         DisplayMath str ->
-            MathJax.display 500 str
+            KaTeXExample.display 500 str
 
 
 {-|

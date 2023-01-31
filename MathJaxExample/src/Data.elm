@@ -3,6 +3,7 @@ module Data exposing (initialText)
 
 initialText =
     """
+
 \\title{Harmonic Oscillator}
 
 || mathmacros
@@ -24,7 +25,7 @@ initialText =
 
 
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/mass_spring-fdac.png}{Mass-spring system}{width:200}
+\\image{http://psurl.s3.amazonaws.com/images/jc/mass_spring-fdac.png Mass-spring system width:200}
 
 
 The prototypical harmonic oscillator is classical mechanics is given by the mass-spring system, as in the figure.  If $m$ is the mass and $k$ is the spring constant, then the equation of motion is
@@ -174,7 +175,8 @@ Taking the difference of the last two relations, one obtains
 
 \\begin{equation}
   \\label{aadaggercommutation}
-  \\[a,a^\\dagger\\] = 1.
+  [a,a^\\dagger] = 1.
+\\end{equation}
 
 
 
@@ -201,7 +203,7 @@ Using
 
 \\begin{aligned}
 \\bra H\\phi, \\phi\\ket 
-  &= \\hbar\\omega(\\bra a^\\dagger a \\phi, \\phi \\ket + (1/2)\\bra \\phi, \\psi \\ket) \\
+  &= \\hbar\\omega(\\bra a^\\dagger a \\phi, \\phi \\ket + (1/2)\\bra \\phi, \\psi \\ket) \\\\
   &= \\hbar \\omega(||a\\phi||^2 + (1/2)||\\phi||^2)
 \\end{aligned}
 
@@ -226,16 +228,16 @@ The proof depends on the commutation relation
 It follows form the basic commutation relation $[a,a^\\dagger] = 1$:
 
 \\begin{aligned}
-[H,a] &= \\hbar\\omega[a^\\dagger a, a] = \\hbar\\omega(a^\\dagger a a - a a^\\dagger a) \\
-  &= \\hbar\\omega(a^\\dagger a a - (a^\\dagger  aa + [a^\\dagger, a] a)) \\
+[H,a] &= \\hbar\\omega[a^\\dagger a, a] = \\hbar\\omega(a^\\dagger a a - a a^\\dagger a) \\\\
+  &= \\hbar\\omega(a^\\dagger a a - (a^\\dagger  aa + [a^\\dagger, a] a)) \\\\
  &= -\\hbar\\omega a
 \\end{aligned}
 
 Returning to the lemma, we have
 
 \\begin{aligned}
-Ha\\phi_\\lambda &= a H\\phi_\\lambda + [H,a]\\phi_\\lambda \\
-  &= \\lambda a \\phi_\\lambda - \\hbar\\omega a \\phi_\\lambda \\
+Ha\\phi_\\lambda &= a H\\phi_\\lambda + [H,a]\\phi_\\lambda \\\\
+  &= \\lambda a \\phi_\\lambda - \\hbar\\omega a \\phi_\\lambda \\\\
  &= (\\lambda - \\hbar\\omega)\\phi_\\lambda
 \\end{aligned}
 
@@ -384,11 +386,11 @@ and the polynomials are the \\term{Hermite polynomials}.
 Proceeding in the same way, one can discover the wave functions $\\phi_n$ for arbitrary $n$, that is, one can find the Hermite polynomals
 
 \\begin{aligned}
-H_0 &= 1 \\
-H_1 &= 2x \\
-H_2 &= 4x^2 - 2 \\
-H_3 &= 8x^3 - 12x \\
-H^4 &= 8x^3 - 48x^2 + 12 \\
+H_0 &= 1 \\\\
+H_1 &= 2x \\\\
+H_2 &= 4x^2 - 2 \\\\
+H_3 &= 8x^3 - 12x \\\\
+H^4 &= 8x^3 - 48x^2 + 12 \\\\
 etc
 \\end{aligned}
 
@@ -411,7 +413,7 @@ Let $\\psi)n(x)$ be a normalized pure state with energy $E_n = m\\hbar \\omega(n
 The images below are graphs of the probability densities $|\\psi_n(x)|^2$ for various $n$.  The ground state $\\psi_0$ has a single hump, $\\psi_1$ has two, and so on. Viewing a particle as a localized region of high probability density, we interpret $\\psi_n$ as a state consisting of $n+1$ particles.  It is for this reason that $a^\\dagger$ is called the creation operator: when applied to an $n$-particle state, it produces an $(n+1)$-particle state.
 
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/harmonic_oscillator_wave_functions-f79d.png}{Harmonic Oscillator}{width: 400, align: center}
+\\image{http://psurl.s3.amazonaws.com/images/jc/harmonic_oscillator_wave_functions-f79d.png Harmonic Oscillator width: 400, align: center}
 
 
 There are other lessons to be learned from thinking about these graphs.  Consider for a moment the corresponding classical harmonic oscillator. 
@@ -463,8 +465,8 @@ The other normalization constants can be computed using our operator calculus.
 Note that $a^\\dagger \\psi_n$ is a scalar multiple of $\\psi_n$, so we can write $a^\\dagger\\psi_n = c_n\\psi_n$. Then
 
 \\begin{aligned}
-\\bra a^\\dagger \\psi, a^\\dagger \\psi_n \\ket &= c_n^2 \\
-&= \\bra aa^\\dagger \\psi_n, \\psi_n \\ket> \\
+\\bra a^\\dagger \\psi, a^\\dagger \\psi_n \\ket &= c_n^2 \\\\
+&= \\bra aa^\\dagger \\psi_n, \\psi_n \\ket> \\\\
 &= (n+1)||\\psi_n|^2
 \\end{aligned}
 
@@ -542,23 +544,10 @@ The higher order terms do have an effect; we will treat this matter in the next 
 
 \\subheading{HCl absorption spectrum}
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/hcl_spectral_energies-4194.png}{HCl Absorption Spectrum}{width:400, align:center}
+\\image{http://psurl.s3.amazonaws.com/images/jc/hcl_spectral_energies-4194.png HCl Absorption Spectrum width:400, align:center}
 
 The energy spectrum is $E_n =\\omega \\hbar (n + 1/2)$.
 If this is so (in spite of the approximations made), then there is a prediction which can be checked with experiment.  Pass a monochromatic beam of electromagnetic radiation through a diatomic gas.  We consider the case of $\\text{HCl}$.  At frequencies with energy $E_n$ photons in the beam will interact with the molecule in the ground state and  raise it to the $n$-th state.  In such circumstances, beam energy is absorbed.  The  harmonic oscillator model predicts that these absorption frequencies be evenly spaced. The chart below is derived from the data in the figure (http://infohost.nmt.edu/~jaltig/HCl.pdf[source]). Numbers in the second column are wave numbers of absorbed radiation.  The number in column two, row $n$ results from absorption of a photon by an $\\text{HCl}$ molecule which bumps it from the ground state to the $n$-th state.  The first point is that wave numbers $k$ are proportional to energy: from $E = \\hbar \\omega$ and $\\omega/k = c$, we deduce $E = \\hbar k c$.  The second is that the observed wavenumber are indeed evenly spaced, up to a modest deviation.  In the table, the second differences are no more than 10 percent of the first differences.
-
-
-|| comment
-\\begin{indent}
-\\begin{tabular}{|c|c|c|c|}
-n & Wave number   & Difference & 2nd Diff  \\
-1 &  2885.98      &      -      &     -      \\
-2 &  5567.98      &  2682.00    &     -     \\
-3 &  8346.78      &  2778.80    &    96.8  \\
-4 & 10922.81      &  2576.03   &   -202.77 \\
-5 & 13396.19      &  2473.38   &   -102.65  \\
-\\end{tabular}
-\\end{indent}
 
 || datatable
 n____, Wave number, Difference, 2nd Diff
@@ -572,7 +561,7 @@ This is not bad considering that the harmonic oscillator model leaves out the fa
 
 
 
-\\image{http://psurl.s3.amazonaws.com/images/jc/hcl_fine_structure-b4e6.png}{Fine structure}{width: 400, align: center}
+\\image{http://psurl.s3.amazonaws.com/images/jc/hcl_fine_structure-b4e6.png Fine structure width: 400, align: center}
 
 .Molecular force constant
 The lowest vibrational energy transition of chem::[HCl] occurs at $\\lambda^{-1} = 2.89 \\times 10^{5} \\text{m}^{-1}$, corresponding to a frequency of $8.67\\times 10^{13} \\text{ Hertz}$. We can use this to estimate the length the bond between chem::[H] and chem::[Cl] by viewing the molecule as a classical mass-spring system vibrating at that frequency.  From the relations $\\omega^2 = k/\\mu$ and $\\omega = 2\\pi c/\\lambda$, we find that the spring constant is given by
@@ -616,6 +605,9 @@ NOTE: In the references on the chem::[HCl] spectrum, wavenumber, usually in inve
 
 
 \\href{http://depa.fquim.unam.mx/amyd/archivero/DiatomicMolecule_1314.pdf}{Intro to Molecular spectroscopy}
+
+
+
 
 
 """

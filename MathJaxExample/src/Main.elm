@@ -53,6 +53,7 @@ displaySettings : Int -> Scripta.API.DisplaySettings
 displaySettings counter =
     { windowWidth = 500
     , counter = counter
+    , longEquationLimit = 100
     , selectedId = "--"
     , selectedSlug = Nothing
     , scale = 0.8

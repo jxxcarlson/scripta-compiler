@@ -78,20 +78,19 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         inner =
             column
                 [ spacing 8
-                , Element.width (px settings.width)
-                , params.placement
                 , Element.paddingXY 0 18
+                , Element.centerX
                 ]
-                [ Element.image [ Element.width params.width, params.placement ]
+                [ Element.image [ Element.width params.width ]
                     { src = url, description = getDescription properties }
                 , el
-                    ([ params.placement, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
+                    ([ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
                         ++ Render.Utility.highlightElement id settings.selectedId
                     )
-                    (Element.text label)
+                    (Element.el [ Element.centerX ] (Element.text label))
                 ]
     in
-    Element.newTabLink []
+    Element.newTabLink [ Element.width (px settings.width) ]
         { url = url
         , label = inner
         }
@@ -332,6 +331,9 @@ parameters settings properties =
 
                 Just "fill" ->
                     Element.fill
+
+                Just "to-edges" ->
+                    px (displayWidth + 198)
 
                 Just w_ ->
                     case String.toInt w_ of
