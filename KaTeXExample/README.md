@@ -2,9 +2,9 @@
 # KaTeXExample
 
 In KaTeXExample, we show how to compile 
-into Html a very simple
-language, "SimpleMarkup," that has just three elements: text, inline
-math, and display math, as in the example below.
+a very simple language, "SimpleMarkup," 
+into Html.  SimpleMarkup has just three elements: text, inline
+math, and display math, as in the example in the next section.
 
 To run the code from the folder `KaTeXExample`, 
 say `sh make.sh` and then point your browser at 
