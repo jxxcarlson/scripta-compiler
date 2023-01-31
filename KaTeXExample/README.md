@@ -1,9 +1,14 @@
 
 # KaTeXExample
 
-In KaTeXExample, we show how to compile a very simple
+In KaTeXExample, we show how to compile 
+into Html a very simple
 language that has just three elements: text, inline
 math, and display math, as in the example below.
+
+To run the code from the folder `KaTeXExample`, 
+say `sh make.sh` and then point your browser to 
+`./assets/index.html`
 
 
 ```text
