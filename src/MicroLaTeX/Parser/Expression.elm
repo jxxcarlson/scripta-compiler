@@ -538,6 +538,28 @@ recoverFromError state =
                     , messages = Helpers.prependMessage state.lineNumber "opening dollar sign needs to be matched with a closing one" state.messages
                 }
 
+        -- left bracket with no closing right bracket
+        (LMathBracket meta) :: rest ->
+            let
+                content =
+                    Token.toString rest
+
+                message =
+                    if content == "" then
+                        "\\[?\\]"
+
+                    else
+                        "\\[ "
+            in
+            Loop
+                { state
+                    | committed = errorMessage message :: state.committed
+                    , stack = []
+                    , tokenIndex = meta.index + 1
+                    , numberOfTokens = 0
+                    , messages = Helpers.prependMessage state.lineNumber "left bracket needs to be matched with a right bracket" state.messages
+                }
+
         -- backtick with no closing backtick
         (CodeToken meta) :: rest ->
             let
@@ -561,7 +583,7 @@ recoverFromError state =
                 }
 
         _ ->
-            recoverFromError1 state
+            recoverFromError2 state
 
 
 errorSuffix rest =
@@ -591,8 +613,8 @@ makeId a b =
     String.fromInt a ++ "." ++ String.fromInt b
 
 
-recoverFromError1 : State -> Step State State
-recoverFromError1 state =
+recoverFromError2 : State -> Step State State
+recoverFromError2 state =
     let
         k =
             Symbol.balance <| Symbol.convertTokens2 (List.reverse state.stack)
