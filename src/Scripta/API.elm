@@ -199,6 +199,11 @@ makeSettings id selectedSlug scale width longEquationLimit =
     , leftIndent = 18
     , leftIndentation = 18
     , leftRightIndentation = 18
+    , wideLeftIndentation = 54
+    , windowWidthScale = 0.3
+    , maxHeadingFontSize = 32
+    , redColor = Element.rgb 0.7 0 0
+    , topMarginForChildren = 6
     }
 
 

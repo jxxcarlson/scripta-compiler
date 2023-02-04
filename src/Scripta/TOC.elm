@@ -98,10 +98,10 @@ prepareTOC maximumLevel count acc settings ast =
             getHeadings ast
 
         titleSize =
-            Font.size (round Render.Settings.maxHeadingFontSize)
+            Font.size (round settings.maxHeadingFontSize)
 
         subtitleSize =
-            Font.size (round (0.7 * Render.Settings.maxHeadingFontSize))
+            Font.size (round (0.7 * settings.maxHeadingFontSize))
 
         idAttr =
             Render.Utility.elementAttribute "id" "title"
@@ -131,10 +131,10 @@ prepareFrontMatter count acc settings ast =
             getHeadings ast
 
         titleSize =
-            Font.size (round Render.Settings.maxHeadingFontSize)
+            Font.size (round settings.maxHeadingFontSize)
 
         subtitleSize =
-            Font.size (round (0.7 * Render.Settings.maxHeadingFontSize))
+            Font.size (round (0.7 * settings.maxHeadingFontSize))
 
         idAttr =
             Render.Utility.elementAttribute "id" "title"

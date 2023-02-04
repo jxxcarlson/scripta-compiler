@@ -258,7 +258,7 @@ renderNothing _ _ _ _ =
 renderWithDefault : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault default count acc settings exprs =
     if List.isEmpty exprs then
-        [ Element.el [ Font.color Render.Settings.redColor, Font.size 14 ] (Element.text default) ]
+        [ Element.el [ Font.color settings.redColor, Font.size 14 ] (Element.text default) ]
 
     else
         List.map (Render.Elm.render count acc settings) exprs
@@ -267,7 +267,7 @@ renderWithDefault default count acc settings exprs =
 renderWithDefaultWithSize : Int -> String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefaultWithSize size default count acc settings exprs =
     if List.isEmpty exprs then
-        [ Element.el [ Font.color Render.Settings.redColor, Font.size size ] (Element.text default) ]
+        [ Element.el [ Font.color settings.redColor, Font.size size ] (Element.text default) ]
 
     else
         List.map (Render.Elm.render count acc settings) exprs
@@ -320,7 +320,7 @@ section count acc settings ((ExpressionBlock { lineNumber, args, properties }) a
                     Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
 
         fontSize =
-            Render.Settings.maxHeadingFontSize / sqrt headingLevel |> round
+            settings.maxHeadingFontSize / sqrt headingLevel |> round
 
         exprs =
             getExprs block
@@ -416,7 +416,7 @@ document _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
     Element.row
         [ Element.alignTop
         , Render.Utility.elementAttribute "id" settings.selectedId
-        , vspace 0 Render.Settings.topMarginForChildren
+        , vspace 0 settings.topMarginForChildren
         , Element.moveRight (15 * (level - 1) |> toFloat)
         , fontColor settings.selectedId settings.selectedSlug docId
         ]
@@ -522,7 +522,7 @@ env_ : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 env_ count acc settings ((ExpressionBlock { name, lineNumber, indent, args, blockType, content, properties }) as block) =
     case List.head args of
         Nothing ->
-            Element.paragraph [ Render.Utility.idAttribute lineNumber, Font.color Render.Settings.redColor, Render.Utility.sendLineNumberOnClick lineNumber ] [ Element.text "| env (missing name!)" ]
+            Element.paragraph [ Render.Utility.idAttribute lineNumber, Font.color settings.redColor, Render.Utility.sendLineNumberOnClick lineNumber ] [ Element.text "| env (missing name!)" ]
 
         Just _ ->
             env count acc settings block
@@ -647,7 +647,7 @@ bibitem count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
         label =
             List.Extra.getAt 0 args |> Maybe.withDefault "(12)" |> (\s -> "[" ++ s ++ "]")
     in
-    Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs lineNumber settings)
+    Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 settings.topMarginForChildren ] ++ highlightAttrs lineNumber settings)
         [ Element.el
             [ Font.size 14
             , Element.alignTop
@@ -890,7 +890,7 @@ item count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
                 _ ->
                     "◊"
     in
-    Element.row [ Element.moveRight (indentationScale * level |> toFloat), Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 Render.Settings.topMarginForChildren ]
+    Element.row [ Element.moveRight (indentationScale * level |> toFloat), Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 settings.topMarginForChildren ]
         [ Element.el
             [ Font.size 14
             , Element.alignTop
@@ -942,7 +942,7 @@ numbered count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
                 _ ->
                     String.fromInt index_
     in
-    Element.row [ Element.moveRight (indentationScale * level |> toFloat), Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 Render.Settings.topMarginForChildren ]
+    Element.row [ Element.moveRight (indentationScale * level |> toFloat), Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 settings.topMarginForChildren ]
         [ Element.el
             [ Font.size 14
             , Element.alignTop
@@ -964,7 +964,7 @@ desc count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
         label =
             argString args
     in
-    Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs lineNumber settings)
+    Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 settings.topMarginForChildren ] ++ highlightAttrs lineNumber settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
         , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
             (renderWithDefault "| desc" count acc settings (getExprs block))

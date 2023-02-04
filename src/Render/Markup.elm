@@ -78,7 +78,7 @@ unravel lang settings tree =
             [ root
             , Element.column
                 [ Element.paddingEach
-                    { top = Render.Settings.topMarginForChildren
+                    { top = settings.topMarginForChildren
                     , left =
                         if lang == Scripta.Language.MicroLaTeXLang then
                             0
