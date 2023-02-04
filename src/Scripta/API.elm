@@ -1,10 +1,9 @@
 module Scripta.API exposing
     ( compile, DisplaySettings
     , EditRecord, init, update, render, makeSettings, defaultSettings
-    , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, getBlockNames, rawExport, encodeForPDF
+    , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, banner, getBlockNames, rawExport, encodeForPDF
     , Msg, SyntaxTree
     , matchingIdsInAST
-    , banner
     )
 
 {-| Scripta.API provides the functions you will need for an application
@@ -62,7 +61,7 @@ The Elm app sends data to `https://pdfServ.app`, a small server
 tar archive where it is then accessible by a GET request.
 See [pdfServer2@Github](https://github.com/jxxcarlson/pdfServer2).
 
-@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, Settings, getBlockNames, rawExport, encodeForPDF
+@docs fileNameForExport, packageNames, prepareContentForExport, getImageUrls, banner, getBlockNames, rawExport, encodeForPDF
 
 
 # Compatibility
@@ -221,6 +220,7 @@ renderBody count settings editRecord =
     Render.Markup.renderFromAST count editRecord.accumulator settings (body editRecord)
 
 
+{-| -}
 banner : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> Element MarkupMsg
 banner displaySettings editRecord =
     ASTTools.banner editRecord.tree
