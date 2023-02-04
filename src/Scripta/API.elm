@@ -195,6 +195,10 @@ makeSettings id selectedSlug scale width longEquationLimit =
     , backgroundColor = Element.rgb 1 1 1
     , titlePrefix = ""
     , isStandaloneDocument = False
+    , codeColor = Element.rgb255 0 0 210
+    , leftIndent = 18
+    , leftIndentation = 18
+    , leftRightIndentation = 18
     }
 
 

@@ -147,8 +147,8 @@ markupDict =
 verbatimDict =
     Dict.fromList
         [ ( "$", \g a _ m str -> math g a m str )
-        , ( "`", \_ _ _ m str -> code m str )
-        , ( "code", \_ _ _ m str -> code m str )
+        , ( "`", \_ _ s m str -> code s m str )
+        , ( "code", \_ _ s m str -> code s m str )
         , ( "math", \g a _ m str -> math g a m str )
         ]
 
@@ -325,8 +325,8 @@ cite acc str =
         [ Element.text (tag |> (\s -> "[" ++ s ++ "]")) ]
 
 
-code m str =
-    verbatimElement codeStyle m str
+code s m str =
+    verbatimElement (codeStyle s) m str
 
 
 math g a m str =
@@ -672,13 +672,13 @@ mathElement generation acc meta str =
 -- DEFINITIONS
 
 
-codeStyle =
+codeStyle settings =
     [ Font.family
         [ Font.typeface "Inconsolata"
         , Font.monospace
         ]
     , Font.unitalicized
-    , Font.color Render.Settings.codeColor
+    , Font.color settings.codeColor
     , Element.paddingEach { left = 2, right = 2, top = 0, bottom = 0 }
     ]
 

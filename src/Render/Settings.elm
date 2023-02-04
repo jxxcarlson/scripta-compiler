@@ -1,19 +1,23 @@
 module Render.Settings exposing
     ( Display(..)
-    , Settings
-    , blueColor
-    , codeColor
+    ,  Settings
+       --, blueColor
+
     , defaultSettings
-    , leftIndent
-    , leftIndentation
-    , leftRightIndentation
     , makeSettings
     , maxHeadingFontSize
     , redColor
-    , topMarginForChildren
-    , wideLeftIndentation
-    , windowWidthScale
+    ,  topMarginForChildren
+       --, wideLeftIndentation
+       --, windowWidthScale
+
     )
+
+{-| The Settings record holds information needed to render a
+parsed document. For example, the renderer needs to
+know the width of the window in which the document
+is to be displayed. This is given by the `.width` field.
+-}
 
 import Element
 
@@ -31,6 +35,10 @@ type alias Settings =
     , backgroundColor : Element.Color
     , titlePrefix : String
     , isStandaloneDocument : Bool
+    , codeColor : Element.Color
+    , leftIndent : Int
+    , leftIndentation : Int
+    , leftRightIndentation : Int
     }
 
 
@@ -58,9 +66,14 @@ makeSettings id selectedSlug scale windowWidth =
     , backgroundColor = Element.rgb 1 1 1
     , titlePrefix = ""
     , isStandaloneDocument = False
+    , codeColor = Element.rgb255 0 0 210
+    , leftIndent = 18
+    , leftIndentation = 18
+    , leftRightIndentation = 18
     }
 
 
+codeColor : Element.Color
 codeColor =
     Element.rgb255 0 0 210
 
@@ -74,22 +87,21 @@ maxHeadingFontSize =
     32
 
 
-leftIndent =
-    18
-
-
 topMarginForChildren =
     6
 
 
+leftIndentation : Element.Attribute msg
 leftIndentation =
     Element.paddingEach { left = 18, right = 0, top = 0, bottom = 0 }
 
 
+wideLeftIndentation : Element.Attribute msg
 wideLeftIndentation =
     Element.paddingEach { left = 54, right = 0, top = 0, bottom = 0 }
 
 
+leftRightIndentation : Element.Attribute msg
 leftRightIndentation =
     Element.paddingEach { left = 18, right = 8, top = 0, bottom = 0 }
 

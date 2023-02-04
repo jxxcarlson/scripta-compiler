@@ -43,10 +43,10 @@ renderTree count accumulator settings tree =
                 |> Maybe.withDefault "---"
     in
     if List.member blockName Parser.Settings.numberedBlockNames then
-        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree)
+        Element.el [ Font.italic ] ((Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language settings) tree)
 
     else
-        (Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language) tree
+        (Tree.map (Render.Block.render count accumulator settings) >> unravel accumulator.language settings) tree
 
 
 getMessages : Forest ExpressionBlock -> List String
@@ -58,8 +58,8 @@ getMessages syntaxTree =
         |> List.concat
 
 
-unravel : Language -> Tree (Element MarkupMsg) -> Element MarkupMsg
-unravel lang tree =
+unravel : Language -> Settings -> Tree (Element MarkupMsg) -> Element MarkupMsg
+unravel lang settings tree =
     let
         children =
             Tree.children tree
@@ -84,10 +84,14 @@ unravel lang tree =
                             0
 
                         else
-                            Render.Settings.leftIndent
+                            settings.leftIndentation
                     , right = 0
                     , bottom = 0
                     }
                 ]
-                (List.map (unravel lang) children)
+                (List.map (unravel lang settings) children)
             ]
+
+
+leftPadding p =
+    Element.paddingEach { left = p, right = 0, top = 0, bottom = 0 }

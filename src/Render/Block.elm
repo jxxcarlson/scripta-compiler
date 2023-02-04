@@ -580,11 +580,15 @@ blockLabel properties =
 -- VARIOUS BLOCKS
 
 
+leftPadding p =
+    Element.paddingEach { left = p, right = 0, top = 0, bottom = 0 }
+
+
 {-| indented block
 -}
 indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 indented count acc settings ((ExpressionBlock { lineNumber }) as block) =
-    Element.paragraph ([ Render.Settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
+    Element.paragraph ([ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
         (renderWithDefault "indent" count acc settings (getExprs block))
 
 
@@ -630,7 +634,7 @@ comment count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
 
 quotation count acc settings ((ExpressionBlock { lineNumber, args, properties }) as block) =
     Element.column [ Element.spacing 12 ]
-        [ Element.paragraph ([ Font.italic, Render.Settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
+        [ Element.paragraph ([ Font.italic, leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
             (renderWithDefault "(quotation)" count acc settings (getExprs block))
 
         --, Element.el [ Render.Settings.wideLeftIndentation, Font.italic ] (Element.text (getLabel properties))
@@ -753,7 +757,7 @@ validSrc src =
 renderCode : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderCode count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
     Element.column
-        [ Font.color Render.Settings.codeColor
+        [ Font.color settings.codeColor
         , Font.family
             [ Font.typeface "Inconsolata"
             , Font.monospace
@@ -892,10 +896,10 @@ item count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
             , Element.alignTop
             , Element.moveRight 6
             , Element.width (Element.px 24)
-            , Render.Settings.leftIndentation
+            , leftPadding settings.leftIndentation
             ]
             (Element.text label)
-        , Element.paragraph [ Render.Settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
             (renderWithDefault "| item" count acc settings (getExprs block))
         ]
 
@@ -943,10 +947,10 @@ numbered count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
             [ Font.size 14
             , Element.alignTop
             , Element.width (Element.px 24)
-            , Render.Settings.leftRightIndentation
+            , leftPadding settings.leftRightIndentation
             ]
             (Element.text (label ++ ". "))
-        , Element.paragraph [ Render.Settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
             (renderWithDefault "| numbered" count acc settings (getExprs block))
         ]
 
@@ -962,7 +966,7 @@ desc count acc settings ((ExpressionBlock { lineNumber, args }) as block) =
     in
     Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 Render.Settings.topMarginForChildren ] ++ highlightAttrs lineNumber settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
-        , Element.paragraph [ Render.Settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber ]
             (renderWithDefault "| desc" count acc settings (getExprs block))
         ]
 
