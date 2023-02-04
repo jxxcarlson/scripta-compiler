@@ -100,4 +100,4 @@ program process =
                             IO.return ()
 
         _ ->
-            Proc.logErr "Usage: elm-cli <program> file\n"
+            Proc.logErr "Usage: elm-cli <program> file [p|rt]\n"

@@ -179,6 +179,22 @@ type Expr
     | Verbatim String String Meta
 ```
 
+where
+
+```text
+-- Parser.Meta
+type alias Meta =
+    { begin : Int, end : Int, index : Int, id : String }
+```
+
+The fields `begin` and `end` of a `Meta` value 
+give the position of the string in 
+the `sourceText` field.  The `index` field is the position
+of the corresponding token (first token??).
+The `id` is a unique identifier derived from ... XXX ...
+more detail here.
+
+
 ## Expression Blocks
 
 ```
@@ -201,6 +217,45 @@ type ExpressionBlock
         }
 ```
 
+The `lineNumber` field is used in 
+[RL synchronization](/docs-scripta-compiler/synchronization)
+
+In the example below, we show how to examine the 
+block line numbers (`0:` and `3:`) as well
+as the `begin` and `end` fields of the metadata
+of the expressions comprising the block
+(`[0-3]`, `[5-5]`, etc.)
+
+```text
+-- In ./CLI
+-- $ vr lxe lno1.txt p
+
+==========================
+Parse to Expression blocks
+==========================
+abc $x$
+def
+
+ghi $y$
+jkl
+
+------
+0:
+abc [0-3] $x$[5-5]
+def[7-10]
+
+3:
+ghi [0-3] $y$[5-5]
+jkl[7-10]
+```
+
+It looks to me like the `begin` field can be the
+index of a leading newline.
+
+*Maybe we can put a `lineNumber` field in `Meta`, 
+calculating it from the the data we already have.
+Then change things so that clicks are on the level
+of expressions instead of blocks.*
 
 ## Edit records
 

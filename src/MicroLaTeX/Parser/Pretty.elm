@@ -7,6 +7,7 @@ import MicroLaTeX.Parser.TransformLaTeX
 import Parser.Block
 import Parser.Expr
 import Parser.Forest
+import Parser.Meta
 import Parser.Settings
 import Scripta.Language
 import Tree exposing (Tree)
@@ -103,11 +104,16 @@ printOrdinaryBlock name exprs =
     [ beginTag name, printExprs exprs ] |> String.join "\n"
 
 
+printLineNumber : Parser.Block.ExpressionBlock -> String
+printLineNumber (Parser.Block.ExpressionBlock data) =
+    String.fromInt data.lineNumber ++ ":\n"
+
+
 printBlock : Parser.Block.ExpressionBlock -> String
 printBlock ((Parser.Block.ExpressionBlock data) as block) =
     (case Parser.Block.getBlockType block of
         Parser.Block.Paragraph ->
-            (block |> Parser.Block.getContent |> printExprs) ++ "\n"
+            printLineNumber block ++ (block |> Parser.Block.getContent |> printExprs) ++ "\n"
 
         Parser.Block.OrdinaryBlock args ->
             let
@@ -118,18 +124,18 @@ printBlock ((Parser.Block.ExpressionBlock data) as block) =
                     block |> Parser.Block.getContent
             in
             (if List.member name MicroLaTeX.Parser.TransformLaTeX.pseudoBlockNames then
-                "\\" ++ name ++ " " ++ printExprs content
+                printLineNumber block ++ "\\" ++ name ++ " " ++ printExprs content
 
              else if List.member name MicroLaTeX.Parser.Transform.pseudoBlockNamesWithContent then
-                macro name content
+                printLineNumber block ++ macro name content
 
              else
                 case data.error of
                     Nothing ->
-                        [ beginTag name, printExprs content, endTag name ] |> String.join "\n"
+                        printLineNumber block ++ ([ beginTag name, printExprs content, endTag name ] |> String.join "\n")
 
                     Just e ->
-                        [ beginTag name, printExprs content, endTag name, "ERROR: " ++ e.error ] |> String.join "\n"
+                        printLineNumber block ++ ([ beginTag name, printExprs content, endTag name, "ERROR: " ++ e.error ] |> String.join "\n")
             )
                 ++ "\n"
 
@@ -141,7 +147,7 @@ printBlock ((Parser.Block.ExpressionBlock data) as block) =
                 name =
                     block |> Parser.Block.getName |> Maybe.withDefault "(anon)"
             in
-            [ beginTag name, content, endTag name ] |> String.join "\n"
+            printLineNumber block ++ ([ beginTag name, content, endTag name ] |> String.join "\n")
     )
         ++ "\n"
 
@@ -176,8 +182,8 @@ printExprs exprs =
     List.map printExpr exprs |> String.join ""
 
 
-printExpr : Parser.Expr.Expr -> String
-printExpr expr =
+printExpr1 : Parser.Expr.Expr -> String
+printExpr1 expr =
     case expr of
         Parser.Expr.Text str _ ->
             str
@@ -195,6 +201,32 @@ printExpr expr =
 
                 _ ->
                     [ name, body ] |> String.join " "
+
+
+printMeta : Parser.Meta.Meta -> String
+printMeta meta =
+    "[" ++ String.fromInt meta.begin ++ "-" ++ String.fromInt meta.end ++ "] "
+
+
+printExpr : Parser.Expr.Expr -> String
+printExpr expr =
+    case expr of
+        Parser.Expr.Text str meta ->
+            str ++ printMeta meta
+
+        Parser.Expr.Fun name exprs meta ->
+            macro name exprs ++ printMeta meta
+
+        Parser.Expr.Verbatim name body meta ->
+            case name of
+                "math" ->
+                    ([ "$", body, "$" ] |> String.join "") ++ printMeta meta
+
+                "code" ->
+                    ([ "`", body, "`" ] |> String.join "") ++ printMeta meta
+
+                _ ->
+                    ([ name, body ] |> String.join " ") ++ printMeta meta
 
 
 appendNewline : String -> String

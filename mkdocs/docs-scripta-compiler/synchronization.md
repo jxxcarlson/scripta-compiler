@@ -20,10 +20,18 @@ corresponding source text is scrolled into view and highlighted.
 the message is passed on to the Codemirror editor, whihc does the
 scrolling and highlighting.
 
-PROBLEM: there are still some problems stemming from innaccurate
+**NOTES.**
+
+- There are still some problems stemming from innaccurate
 computation of line numbers by the differential parser.  To 
 be resolved.
 
+- To get a finer level of detail, we will need to use
+something more than the current line numbers.  These
+only give information about blocks, namely the
+first line of the block.  Can we at least get at
+the line number of text within a block?  See 
+the section on [Expressions](/docs-scripta-compiler/dataStructures#expressions)
 
 ## Synchronizing Source Text to Rendered Text
 
