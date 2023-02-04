@@ -78,13 +78,14 @@ type alias Flags =
     {}
 
 
-settings : a -> { windowWidth : number, counter : a, selectedId : String, selectedSlug : Maybe b, scale : Float }
+settings : a -> { longEquationLimit : Float, windowWidth : number, counter : a, selectedId : String, selectedSlug : Maybe b, scale : Float }
 settings counter =
     { windowWidth = 500
     , counter = counter
     , selectedId = "--"
     , selectedSlug = Nothing
     , scale = 0.8
+    , longEquationLimit = 300
     }
 
 
