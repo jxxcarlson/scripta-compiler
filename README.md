@@ -26,7 +26,9 @@ and this GitHub repository to post issues.
 - [Scripta Desktop](https://github.com/jxxcarlson/scripta-tauri/releases)
   is a desktop version of Scripta.io.  It has less functionality,
   but can be used without an internet condition.  Files are stored
-  in the user's computer.
+  in the user's computer.  Scripta Desktop uses [Tauri](https://tauri.app)
+  to turn Elm code into a desktop.  The build process is described
+  [here](https://jxxcarlson.medium.com/elm-tauri-befa59eab403).
 
  
 ## Scripta.io
