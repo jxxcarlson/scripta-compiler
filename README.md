@@ -6,10 +6,8 @@ written in [Elm](https://elm-lang.org) and
 is used in the apps described below.
 
 
-The Scripta project (compiler and apps) is  
-pre-release software, but in pretty good shape.
-I've used it extensively, mostly for courses  and
-lecture notes. I welcome comments and suggestions.
+The Scripta project (compiler and apps) is pre-release software, but in pretty good shape.
+I've used it extensively, mostly for courses  and lecture notes. I welcome comments and suggestions.
 
 ## Contact
 
