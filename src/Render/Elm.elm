@@ -5,6 +5,7 @@ import Compiler.Acc exposing (Accumulator)
 import Dict exposing (Dict)
 import Element exposing (Element, column, el, newTabLink, spacing)
 import Element.Background as Background
+import Element.Border
 import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
@@ -88,6 +89,20 @@ markupDict =
         , ( "today", \_ _ _ _ -> Element.none )
         , ( "comment", \g acc s exprList -> blue g acc s exprList )
         , ( "lambda", \_ _ _ _ -> Element.none )
+        , ( "hrule"
+          , \_ _ s _ ->
+                Element.column
+                    [ Element.width (Element.px s.width)
+                    ]
+                    [ Element.el
+                        [ Element.Border.width 1
+                        , Element.width (Element.px (s.width - 20))
+                        , Element.centerX
+                        , Element.Border.color (Element.rgb 0.75 0.75 0.75)
+                        ]
+                        (Element.text "")
+                    ]
+          )
 
         -- LATEX
         , ( "title", \g acc s exprList -> title g acc s exprList )
@@ -183,17 +198,35 @@ link _ _ _ exprList =
 
                 n =
                     List.length args
-
-                label =
-                    List.take (n - 1) args |> String.join " "
-
-                url =
-                    List.drop (n - 1) args |> String.join " "
             in
-            newTabLink []
-                { url = url
-                , label = el [ Font.color linkColor ] (Element.text label)
-                }
+            if n == 0 then
+                errorText_ "Please provide url"
+
+            else if n == 1 then
+                let
+                    url =
+                        argString
+
+                    label =
+                        argString |> String.replace "https://" "" |> String.replace "http://" ""
+                in
+                newTabLink []
+                    { url = url
+                    , label = el [ Font.color linkColor ] (Element.text label)
+                    }
+
+            else
+                let
+                    label =
+                        List.take (n - 1) args |> String.join " "
+
+                    url =
+                        List.drop (n - 1) args |> String.join " "
+                in
+                newTabLink []
+                    { url = url
+                    , label = el [ Font.color linkColor ] (Element.text label)
+                    }
 
 
 href : Int -> Accumulator -> Settings -> List Expr -> Element MarkupMsg

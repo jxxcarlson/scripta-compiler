@@ -26,7 +26,7 @@ scripts:
     sed 's/^.*(//' macros.txt | sed 's/\",.*//'  | sed 's/^ //' | sed 's/^\"//' | grep -v "^ " | grep -v "^E"
 
   clean-macros3:
-    cat macros.txt | sed 's/ *//' | sed 's/,//' | sed 's/(//' | sed 's/ \"//' | sed 's/\".*//'
+    cat macros.txt | sed 's/ *//' | sed 's/,//' | sed 's/(//' | sed 's/ \"//' | sed 's/\".*//' | sed 's/^/- /'
 
   server: fs -p 3300 initialDocs
 
