@@ -232,11 +232,14 @@ renderBody count settings editRecord =
 {-| -}
 banner : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> Element MarkupMsg
 banner displaySettings editRecord =
-    ASTTools.banner editRecord.tree
-        |> Maybe.map (Parser.Block.setName "banner_")
-        |> Debug.log "BANNER"
-        |> Maybe.map (Render.Block.render displaySettings.counter editRecord.accumulator (renderSettings displaySettings))
-        |> Maybe.withDefault Element.none
+    case ASTTools.banner editRecord.tree of
+        Nothing ->
+            Element.column [ Element.height (Element.px 36) ] []
+
+        Just ast ->
+            ast
+                |> Parser.Block.setName "banner_"
+                |> Render.Block.render displaySettings.counter editRecord.accumulator (renderSettings displaySettings)
 
 
 
