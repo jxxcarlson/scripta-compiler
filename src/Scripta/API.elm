@@ -234,6 +234,7 @@ banner : DisplaySettings -> Compiler.DifferentialParser.EditRecord -> Element Ma
 banner displaySettings editRecord =
     ASTTools.banner editRecord.tree
         |> Maybe.map (Parser.Block.setName "banner_")
+        |> Debug.log "BANNER"
         |> Maybe.map (Render.Block.render displaySettings.counter editRecord.accumulator (renderSettings displaySettings))
         |> Maybe.withDefault Element.none
 
