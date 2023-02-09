@@ -20,13 +20,10 @@ scripts:
   cloc: cloc --by-file src/
 
   clean-macros:
-    cat macros.txt | sed 's/^, (//g' | sed 's/,.*//g' | sed 's/"//g'
+    cat txt/macros.txt | sed 's/ *//' | sed 's/,//' | sed 's/(//' | sed 's/ \"//' | sed 's/\".*//' | sed 's/^/- /'
 
-  clean-macros2:
-    sed 's/^.*(//' macros.txt | sed 's/\",.*//'  | sed 's/^ //' | sed 's/^\"//' | grep -v "^ " | grep -v "^E"
-
-  clean-macros3:
-    cat macros.txt | sed 's/ *//' | sed 's/,//' | sed 's/(//' | sed 's/ \"//' | sed 's/\".*//' | sed 's/^/- /'
+  clean-blocks:
+    cat txt/blocks.txt | sed 's/ *//' | sed 's/,//' | sed 's/(//' | sed 's/ \"//' | sed 's/\".*//' | sed 's/^/- /'
 
   server: fs -p 3300 initialDocs
 
