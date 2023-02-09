@@ -164,6 +164,7 @@ blockDict : Dict String (Int -> Accumulator -> Settings -> ExpressionBlock -> El
 blockDict =
     Dict.fromList
         [ ( "indent", indented )
+        , ( "center", centered )
         , ( "box", box )
         , ( "quotation", quotation )
         , ( "set-key", \_ _ _ _ -> Element.none )
@@ -227,7 +228,7 @@ verbatimDict =
 
 
 
--- ERRORS
+-- ERRORS.
 
 
 noSuchVerbatimBlock : String -> String -> Element MarkupMsg
@@ -589,6 +590,12 @@ leftPadding p =
 indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 indented count acc settings ((ExpressionBlock { lineNumber }) as block) =
     Element.paragraph ([ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
+        (renderWithDefault "indent" count acc settings (getExprs block))
+
+
+centered : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+centered count acc settings ((ExpressionBlock { lineNumber }) as block) =
+    Element.paragraph ([ Element.width (Element.px (settings.width - 60)), Element.centerX, Render.Utility.sendLineNumberOnClick lineNumber, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber settings)
         (renderWithDefault "indent" count acc settings (getExprs block))
 
 
