@@ -25,6 +25,7 @@ type alias ImageParameters msg =
     , placement : Element.Attribute msg
     , width : Element.Length
     , url : String
+    , yPadding : Maybe Int
     }
 
 
@@ -34,8 +35,16 @@ image settings body =
         params =
             body |> argumentsFromAST |> imageParameters settings
 
+        ypadding =
+            case params.yPadding of
+                Nothing ->
+                    0
+
+                Just k ->
+                    k
+
         inner =
-            column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 18 ]
+            column [ spacing 8, Element.width (px settings.width), params.placement, Element.paddingXY 0 ypadding ]
                 [ Element.image [ Element.width params.width, params.placement ]
                     { src = params.url, description = params.description }
                 , el [ params.placement ] params.caption
@@ -47,11 +56,21 @@ image settings body =
         }
 
 
+{-| For \\image and [image ...]
+-}
 image2 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
     let
         caption =
             getCaption properties
+
+        ypadding =
+            case Dict.get "yPadding" properties of
+                Nothing ->
+                    18
+
+                Just dy ->
+                    dy |> String.toInt |> Maybe.withDefault 18
 
         label =
             case caption of
@@ -78,7 +97,7 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
         inner =
             column
                 [ spacing 8
-                , Element.paddingXY 0 18
+                , Element.paddingXY 0 ypadding
                 , Element.centerX
                 ]
                 [ Element.image [ Element.width params.width ]
@@ -273,6 +292,9 @@ imageParameters settings arguments =
         displayWidth =
             settings.width
 
+        yPadding =
+            Dict.get "ypadding" dict |> Maybe.andThen String.toInt
+
         width : Element.Length
         width =
             case Dict.get "width" dict of
@@ -283,7 +305,7 @@ imageParameters settings arguments =
                     Element.fill
 
                 Just "to-edges" ->
-                    px (displayWidth + 198)
+                    px (round (1.5 * toFloat displayWidth))
 
                 Just w_ ->
                     case String.toInt w_ of
@@ -310,7 +332,7 @@ imageParameters settings arguments =
                 _ ->
                     centerX
     in
-    { caption = caption, description = description, placement = placement, width = width, url = url }
+    { caption = caption, description = description, placement = placement, width = width, url = url, yPadding = yPadding }
 
 
 parameters : Settings -> Dict String String -> { caption : String, description : String, placement : Element.Attribute msg, width : Element.Length }
