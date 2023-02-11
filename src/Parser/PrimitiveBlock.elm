@@ -26,6 +26,7 @@ type alias PrimitiveBlock =
     , lineNumber : Int
     , position : Int
     , content : List String
+    , numberOfLines : Int
     , name : Maybe String
     , args : List String
     , properties : Dict String String
@@ -76,6 +77,7 @@ empty =
     , lineNumber = 0
     , position = 0
     , content = [ "???" ]
+    , numberOfLines = 1
     , name = Nothing
     , args = []
     , properties = Dict.empty
@@ -129,6 +131,7 @@ toPrimitiveBlock block =
     , lineNumber = block.lineNumber
     , position = block.position
     , content = block.content
+    , numberOfLines = block.lineNumber
     , name = block.name
     , args = block.args
     , properties = block.properties
@@ -173,6 +176,7 @@ parsePlainText_ lines =
       , lineNumber = 0
       , position = 0
       , content = lines
+      , numberOfLines = List.length lines
       , name = Just "verbatim"
       , args = []
       , properties = Dict.empty
@@ -235,6 +239,7 @@ blockFromLine lang ({ indent, lineNumber, position, prefix, content } as line) =
     , lineNumber = lineNumber
     , position = position
     , content = [ prefix ++ content ]
+    , numberOfLines = 1
     , name = Nothing
     , args = []
     , properties = Dict.empty -- TODO complete this

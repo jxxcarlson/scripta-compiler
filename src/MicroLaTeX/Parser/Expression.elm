@@ -546,7 +546,7 @@ recoverFromError state =
 
                 message =
                     if content == "" then
-                        "\\[?\\]"
+                        "\\[ ? \\]"
 
                     else
                         "\\[ "
@@ -656,17 +656,18 @@ bracketError : Int -> Expr
 bracketError k =
     if k < 0 then
         let
-            braces =
+            brackets =
                 List.repeat -k "]" |> String.join ""
         in
-        errorMessage <| " " ++ braces ++ " extra { (" ++ String.fromInt -k ++ ")"
+        errorMessage <| " " ++ "\\" ++ brackets ++ "?"
+        -- ++ " extra { (" ++ String.fromInt -k ++ ")"
 
     else
         let
-            braces =
-                List.repeat k "{" |> String.join ""
+            brackets =
+                List.repeat k "[" |> String.join ""
         in
-        errorMessage <| " " ++ "\\" ++ braces ++ "?"
+        errorMessage <| " " ++ "\\" ++ brackets ++ "?"
 
 
 braceErrorAsString : Int -> String

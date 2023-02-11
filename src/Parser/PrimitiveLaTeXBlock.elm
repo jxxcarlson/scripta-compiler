@@ -29,6 +29,7 @@ type alias PrimitiveLaTeXBlock =
     , position : Int
     , level : Int
     , content : List String
+    , numberOfLines : Int
     , firstLine : String
     , name : Maybe String
     , args : List String
@@ -440,16 +441,19 @@ endBlockOnMismatch label_ classifier line state =
                                     else
                                         name_
 
+                        content =
+                            --- TODO: WTF!?
+                            if List.member name verbatimBlockNames then
+                                getContent label_.classification line state |> List.reverse
+
+                            else
+                                getContent label_.classification line state |> List.reverse
+
                         newBlock =
                             { block
                                 | name = Just name
-                                , content =
-                                    --- TODO: WTF!?
-                                    if List.member name verbatimBlockNames then
-                                        getContent label_.classification line state |> List.reverse
-
-                                    else
-                                        getContent label_.classification line state |> List.reverse
+                                , content = content
+                                , numberOfLines = List.length content
                                 , args =
                                     if List.member name [ "item", "numbered" ] then
                                         block.content
@@ -552,10 +556,13 @@ addSource : String -> PrimitiveLaTeXBlock -> PrimitiveLaTeXBlock
 addSource lastLine block =
     case block.name of
         Nothing ->
-            { block | sourceText = String.join "\n" block.content }
+            { block | sourceText = String.join "\n" block.content, numberOfLines = List.length block.content }
 
         _ ->
-            { block | sourceText = block.firstLine ++ "\n" ++ String.join "\n" block.content ++ "\n" ++ lastLine }
+            { block
+                | sourceText = block.firstLine ++ "\n" ++ String.join "\n" block.content ++ "\n" ++ lastLine
+                , numberOfLines = List.length block.content + 2
+            }
 
 
 getError label classifier =
@@ -661,10 +668,11 @@ plainText state currentLine =
         Loop state
 
 
+handleComment : Line -> State -> State
 handleComment line state =
     let
         newBlock =
-            blockFromLine 0 line |> (\b -> { b | name = Just "texComment", blockType = PBVerbatim })
+            blockFromLine 0 line |> (\b -> { b | numberOfLines = 1, name = Just "texComment", blockType = PBVerbatim })
 
         labelStack =
             case List.Extra.uncons state.labelStack of
@@ -1207,6 +1215,7 @@ blockFromLine level ({ indent, lineNumber, position, prefix, content } as line) 
     , lineNumber = lineNumber
     , position = position
     , content = []
+    , numberOfLines = 1
     , firstLine = line.content
     , level = level
     , name = label
