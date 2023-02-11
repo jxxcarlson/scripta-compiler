@@ -550,7 +550,7 @@ endBlockOnMatch labelHead classifier line state =
                             newBlockWithError classifier
                                 (getContent classifier line state)
                                 { block
-                                    | numberOfLines = List.length block.content |> Debug.log "!!(1) Number of  lines"
+                                    | numberOfLines = List.length block.content
                                     , sourceText = sourceText
                                 }
 
@@ -1002,7 +1002,7 @@ handleMathBlock line state =
                                     slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines
 
                                 newBlock =
-                                    { block | content = content, numberOfLines = List.length content |> Debug.log "handleMathBlock, numberOfLines", status = Finished } |> addSource "$$"
+                                    { block | content = content, numberOfLines = List.length content, status = Finished } |> addSource "$$"
                             in
                             { state | committedBlocks = newBlock :: state.committedBlocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 
