@@ -63,7 +63,7 @@ getContent (ExpressionBlock { content }) =
 
 
 equation : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-equation count acc settings ((ExpressionBlock { id, args, error, properties }) as block) =
+equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, error, properties }) as block) =
     let
         w =
             String.fromInt settings.width ++ "px"
@@ -80,10 +80,10 @@ equation count acc settings ((ExpressionBlock { id, args, error, properties }) a
         -- TODO: changed 45 -> 0
         attrs =
             if id == settings.selectedId then
-                [ Events.onClick (SendLineNumber id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
 
             else
-                [ Events.onClick (SendLineNumber id), leftPadding ]
+                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
 
         attrs2 =
             if List.member "highlight" args then
@@ -132,16 +132,17 @@ getLabel label dict =
 
 
 aligned : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-aligned count acc settings ((ExpressionBlock { id, args, properties, error }) as block) =
+aligned count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, properties, error }) as block) =
     Element.column []
         [ Element.row [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
-            [ Element.el [ Element.centerX ] (aligned_ count acc settings args id (getContent block))
+            [ Element.el [ Element.centerX ] (aligned_ count acc settings args lineNumber numberOfLines id (getContent block))
             , putLabel settings.display (getContent block) properties settings.longEquationLimit
             ]
         ]
 
 
-aligned_ count acc settings _ id str =
+aligned_ : Int -> Accumulator -> Settings -> List String -> Int -> Int -> String -> String -> Element MarkupMsg
+aligned_ count acc settings _ lineNumber numberOfLines id str =
     let
         w =
             String.fromInt settings.width ++ "px"
@@ -153,10 +154,10 @@ aligned_ count acc settings _ id str =
 
         attrs =
             if id == settings.selectedId then
-                [ Events.onClick (SendLineNumber id), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
 
             else
-                [ Events.onClick (SendLineNumber id), leftPadding ]
+                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
 
         deleteTrailingSlashes str_ =
             if String.right 2 str_ == "\\\\" then

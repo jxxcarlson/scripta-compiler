@@ -351,7 +351,8 @@ cite acc str =
     in
     Element.paragraph
         [ Element.width Element.fill
-        , Events.onClick (SendLineNumber id)
+
+        -- , Events.onClick (SendLineNumber _)
         , Events.onClick (SelectId id)
         , Font.color (Element.rgb 0.2 0.2 1.0)
         ]

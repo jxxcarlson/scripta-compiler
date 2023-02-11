@@ -11,7 +11,7 @@ text when using the Codemirror editor.
 {-| -}
 type MarkupMsg
     = SendMeta { begin : Int, end : Int, index : Int, id : String }
-    | SendLineNumber String
+    | SendLineNumber { begin : Int, end : Int }
     | SelectId String
     | HighlightId String
     | GetPublicDocument Handling String

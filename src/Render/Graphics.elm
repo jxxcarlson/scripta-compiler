@@ -59,7 +59,7 @@ image settings body =
 {-| For \\image and [image ...]
 -}
 image2 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
+image2 _ _ settings (ExpressionBlock { lineNumber, numberOfLines, id, args, properties, content }) =
     let
         caption =
             getCaption properties
@@ -104,7 +104,7 @@ image2 _ _ settings (ExpressionBlock { id, args, properties, content }) =
                     { src = url, description = getDescription properties }
                 , el
                     ([ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
-                        ++ Render.Utility.highlightElement id settings.selectedId
+                        ++ Render.Utility.highlightElement lineNumber (lineNumber + numberOfLines) id settings.selectedId
                     )
                     (Element.el [ Element.centerX ] (Element.text label))
                 ]
@@ -199,7 +199,7 @@ tikz count acc settings ((ExpressionBlock { id, args }) as block) =
 
 
 quiver : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
+quiver _ _ settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, properties }) as block) =
     let
         -- arguments: ["width:250","caption:Fig","1"]
         qArgs : { caption : String, description : String, placement : Element.Attribute a, width : Element.Length }
@@ -239,7 +239,7 @@ quiver _ _ settings ((ExpressionBlock { id, args, properties }) as block) =
                     { src = params.url, description = desc }
                 , Element.el
                     ([ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
-                        ++ Render.Utility.highlightElement id settings.selectedId
+                        ++ Render.Utility.highlightElement lineNumber (lineNumber + numberOfLines) id settings.selectedId
                     )
                     (Element.text desc)
                 ]

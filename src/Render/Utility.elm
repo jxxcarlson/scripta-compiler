@@ -123,9 +123,9 @@ getVerbatimContent (Parser.Block.ExpressionBlock { content }) =
             ""
 
 
-sendLineNumberOnClick : Int -> Element.Attribute MarkupMsg
-sendLineNumberOnClick lineNumber =
-    Events.onClick (SendLineNumber (String.fromInt lineNumber))
+sendLineNumberOnClick : Int -> Int -> Element.Attribute MarkupMsg
+sendLineNumberOnClick firstLineNumber numberOfLines =
+    Events.onClick (SendLineNumber { begin = firstLineNumber, end = firstLineNumber + numberOfLines })
 
 
 idAttribute : Int -> Element.Attribute msg
@@ -193,12 +193,13 @@ elementAttribute key value =
     Element.htmlAttribute (Html.Attributes.attribute key value)
 
 
-highlightElement id selectedId =
+highlightElement : Int -> Int -> String -> String -> List (Element.Attribute MarkupMsg)
+highlightElement firstLineNumber lastLineNumber id selectedId =
     if id == selectedId then
-        [ Events.onClick (SendLineNumber id), Background.color (Element.rgb 0.8 0.8 1.0) ]
+        [ Events.onClick (SendLineNumber { begin = firstLineNumber, end = lastLineNumber }), Background.color (Element.rgb 0.8 0.8 1.0) ]
 
     else
-        [ Events.onClick (SendLineNumber id) ]
+        [ Events.onClick (SendLineNumber { begin = firstLineNumber, end = lastLineNumber }) ]
 
 
 leftPadding =
