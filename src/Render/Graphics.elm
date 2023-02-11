@@ -112,12 +112,13 @@ image2 _ _ settings (ExpressionBlock { lineNumber, numberOfLines, id, args, prop
                 (Element.el [ Element.centerX ] (Element.text label))
 
         outer =
-            Element.newTabLink [ Element.width (px settings.width) ]
+            Element.newTabLink []
                 { url = url
                 , label = inner
                 }
     in
-    Element.column [] [ outer, figureLabel ]
+    Element.column [ Element.width (Element.px settings.width) ]
+        [ Element.column [ Element.width params.width, Element.centerX ] [ outer, Element.el [] figureLabel ] ]
 
 
 

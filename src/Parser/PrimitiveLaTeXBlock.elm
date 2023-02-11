@@ -385,8 +385,19 @@ changeStatusOfStackTop block rest state =
                 List.head state.labelStack |> Maybe.map .lineNumber |> Maybe.withDefault 0
 
             newBlock =
+                let
+                    content =
+                        slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines
+
+                    numberOfLines =
+                        List.length content
+                in
                 -- set the status to Filled and grab lines from state.lines to fill the content field of the block
-                { block | status = Filled, content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines }
+                { block
+                    | status = Filled
+                    , content = slice (firstBlockLine + 1) (state.lineNumber - 1) state.lines
+                    , numberOfLines = numberOfLines
+                }
         in
         newBlock :: rest
 
@@ -503,7 +514,7 @@ finishBlock lastLine state =
         Just ( block, _ ) ->
             let
                 updatedBlock =
-                    { block | status = Finished } |> addSource lastLine
+                    { block | status = Finished, numberOfLines = List.length block.content } |> addSource lastLine
             in
             { state
                 | committedBlocks = updatedBlock :: state.committedBlocks
@@ -532,7 +543,16 @@ endBlockOnMatch labelHead classifier line state =
                             newBlockWithError classifier (getContent classifier line state ++ [ block.firstLine ]) block |> addSource line.content
 
                         else if List.member classifier (List.map CEndBlock verbatimBlockNames) then
-                            newBlockWithError classifier (getContent classifier line state) { block | sourceText = getSource line state }
+                            let
+                                sourceText =
+                                    getSource line state
+                            in
+                            newBlockWithError classifier
+                                (getContent classifier line state)
+                                { block
+                                    | numberOfLines = List.length block.content |> Debug.log "!!(1) Number of  lines"
+                                    , sourceText = sourceText
+                                }
 
                         else
                             newBlockWithOutError (getContent classifier line state) block |> addSource line.content
@@ -978,8 +998,11 @@ handleMathBlock line state =
 
                         Just ( topLabel, otherLabels ) ->
                             let
+                                content =
+                                    slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines
+
                                 newBlock =
-                                    { block | content = slice (topLabel.lineNumber + 1) (state.lineNumber - 1) state.lines, status = Finished } |> addSource "$$"
+                                    { block | content = content, numberOfLines = List.length content |> Debug.log "handleMathBlock, numberOfLines", status = Finished } |> addSource "$$"
                             in
                             { state | committedBlocks = newBlock :: state.committedBlocks, labelStack = otherLabels, stack = rest, level = state.level - 1 }
 

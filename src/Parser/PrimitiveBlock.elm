@@ -131,7 +131,7 @@ toPrimitiveBlock block =
     , lineNumber = block.lineNumber
     , position = block.position
     , content = block.content
-    , numberOfLines = block.lineNumber
+    , numberOfLines = block.numberOfLines
     , name = block.name
     , args = block.args
     , properties = block.properties
@@ -204,9 +204,10 @@ finalize block =
             List.reverse block.content
 
         sourceText =
+            -- TODO: maybe this should be set at the Primitive block level
             String.join "\n" content
     in
-    { block | content = content, sourceText = sourceText }
+    { block | content = content, numberOfLines = block.numberOfLines, sourceText = sourceText }
 
 
 {-|
