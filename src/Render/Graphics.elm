@@ -102,17 +102,22 @@ image2 _ _ settings (ExpressionBlock { lineNumber, numberOfLines, id, args, prop
                 ]
                 [ Element.image [ Element.width params.width ]
                     { src = url, description = getDescription properties }
-                , el
-                    ([ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
-                        ++ Render.Utility.highlightElement lineNumber (lineNumber + numberOfLines) id settings.selectedId
-                    )
-                    (Element.el [ Element.centerX ] (Element.text label))
                 ]
+
+        figureLabel =
+            Element.el
+                ([ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
+                    ++ Render.Utility.highlightElement lineNumber (lineNumber + numberOfLines) id settings.selectedId
+                )
+                (Element.el [ Element.centerX ] (Element.text label))
+
+        outer =
+            Element.newTabLink [ Element.width (px settings.width) ]
+                { url = url
+                , label = inner
+                }
     in
-    Element.newTabLink [ Element.width (px settings.width) ]
-        { url = url
-        , label = inner
-        }
+    Element.column [] [ outer, figureLabel ]
 
 
 
