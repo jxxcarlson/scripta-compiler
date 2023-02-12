@@ -35,7 +35,7 @@ leftPadding =
 
 
 displayedMath : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
-displayedMath count acc settings ((ExpressionBlock { id, error }) as block) =
+displayedMath count acc settings ((ExpressionBlock { id, args, lineNumber, numberOfLines, error }) as block) =
     let
         w =
             String.fromInt settings.width ++ "px"
@@ -48,8 +48,8 @@ displayedMath count acc settings ((ExpressionBlock { id, error }) as block) =
                 |> List.filter (\line -> line /= "")
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
     in
-    Element.column [ leftPadding ]
-        [ mathText count w id DisplayMathMode (filteredLines |> String.join "\n") ]
+    Element.column ([ leftPadding ] ++ attrs id settings lineNumber numberOfLines)
+        [ Element.el (attrs2 args) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
 
 
 getContent : ExpressionBlock -> String
@@ -78,23 +78,13 @@ equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, a
             String.join "\n" filteredLines
 
         -- TODO: changed 45 -> 0
-        attrs =
-            if id == settings.selectedId then
-                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
-
-            else
-                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
-
-        attrs2 =
-            if List.member "highlight" args then
-                Background.color (Element.rgb 0.85 0.85 1.0) :: [ Element.centerX ]
-
-            else
-                [ Element.centerX ]
     in
     Element.column []
-        [ Element.row ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ] ++ attrs)
-            [ Element.el attrs2 (mathText count w id DisplayMathMode content)
+        [ Element.row
+            ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
+                ++ attrs id settings lineNumber numberOfLines
+            )
+            [ Element.el (attrs2 args) (mathText count w id DisplayMathMode content)
             , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
@@ -118,6 +108,8 @@ putLabel display content properties longEquationLimit_ =
         Element.none
 
     else
+        -- TODO: is this fixed?
+        -- Element.el [ Font.size 12 ] (Element.text <| "(" ++ (getLabel "equation" properties |> Debug.log "EQ NO (2)") ++ ")")
         Element.el [ Font.size 12 ] (Element.text <| "(" ++ getLabel "equation" properties ++ ")")
 
 
@@ -141,8 +133,24 @@ aligned count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, ar
         ]
 
 
+attrs id settings lineNumber numberOfLines =
+    if id == settings.selectedId then
+        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+
+    else
+        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
+
+
+attrs2 args =
+    if List.member "highlight" args then
+        Background.color (Element.rgb 0.85 0.85 1.0) :: [ Element.centerX ]
+
+    else
+        [ Element.centerX ]
+
+
 aligned_ : Int -> Accumulator -> Settings -> List String -> Int -> Int -> String -> String -> Element MarkupMsg
-aligned_ count acc settings _ lineNumber numberOfLines id str =
+aligned_ count acc settings args lineNumber numberOfLines id str =
     let
         w =
             String.fromInt settings.width ++ "px"
@@ -151,13 +159,6 @@ aligned_ count acc settings _ lineNumber numberOfLines id str =
             -- lines of math text to be rendered: filter stuff out
             String.lines str
                 |> List.filter (\line -> not (String.left 6 line == "[label") && not (line == ""))
-
-        attrs =
-            if id == settings.selectedId then
-                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
-
-            else
-                [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
 
         deleteTrailingSlashes str_ =
             if String.right 2 str_ == "\\\\" then
@@ -177,8 +178,8 @@ aligned_ count acc settings _ lineNumber numberOfLines id str =
         content =
             String.join "\n" adjustedLines
     in
-    Element.column attrs
-        [ mathText count w id DisplayMathMode content ]
+    Element.column (attrs id settings lineNumber numberOfLines)
+        [ Element.el (attrs2 args) (mathText count w id DisplayMathMode content) ]
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg
