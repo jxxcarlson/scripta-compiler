@@ -48,8 +48,8 @@ displayedMath count acc settings ((ExpressionBlock { id, args, lineNumber, numbe
                 |> List.filter (\line -> line /= "")
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
     in
-    Element.column ([ leftPadding ] ++ attrs id settings lineNumber numberOfLines)
-        [ Element.el (attrs2 args) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
+    Element.column ([ leftPadding ] ++ Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines)
+        [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
 
 
 getContent : ExpressionBlock -> String
@@ -82,9 +82,9 @@ equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, a
     Element.column []
         [ Element.row
             ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
-                ++ attrs id settings lineNumber numberOfLines
+                ++ Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines
             )
-            [ Element.el (attrs2 args) (mathText count w id DisplayMathMode content)
+            [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode content)
             , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
@@ -133,22 +133,6 @@ aligned count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, ar
         ]
 
 
-attrs id settings lineNumber numberOfLines =
-    if id == settings.selectedId then
-        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
-
-    else
-        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
-
-
-attrs2 args =
-    if List.member "highlight" args then
-        Background.color (Element.rgb 0.85 0.85 1.0) :: [ Element.centerX ]
-
-    else
-        [ Element.centerX ]
-
-
 aligned_ : Int -> Accumulator -> Settings -> List String -> Int -> Int -> String -> String -> Element MarkupMsg
 aligned_ count acc settings args lineNumber numberOfLines id str =
     let
@@ -178,8 +162,8 @@ aligned_ count acc settings args lineNumber numberOfLines id str =
         content =
             String.join "\n" adjustedLines
     in
-    Element.column (attrs id settings lineNumber numberOfLines)
-        [ Element.el (attrs2 args) (mathText count w id DisplayMathMode content) ]
+    Element.column (Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines)
+        [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode content) ]
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg

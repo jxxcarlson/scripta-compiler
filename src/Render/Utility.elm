@@ -7,7 +7,9 @@ module Render.Utility exposing
     , idAttribute
     , internalLink
     , keyValueDict
+    , leftRightSyncHelper
     , makeId
+    , rightLeftSyncHelper
     , sendLineNumberOnClick
     , textWidth
     , vspace
@@ -25,7 +27,26 @@ import Maybe.Extra
 import Parser.Block
 import Parser.Expr
 import Render.Msg exposing (MarkupMsg(..))
+import Render.Settings
 import Utility
+
+
+rightLeftSyncHelper : String -> Render.Settings.Settings -> Int -> Int -> List (Element.Attribute MarkupMsg)
+rightLeftSyncHelper id settings lineNumber numberOfLines =
+    if id == settings.selectedId then
+        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
+
+    else
+        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
+
+
+leftRightSyncHelper : List String -> List (Element.Attr () msg)
+leftRightSyncHelper args =
+    if List.member "highlight" args then
+        Background.color (Element.rgb 0.85 0.85 1.0) :: [ Element.centerX ]
+
+    else
+        [ Element.centerX ]
 
 
 textWidth : String -> Float
