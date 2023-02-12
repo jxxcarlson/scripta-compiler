@@ -152,18 +152,6 @@ nextStep state_ =
     let
         state =
             { state_ | lineNumber = state_.lineNumber + 1, count = state_.count + 1 }
-
-        --rawLine_ =
-        --    List.Extra.getAt state.lineNumber state.lines |> Maybe.withDefault "----"
-        --
-        --currentLine_ =
-        --    Line.classify (getPosition rawLine_ state) state.lineNumber rawLine_
-        --
-        --classification =
-        --    ClassifyBlock.classify currentLine_.content
-        --
-        --_ =
-        --    Debug.log (String.fromInt state.lineNumber ++ ":: " ++ rawLine_ ++ " :") ( classification, List.map .classification state.labelStack )
     in
     case List.Extra.getAt state.lineNumber state.lines of
         Nothing ->
@@ -1169,6 +1157,7 @@ print block =
     , "Properties: " ++ showProperties block.properties
     , "Error: " ++ showError block.error
     , "Line number: " ++ String.fromInt block.lineNumber
+    , "Number of lines: " ++ String.fromInt block.numberOfLines
     , "Content:"
     , block.content |> List.indexedMap (\k s -> String.padLeft 3 ' ' (String.fromInt (k + 1 + block.lineNumber)) ++ ": " ++ s) |> String.join "\n"
     , "Source text:\n" ++ block.sourceText

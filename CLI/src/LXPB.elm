@@ -47,7 +47,7 @@ program process =
                                 ++ (List.map Parser.PrimitiveLaTeXBlock.print parsed.stack |> String.join "\n\n")
                                 ++ "\n----------------\n"
                     in
-                    IO.do (Proc.print (blockString2 ++ holdingStackString ++ stackString)) <|
+                    IO.do (Proc.print (blockString ++ blockString2 ++ holdingStackString ++ stackString)) <|
                         \_ ->
                             IO.return ()
 
