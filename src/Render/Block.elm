@@ -85,7 +85,7 @@ clickableParagraph lineNumber numberOfLines color elements =
         id =
             String.fromInt lineNumber
     in
-    Element.paragraph [ color, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines, htmlId id ] elements
+    Element.paragraph [ color, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines, htmlId id ] elements
 
 
 renderOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -521,7 +521,7 @@ env_ : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 env_ count acc settings ((ExpressionBlock { name, lineNumber, numberOfLines, indent, args, blockType, content, properties }) as block) =
     case List.head args of
         Nothing ->
-            Element.paragraph [ Render.Utility.idAttribute lineNumber, Font.color settings.redColor, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ] [ Element.text "| env (missing name!)" ]
+            Element.paragraph [ Render.Utility.idAttribute lineNumber, Font.color settings.redColor, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ] [ Element.text "| env (missing name!)" ]
 
         Just _ ->
             env count acc settings block
@@ -540,8 +540,8 @@ env count acc settings (ExpressionBlock { name, indent, args, blockType, content
 
         Right exprs ->
             Element.column ([ Element.spacing 8, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber numberOfLines settings)
-                [ Element.el [ Font.bold, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ] (Element.text (blockHeading name args properties))
-                , Element.paragraph [ Font.italic, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ]
+                [ Element.el [ Font.bold, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ] (Element.text (blockHeading name args properties))
+                , Element.paragraph [ Font.italic, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ]
                     (renderWithDefault2 ("??" ++ (name |> Maybe.withDefault "(name)")) count acc settings exprs)
                 ]
 
@@ -589,7 +589,7 @@ indented : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMs
 indented count acc settings ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
     Element.paragraph
         ([ leftPadding settings.leftIndentation
-         , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+         , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
          , Render.Utility.idAttribute lineNumber
          ]
             ++ highlightAttrs lineNumber numberOfLines settings
@@ -602,7 +602,7 @@ centered count acc settings ((ExpressionBlock { lineNumber, numberOfLines }) as 
     Element.paragraph
         ([ Element.width (Element.px (settings.width - 60))
          , Element.centerX
-         , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+         , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
          , Render.Utility.idAttribute lineNumber
          ]
             ++ highlightAttrs lineNumber numberOfLines settings
@@ -616,7 +616,7 @@ box count acc settings ((ExpressionBlock { lineNumber, numberOfLines, name, args
         [ Element.column
             ([ Background.color Color.lightBlue
              , Element.padding 20
-             , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+             , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
              , Render.Utility.idAttribute lineNumber
              , Element.spacing 18
              ]
@@ -645,7 +645,7 @@ comment count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args }
     in
     Element.column [ Element.spacing 6 ]
         [ Element.el [ Font.bold, Font.color Color.blue ] (Element.text author)
-        , Element.paragraph ([ Font.italic, Font.color Color.blue, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber numberOfLines settings)
+        , Element.paragraph ([ Font.italic, Font.color Color.blue, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines, Render.Utility.idAttribute lineNumber ] ++ highlightAttrs lineNumber numberOfLines settings)
             (renderWithDefault "| comment" count acc settings (getExprs block))
         ]
 
@@ -659,7 +659,7 @@ quotation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args
         [ Element.paragraph
             ([ Font.italic
              , leftPadding settings.leftIndentation
-             , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+             , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
              , Render.Utility.idAttribute lineNumber
              ]
                 ++ highlightAttrs lineNumber numberOfLines settings
@@ -684,17 +684,17 @@ bibitem count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args }
             , Element.width (Element.px 34)
             ]
             (Element.text label)
-        , Element.paragraph ([ Element.paddingEach { left = 25, right = 0, top = 0, bottom = 0 }, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ] ++ highlightAttrs lineNumber numberOfLines settings)
+        , Element.paragraph ([ Element.paddingEach { left = 25, right = 0, top = 0, bottom = 0 }, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ] ++ highlightAttrs lineNumber numberOfLines settings)
             (renderWithDefault "bibitem" count acc settings (getExprs block))
         ]
 
 
 highlightAttrs firstLineNumber numberOfLines settings =
     if String.fromInt firstLineNumber == settings.selectedId then
-        [ Render.Utility.sendLineNumberOnClick firstLineNumber (firstLineNumber + numberOfLines), Background.color (Element.rgb 0.8 0.8 1.0) ]
+        [ Render.Utility.rightLeftSyncHelper firstLineNumber (firstLineNumber + numberOfLines), Background.color (Element.rgb 0.8 0.8 1.0) ]
 
     else
-        [ Render.Utility.sendLineNumberOnClick firstLineNumber (firstLineNumber + numberOfLines) ]
+        [ Render.Utility.rightLeftSyncHelper firstLineNumber (firstLineNumber + numberOfLines) ]
 
 
 renderIFrame : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
@@ -729,7 +729,7 @@ renderIFrame count acc settings ((ExpressionBlock { lineNumber, numberOfLines, p
                             ""
             in
             Element.column
-                [ Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+                [ Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
                 , Render.Utility.idAttribute lineNumber
                 , Element.width (Element.px w)
                 ]
@@ -794,7 +794,7 @@ renderCode count acc settings ((ExpressionBlock { lineNumber, numberOfLines, arg
 
         --, Element.spacing 8
         , Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+        , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
         , Render.Utility.idAttribute lineNumber
         ]
         (case List.head args of
@@ -809,7 +809,7 @@ renderCode count acc settings ((ExpressionBlock { lineNumber, numberOfLines, arg
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderVerse _ _ _ ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
     Element.column
-        [ Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+        [ Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
         , Render.Utility.idAttribute lineNumber
         ]
         (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block))))
@@ -883,7 +883,7 @@ renderVerbatim _ _ _ ((ExpressionBlock { lineNumber, numberOfLines, args }) as b
             ]
         , Element.spacing 8
         , Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Render.Utility.sendLineNumberOnClick lineNumber numberOfLines
+        , Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
         , Render.Utility.idAttribute lineNumber
         ]
         (case List.head args of
@@ -928,7 +928,7 @@ item count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args }) a
             , leftPadding settings.leftIndentation
             ]
             (Element.text label)
-        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ]
             (renderWithDefault "| item" count acc settings (getExprs block))
         ]
 
@@ -979,7 +979,7 @@ numbered count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args 
             , leftPadding settings.leftRightIndentation
             ]
             (Element.text (label ++ ". "))
-        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ]
             (renderWithDefault "| numbered" count acc settings (getExprs block))
         ]
 
@@ -995,7 +995,7 @@ desc count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args }) a
     in
     Element.row ([ Element.alignTop, Render.Utility.idAttribute lineNumber, vspace 0 settings.topMarginForChildren ] ++ highlightAttrs lineNumber numberOfLines settings)
         [ Element.el [ Font.bold, Element.alignTop, Element.width (Element.px 100) ] (Element.text label)
-        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.sendLineNumberOnClick lineNumber numberOfLines ]
+        , Element.paragraph [ leftPadding settings.leftIndentation, Render.Utility.rightLeftSyncHelper lineNumber numberOfLines ]
             (renderWithDefault "| desc" count acc settings (getExprs block))
         ]
 

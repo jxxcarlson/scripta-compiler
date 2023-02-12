@@ -106,7 +106,7 @@ render count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args })
     in
     Element.column
         [ Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Render.Utility.sendLineNumberOnClick lineNumber (lineNumber + numberOfLines)
+        , Render.Utility.rightLeftSyncHelper lineNumber (lineNumber + numberOfLines)
         , Render.Utility.idAttribute lineNumber
         ]
         (renderTable extendedFormatList parsedCells)

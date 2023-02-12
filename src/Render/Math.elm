@@ -48,8 +48,8 @@ displayedMath count acc settings ((ExpressionBlock { id, args, lineNumber, numbe
                 |> List.filter (\line -> line /= "")
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
     in
-    Element.column ([ leftPadding ] ++ Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines)
-        [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
+    Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
+        [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
 
 
 getContent : ExpressionBlock -> String
@@ -81,10 +81,8 @@ equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, a
     in
     Element.column []
         [ Element.row
-            ([ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ]
-                ++ Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines
-            )
-            [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode content)
+            (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ])
+            [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode content)
             , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
@@ -162,8 +160,8 @@ aligned_ count acc settings args lineNumber numberOfLines id str =
         content =
             String.join "\n" adjustedLines
     in
-    Element.column (Render.Utility.rightLeftSyncHelper id settings lineNumber numberOfLines)
-        [ Element.el (Render.Utility.leftRightSyncHelper args) (mathText count w id DisplayMathMode content) ]
+    Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
+        [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode content) ]
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg

@@ -2,7 +2,6 @@ module Render.Utility exposing
     ( elementAttribute
     , getArg
     , getVerbatimContent
-    , highlightElement
     , hspace
     , idAttribute
     , internalLink
@@ -10,7 +9,6 @@ module Render.Utility exposing
     , leftRightSyncHelper
     , makeId
     , rightLeftSyncHelper
-    , sendLineNumberOnClick
     , textWidth
     , vspace
     )
@@ -27,26 +25,25 @@ import Maybe.Extra
 import Parser.Block
 import Parser.Expr
 import Render.Msg exposing (MarkupMsg(..))
-import Render.Settings
 import Utility
 
 
-rightLeftSyncHelper : String -> Render.Settings.Settings -> Int -> Int -> List (Element.Attribute MarkupMsg)
-rightLeftSyncHelper id settings lineNumber numberOfLines =
-    if id == settings.selectedId then
-        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding, Background.color (Element.rgb 0.8 0.8 1.0) ]
 
-    else
-        [ Events.onClick (SendLineNumber { begin = lineNumber, end = lineNumber + numberOfLines }), leftPadding ]
+-- SYNC HELPERS
 
 
-leftRightSyncHelper : List String -> List (Element.Attr () msg)
-leftRightSyncHelper args =
+rightLeftSyncHelper : Int -> Int -> Element.Attribute MarkupMsg
+rightLeftSyncHelper firstLineNumber numberOfLines =
+    Events.onClick (SendLineNumber { begin = firstLineNumber, end = firstLineNumber + numberOfLines })
+
+
+leftRightSyncHelper : List String -> List (Element.Attr () msg) -> List (Element.Attr () msg)
+leftRightSyncHelper args attrs =
     if List.member "highlight" args then
-        Background.color (Element.rgb 0.85 0.85 1.0) :: [ Element.centerX ]
+        Background.color (Element.rgb 0.85 0.85 1.0) :: attrs
 
     else
-        [ Element.centerX ]
+        attrs
 
 
 textWidth : String -> Float
@@ -144,11 +141,6 @@ getVerbatimContent (Parser.Block.ExpressionBlock { content }) =
             ""
 
 
-sendLineNumberOnClick : Int -> Int -> Element.Attribute MarkupMsg
-sendLineNumberOnClick firstLineNumber numberOfLines =
-    Events.onClick (SendLineNumber { begin = firstLineNumber, end = firstLineNumber + numberOfLines })
-
-
 idAttribute : Int -> Element.Attribute msg
 idAttribute k =
     elementAttribute "id" (String.fromInt k)
@@ -212,15 +204,6 @@ pairFromList strings =
 elementAttribute : String -> String -> Element.Attribute msg
 elementAttribute key value =
     Element.htmlAttribute (Html.Attributes.attribute key value)
-
-
-highlightElement : Int -> Int -> String -> String -> List (Element.Attribute MarkupMsg)
-highlightElement firstLineNumber lastLineNumber id selectedId =
-    if id == selectedId then
-        [ Events.onClick (SendLineNumber { begin = firstLineNumber, end = lastLineNumber }), Background.color (Element.rgb 0.8 0.8 1.0) ]
-
-    else
-        [ Events.onClick (SendLineNumber { begin = firstLineNumber, end = lastLineNumber }) ]
 
 
 leftPadding =
