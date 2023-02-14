@@ -49,7 +49,7 @@ displayedMath count acc settings ((ExpressionBlock { id, args, lineNumber, numbe
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
     in
     Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
-        [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
+        [ Element.el (Render.Utility.highlighter args [ Element.centerX ]) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
 
 
 getContent : ExpressionBlock -> String
@@ -65,6 +65,8 @@ getContent (ExpressionBlock { content }) =
 equation : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, error, properties }) as block) =
     let
+        --_ =
+        --    Debug.log "equation (id, selectedId)" ( id, settings.selectedId )
         w =
             String.fromInt settings.width ++ "px"
 
@@ -82,7 +84,7 @@ equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, a
     Element.column []
         [ Element.row
             (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ])
-            [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode content)
+            [ Element.el (Render.Utility.highlightIfIdSelected id settings (Render.Utility.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content)
             , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
@@ -161,7 +163,7 @@ aligned_ count acc settings args lineNumber numberOfLines id str =
             String.join "\n" adjustedLines
     in
     Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
-        [ Element.el (Render.Utility.leftRightSyncHelper args [ Element.centerX ]) (mathText count w id DisplayMathMode content) ]
+        [ Element.el (Render.Utility.highlightIfIdSelected id settings (Render.Utility.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content) ]
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg

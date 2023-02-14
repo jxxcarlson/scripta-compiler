@@ -107,7 +107,7 @@ image2 _ _ settings (ExpressionBlock { lineNumber, numberOfLines, id, args, prop
         figureLabel =
             Element.el
                 (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
-                    :: Render.Utility.leftRightSyncHelper args [ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
+                    :: Render.Utility.highlighter args [ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
                 )
                 (Element.el [ Element.centerX ] (Element.text label))
 
@@ -245,7 +245,7 @@ quiver _ _ settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, pro
                     { src = params.url, description = desc }
                 , Element.el
                     (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
-                        :: Render.Utility.leftRightSyncHelper args [ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
+                        :: Render.Utility.highlighter args [ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
                     )
                     (Element.text desc)
                 ]

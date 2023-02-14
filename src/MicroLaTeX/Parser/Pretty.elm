@@ -111,10 +111,6 @@ printLineNumber (Parser.Block.ExpressionBlock data) =
 
 printBlock : Parser.Block.ExpressionBlock -> String
 printBlock ((Parser.Block.ExpressionBlock data) as block) =
-    let
-        _ =
-            Debug.log "Lines" data.numberOfLines
-    in
     (case Parser.Block.getBlockType block of
         Parser.Block.Paragraph ->
             printLineNumber block ++ (block |> Parser.Block.getContent |> printExprs) ++ "\n"

@@ -2,11 +2,12 @@ module Render.Utility exposing
     ( elementAttribute
     , getArg
     , getVerbatimContent
+    , highlightIfIdSelected
+    , highlighter
     , hspace
     , idAttribute
     , internalLink
     , keyValueDict
-    , leftRightSyncHelper
     , makeId
     , rightLeftSyncHelper
     , textWidth
@@ -25,6 +26,7 @@ import Maybe.Extra
 import Parser.Block
 import Parser.Expr
 import Render.Msg exposing (MarkupMsg(..))
+import Render.Settings
 import Utility
 
 
@@ -37,17 +39,45 @@ rightLeftSyncHelper firstLineNumber numberOfLines =
     Events.onClick (SendLineNumber { begin = firstLineNumber, end = firstLineNumber + numberOfLines })
 
 
-leftRightSyncHelper : List String -> List (Element.Attr () msg) -> List (Element.Attr () msg)
-leftRightSyncHelper args attrs =
+highlighter : List String -> List (Element.Attr () msg) -> List (Element.Attr () msg)
+highlighter args attrs =
     if List.member "highlight" args then
-        Background.color (Element.rgb 0.85 0.85 1.0) :: attrs
+        Background.color selectedColor :: attrs
 
     else
         attrs
 
 
+highlightIfIdSelected : String -> Render.Settings.Settings -> List (Element.Attr () msg) -> List (Element.Attr () msg)
+highlightIfIdSelected id settings attrs =
+    if id == settings.selectedId then
+        Background.color selectedColor :: attrs
+
+    else
+        attrs
+
+
+selectedColor : Element.Color
+selectedColor =
+    Element.rgb 0.9 0.9 1.0
+
+
 textWidth : String -> Float
 textWidth str_ =
+    if String.contains "\\\\" str_ then
+        str_
+            |> String.split "\\\\"
+            |> List.map basicTextWidth
+            |> List.maximum
+            -- TODO: is 30.0 the correct value?
+            |> Maybe.withDefault 30.0
+
+    else
+        basicTextWidth str_
+
+
+basicTextWidth : String -> Float
+basicTextWidth str_ =
     let
         -- \\[a-z]*([^a-z])
         str =

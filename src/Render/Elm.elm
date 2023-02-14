@@ -633,6 +633,7 @@ eqref acc exprList =
     Element.link
         [ Font.color (Element.rgb 0 0 0.7)
         , Events.onClick (SelectId id)
+        , Events.onClick (HighlightId id)
         ]
         { url = Utility.internalLink id
         , label = Element.paragraph [] [ Element.text ("(" ++ val ++ ")") ]
