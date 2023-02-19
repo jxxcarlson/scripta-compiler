@@ -60,7 +60,15 @@ toExpressionBlock lang parse { name, args, properties, indent, error, lineNumber
                             List.length content
 
                         _ ->
-                            List.length content + 1
+                            case name of
+                                Just "item" ->
+                                    List.length content - 1
+
+                                Just "numbered" ->
+                                    List.length content - 1
+
+                                _ ->
+                                    List.length content + 1
 
                 _ ->
                     List.length content
