@@ -52,7 +52,18 @@ toExpressionBlock lang parse { name, args, properties, indent, error, lineNumber
         , properties = properties
         , indent = indent
         , lineNumber = lineNumber
-        , numberOfLines = List.length content
+        , numberOfLines =
+            case lang of
+                Scripta.Language.MicroLaTeXLang ->
+                    case blockType_ of
+                        Paragraph ->
+                            List.length content
+
+                        _ ->
+                            List.length content + 1
+
+                _ ->
+                    List.length content
         , id = String.fromInt lineNumber
         , tag = Compiler.Util.getItem lang "label" sourceText
         , blockType = blockType_
