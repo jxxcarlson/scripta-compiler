@@ -309,23 +309,30 @@ section count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args, 
     -- level 1 is reserved for titles
     let
         headingLevel =
-            case List.head args of
-                Nothing ->
+            case args of
+                n :: [] ->
+                    if n == "-" then
+                        2
+
+                    else
+                        String.toFloat n |> Maybe.withDefault 2 |> (\x -> x + 1)
+
+                n :: "-" :: [] ->
+                    String.toFloat n |> Maybe.withDefault 2 |> (\x -> x + 1)
+
+                _ ->
                     3
 
-                Just level ->
-                    String.toFloat level |> Maybe.withDefault 2 |> (\x -> x + 1)
+        fontSize =
+            settings.maxHeadingFontSize / sqrt headingLevel |> round
 
         sectionNumber =
-            case List.Extra.getAt 1 args of
-                Just "-" ->
+            case args of
+                "-" :: [] ->
                     Element.none
 
                 _ ->
                     Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
-
-        fontSize =
-            settings.maxHeadingFontSize / sqrt headingLevel |> round
 
         exprs =
             getExprs block
