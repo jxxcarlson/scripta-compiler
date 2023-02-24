@@ -10,6 +10,7 @@ import Parser.Expr exposing (Expr)
 import Render.Elm
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
+import Render.Sync
 import Render.Utility
 import Utility
 
@@ -106,7 +107,7 @@ render count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args })
     in
     Element.column
         [ Element.paddingEach { left = 24, right = 0, top = 0, bottom = 0 }
-        , Render.Utility.rightLeftSyncHelper lineNumber (lineNumber + numberOfLines)
+        , Render.Sync.rightLeftSyncHelper lineNumber (lineNumber + numberOfLines)
         , Render.Utility.idAttribute lineNumber
         ]
         (renderTable extendedFormatList parsedCells)

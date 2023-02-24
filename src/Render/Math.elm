@@ -10,8 +10,6 @@ import Compiler.Acc exposing (Accumulator)
 import Dict exposing (Dict)
 import Either exposing (Either(..))
 import Element exposing (Element)
-import Element.Background as Background
-import Element.Events as Events
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -22,6 +20,7 @@ import Parser.MathMacro
 import Parser.TextMacro
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
+import Render.Sync
 import Render.Utility
 
 
@@ -48,8 +47,8 @@ displayedMath count acc settings ((ExpressionBlock { id, args, lineNumber, numbe
                 |> List.filter (\line -> line /= "")
                 |> List.map (Parser.MathMacro.evalStr acc.mathMacroDict)
     in
-    Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
-        [ Element.el (Render.Utility.highlighter args [ Element.centerX ]) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
+    Element.column (Render.Sync.rightLeftSyncHelper lineNumber numberOfLines :: [])
+        [ Element.el (Render.Sync.highlighter args [ Element.centerX ]) (mathText count w id DisplayMathMode (filteredLines |> String.join "\n")) ]
 
 
 getContent : ExpressionBlock -> String
@@ -83,15 +82,11 @@ equation count acc settings ((ExpressionBlock { lineNumber, numberOfLines, id, a
     in
     Element.column []
         [ Element.row
-            (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ])
-            [ Element.el (Render.Utility.highlightIfIdSelected id settings (Render.Utility.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content)
+            (Render.Sync.rightLeftSyncHelper lineNumber numberOfLines :: [ Element.width (Element.px settings.width), Render.Utility.elementAttribute "id" id ])
+            [ Element.el (Render.Sync.highlightIfIdSelected id settings (Render.Sync.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content)
             , putLabel settings.display content properties settings.longEquationLimit
             ]
         ]
-
-
-
--- Render.Utility.textWidth
 
 
 putLabel display content properties longEquationLimit_ =
@@ -162,8 +157,8 @@ aligned_ count acc settings args lineNumber numberOfLines id str =
         content =
             String.join "\n" adjustedLines
     in
-    Element.column (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines :: [])
-        [ Element.el (Render.Utility.highlightIfIdSelected id settings (Render.Utility.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content) ]
+    Element.column (Render.Sync.rightLeftSyncHelper lineNumber numberOfLines :: [])
+        [ Element.el (Render.Sync.highlightIfIdSelected id settings (Render.Sync.highlighter args [ Element.centerX ])) (mathText count w id DisplayMathMode content) ]
 
 
 mathText : Int -> String -> String -> DisplayMode -> String -> Element msg

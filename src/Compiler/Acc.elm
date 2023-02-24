@@ -9,7 +9,6 @@ module Compiler.Acc exposing
 
 import Compiler.ASTTools
 import Compiler.TextMacro exposing (Macro)
-import Compiler.Util
 import Compiler.Vector as Vector exposing (Vector)
 import Dict exposing (Dict)
 import Either exposing (Either(..))
@@ -21,7 +20,6 @@ import Parser.Forest exposing (Forest)
 import Parser.MathMacro
 import Parser.Meta exposing (Meta)
 import Parser.Settings
-import Render.Utility
 import Scripta.Language exposing (Language)
 import Tree exposing (Tree)
 import Utility
@@ -646,7 +644,7 @@ updateWithVerbatimBlock name_ args tag_ id accumulator =
             Maybe.withDefault "---" name_
 
         dict =
-            Render.Utility.keyValueDict args
+            Utility.keyValueDict args
 
         tag =
             Dict.get "label" dict |> Maybe.withDefault tag_

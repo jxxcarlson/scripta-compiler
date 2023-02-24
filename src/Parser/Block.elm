@@ -1,6 +1,6 @@
 module Parser.Block exposing
     ( BlockType(..), ExpressionBlock(..)
-    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getLineNumber, getName, getType, getVerbatimContent, setLineNumber, setName
+    , ExpressionBlockData, RawBlock, condenseUrls, empty, empty_, getBlockType, getContent, getExprs, getLineNumber, getName, getType, getVerbatimContent, setLineNumber, setName
     )
 
 {-| Source text is parsed into a tree of IntermediateBlocks, where the tree
@@ -18,7 +18,7 @@ consumes trees of ExpressionBlocks to produce Html.
 -}
 
 import Dict exposing (Dict)
-import Either exposing (Either)
+import Either exposing (Either(..))
 import Parser.Expr exposing (Expr)
 
 
@@ -64,6 +64,16 @@ type ExpressionBlock
         , sourceText : String
         , error : Maybe { error : String }
         }
+
+
+getExprs : ExpressionBlock -> List Expr
+getExprs (ExpressionBlock { content }) =
+    case content of
+        Left _ ->
+            []
+
+        Right stuff ->
+            stuff
 
 
 getLineNumber : ExpressionBlock -> Int

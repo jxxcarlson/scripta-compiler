@@ -1,65 +1,35 @@
 module Render.Utility exposing
-    ( elementAttribute
+    ( argString
+    , elementAttribute
     , getArg
     , getVerbatimContent
-    , highlightIfIdSelected
-    , highlighter
     , hspace
     , idAttribute
     , internalLink
-    , keyValueDict
+    , leftPadding
     , makeId
-    , rightLeftSyncHelper
     , textWidth
     , vspace
     )
 
 import Compiler.ASTTools
 import Dict exposing (Dict)
-import Either
-import Element exposing (paddingEach)
-import Element.Background as Background
-import Element.Events as Events
+import Either exposing (Either(..))
+import Element exposing (Element, paddingEach)
 import Html.Attributes
 import List.Extra
-import Maybe.Extra
-import Parser.Block
-import Parser.Expr
-import Render.Msg exposing (MarkupMsg(..))
-import Render.Settings
+import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
+import Parser.Expr exposing (Expr)
 import Utility
 
 
-
--- SYNC HELPERS
-
-
-rightLeftSyncHelper : Int -> Int -> Element.Attribute MarkupMsg
-rightLeftSyncHelper firstLineNumber numberOfLines =
-    Events.onClick (SendLineNumber { begin = firstLineNumber, end = firstLineNumber + numberOfLines })
+argString : List String -> String
+argString args =
+    List.filter (\arg -> not <| String.contains "label:" arg) args |> String.join " "
 
 
-highlighter : List String -> List (Element.Attr () msg) -> List (Element.Attr () msg)
-highlighter args attrs =
-    if List.member "highlight" args then
-        Background.color selectedColor :: attrs
-
-    else
-        attrs
-
-
-highlightIfIdSelected : String -> Render.Settings.Settings -> List (Element.Attr () msg) -> List (Element.Attr () msg)
-highlightIfIdSelected id settings attrs =
-    if id == settings.selectedId then
-        Background.color selectedColor :: attrs
-
-    else
-        attrs
-
-
-selectedColor : Element.Color
-selectedColor =
-    Element.rgb 0.9 0.9 1.0
+leftPadding p =
+    Element.paddingEach { left = p, right = 0, top = 0, bottom = 0 }
 
 
 textWidth : String -> Float
@@ -212,29 +182,6 @@ makeSlug str =
     str |> String.toLower |> String.replace " " ""
 
 
-keyValueDict : List String -> Dict String String
-keyValueDict strings_ =
-    List.map (String.split ":") strings_
-        |> List.map (List.map String.trim)
-        |> List.map pairFromList
-        |> Maybe.Extra.values
-        |> Dict.fromList
-
-
-pairFromList : List String -> Maybe ( String, String )
-pairFromList strings =
-    case strings of
-        [ x, y ] ->
-            Just ( x, y )
-
-        _ ->
-            Nothing
-
-
 elementAttribute : String -> String -> Element.Attribute msg
 elementAttribute key value =
     Element.htmlAttribute (Html.Attributes.attribute key value)
-
-
-leftPadding =
-    Element.paddingEach { left = 45, right = 0, top = 0, bottom = 0 }

@@ -9,6 +9,7 @@ import Parser.Expr exposing (Expr)
 import Render.Export.Util
 import Render.Settings exposing (Settings)
 import Render.Utility
+import Utility
 
 
 exportBlock : Settings -> ExpressionBlock -> String
@@ -127,7 +128,7 @@ imageParameters settings body =
             (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) remainingArguments) |> String.join " "
 
         dict =
-            Render.Utility.keyValueDict keyValueStrings
+            Utility.keyValueDict keyValueStrings
 
         description =
             Dict.get "caption" dict |> Maybe.withDefault ""

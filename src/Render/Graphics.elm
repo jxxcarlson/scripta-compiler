@@ -10,8 +10,10 @@ import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
+import Render.Sync
 import Render.Utility
 import SvgParser
+import Utility
 
 
 red : Element.Color
@@ -106,8 +108,8 @@ image2 _ _ settings (ExpressionBlock { lineNumber, numberOfLines, id, args, prop
 
         figureLabel =
             Element.el
-                (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
-                    :: Render.Utility.highlighter args [ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
+                (Render.Sync.rightLeftSyncHelper lineNumber numberOfLines
+                    :: Render.Sync.highlighter args [ Element.width params.width, Render.Utility.elementAttribute "id" id, Element.paddingXY 12 4 ]
                 )
                 (Element.el [ Element.centerX ] (Element.text label))
 
@@ -244,8 +246,8 @@ quiver _ _ settings ((ExpressionBlock { lineNumber, numberOfLines, id, args, pro
                 [ Element.image [ Element.width qArgs.width, params.placement ]
                     { src = params.url, description = desc }
                 , Element.el
-                    (Render.Utility.rightLeftSyncHelper lineNumber numberOfLines
-                        :: Render.Utility.highlighter args [ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
+                    (Render.Sync.rightLeftSyncHelper lineNumber numberOfLines
+                        :: Render.Sync.highlighter args [ params.placement, params.placement, Element.paddingXY 12 4, Render.Utility.elementAttribute "id" id ]
                     )
                     (Element.text desc)
                 ]
@@ -281,7 +283,7 @@ imageParameters settings arguments =
             (captionLeadString :: List.filter (\s -> not (String.contains ":" s)) remainingArguments) |> String.join " "
 
         dict =
-            Render.Utility.keyValueDict keyValueStrings
+            Utility.keyValueDict keyValueStrings
 
         description : String
         description =
