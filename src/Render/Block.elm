@@ -328,12 +328,27 @@ section count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args, 
 
         sectionNumber =
             case args of
-                "-" :: [] ->
+                n :: [] ->
+                    if n == "-" then
+                        Element.none
+
+                    else
+                        Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
+
+                _ :: "-" :: [] ->
                     Element.none
 
                 _ ->
-                    Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
+                    Element.none
 
+        --case args of
+        --    "-" :: [] ->
+        --        Element.none
+        --
+        --
+        --
+        --    _ ->
+        --        Element.el [ Font.size fontSize ] (Element.text (blockLabel properties ++ ". "))
         exprs =
             getExprs block
     in
