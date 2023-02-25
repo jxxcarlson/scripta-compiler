@@ -745,7 +745,7 @@ renderVerse _ _ _ ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
     Element.column
         (verbatimBlockAttributes lineNumber numberOfLines [])
         (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block)))
-            |> padFirst 10
+            |> padFirst 9
         )
 
 
