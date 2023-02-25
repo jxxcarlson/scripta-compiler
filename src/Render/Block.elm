@@ -743,10 +743,27 @@ renderCode count acc settings ((ExpressionBlock { lineNumber, numberOfLines, arg
 renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
 renderVerse _ _ _ ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
     Element.column
-        [ Render.Sync.rightLeftSyncHelper lineNumber numberOfLines
-        , Render.Utility.idAttribute lineNumber
-        ]
-        (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block))))
+        (verbatimBlockAttributes lineNumber numberOfLines [])
+        (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block)))
+            |> padFirst 10
+        )
+
+
+padFirst : Int -> List (Element MarkupMsg) -> List (Element MarkupMsg)
+padFirst leftPadding elements =
+    case elements of
+        [] ->
+            []
+
+        first :: rest ->
+            Element.el [ Render.Utility.leftPadding leftPadding ] first :: rest
+
+
+verbatimBlockAttributes lineNumber numberOfLines attrs =
+    [ Render.Sync.rightLeftSyncHelper lineNumber numberOfLines
+    , Render.Utility.idAttribute lineNumber
+    ]
+        ++ attrs
 
 
 renderVerbatimLine : String -> String -> Element msg
