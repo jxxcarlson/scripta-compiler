@@ -1,4 +1,4 @@
-module Compiler.AbstractDifferentialParser exposing (EditRecord, UpdateFunctions, differentialParser, init, update)
+module Compiler.AbstractDifferentialParser exposing (EditRecord, InitialData, UpdateFunctions, differentialParser, init, update)
 
 import Compiler.Acc
 import Compiler.Differ

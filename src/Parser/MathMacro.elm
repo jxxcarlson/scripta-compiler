@@ -1,5 +1,8 @@
 module Parser.MathMacro exposing
-    ( MathMacroDict
+    ( Deco(..)
+    , MacroBody(..)
+    , MathExpr(..)
+    , MathMacroDict
     , evalStr
     , makeMacroDict
     , parse
