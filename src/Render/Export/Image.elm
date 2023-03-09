@@ -16,7 +16,7 @@ exportBlock : Settings -> ExpressionBlock -> String
 exportBlock settings ((ExpressionBlock { content, args }) as block) =
     let
         params =
-            imageParameters3 settings block
+            imageParametersForBlock settings block
 
         options =
             [ params.fractionalWidth, ",keepaspectratio" ] |> String.join ""
@@ -190,8 +190,8 @@ imageParameters settings body =
     { caption = caption, description = description, placement = placement, width = width, fractionalWidth = fractionalWidth, url = url }
 
 
-imageParameters3 : Render.Settings.Settings -> ExpressionBlock -> ImageParameters
-imageParameters3 settings (ExpressionBlock { content, args, properties }) =
+imageParametersForBlock : Render.Settings.Settings -> ExpressionBlock -> ImageParameters
+imageParametersForBlock settings (ExpressionBlock { content, args, properties }) =
     let
         arguments : List String
         arguments =
@@ -201,7 +201,7 @@ imageParameters3 settings (ExpressionBlock { content, args, properties }) =
             case content of
                 Left str ->
                     --String.replace "https://" "" str
-                    str
+                    str |> Debug.log "@@@@ BLOCK IMG @@@@"
 
                 Right _ ->
                     "bad block"
