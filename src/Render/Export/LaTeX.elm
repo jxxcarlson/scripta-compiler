@@ -51,7 +51,7 @@ export currentTime settings_ ast =
         ++ ("\n\\setcounter{section}{" ++ (counterValue ast |> zeroOrSome |> String.fromInt) ++ "}\n")
         ++ tableofcontents rawBlockNames
         ++ "\n\n"
-        ++ rawExport settings_ ast
+        ++ (rawExport settings_ ast |> Debug.log "@@@@ RAW @@@@")
         ++ "\n\n\\end{document}\n"
 
 

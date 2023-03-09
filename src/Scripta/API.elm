@@ -4,6 +4,7 @@ module Scripta.API exposing
     , fileNameForExport, packageNames, prepareContentForExport, getImageUrls, banner, getBlockNames, rawExport, encodeForPDF
     , Msg, SyntaxTree
     , matchingIdsInAST
+    , pdfFileNameToGet
     )
 
 {-| Scripta.API provides the functions you will need for an application
@@ -257,6 +258,17 @@ fileNameForExport ast =
         |> (\s -> s ++ ".tex")
 
 
+pdfFileNameToGet : Forest ExpressionBlock -> String
+pdfFileNameToGet ast =
+    ast
+        |> ASTTools.title
+        |> compressWhitespace
+        |> String.replace " " "-"
+        |> String.toLower
+        |> removeNonAlphaNum
+        |> (\s -> s ++ ".pdf")
+
+
 packageDict =
     Dict.fromList [ ( "quiver", "quiver.sty" ) ]
 
@@ -317,11 +329,14 @@ encodeForPDF currentTime settings forest =
 {-| -}
 getImageUrls : Forest ExpressionBlock -> List String
 getImageUrls syntaxTree =
-    getImageUrls1 syntaxTree ++ getImageUrls2 syntaxTree |> List.sort |> List.Extra.unique
+    getImageUrlsFromExpressions syntaxTree
+        ++ getImageUrlsFromBlocks syntaxTree
+        |> List.sort
+        |> List.Extra.unique
 
 
-getImageUrls1 : Forest ExpressionBlock -> List String
-getImageUrls1 syntaxTree =
+getImageUrlsFromExpressions : Forest ExpressionBlock -> List String
+getImageUrlsFromExpressions syntaxTree =
     syntaxTree
         |> List.map Tree.flatten
         |> List.concat
@@ -334,8 +349,8 @@ getImageUrls1 syntaxTree =
         |> Maybe.Extra.values
 
 
-getImageUrls2 : Forest ExpressionBlock -> List String
-getImageUrls2 syntaxTree =
+getImageUrlsFromBlocks : Forest ExpressionBlock -> List String
+getImageUrlsFromBlocks syntaxTree =
     syntaxTree
         |> List.map Tree.flatten
         |> List.concat

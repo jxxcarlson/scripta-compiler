@@ -40,7 +40,7 @@ export s exprs =
             Render.Export.Util.getOneArg exprs |> String.words
 
         params =
-            imageParameters s exprs
+            imageParameters s exprs |> Debug.log "@@@@ PARAMS @@@@"
 
         options =
             [ params.width |> fixWidth, ",keepaspectratio" ] |> String.join ""
@@ -51,10 +51,10 @@ export s exprs =
 
         Just url_ ->
             if params.placement == "C" then
-                exportCenteredFigure (normalizeUrl url_) options params.caption
+                exportCenteredFigure url_ options params.caption
 
             else
-                exportWrappedFigure params.placement (normalizeUrl url_) params.fractionalWidth params.caption
+                exportWrappedFigure params.placement url_ params.fractionalWidth params.caption
 
 
 normalizeUrl : String -> String
@@ -107,7 +107,7 @@ imageParameters settings body =
             Compiler.ASTTools.exprListToStringList body |> List.map String.words |> List.concat
 
         url =
-            List.head arguments |> Maybe.withDefault "no-image"
+            (List.head arguments |> Maybe.withDefault "no-image") |> Debug.log "@@@@ URL impararams @@@@"
 
         remainingArguments =
             List.drop 1 arguments
@@ -200,7 +200,8 @@ imageParameters3 settings (ExpressionBlock { content, args, properties }) =
         url =
             case content of
                 Left str ->
-                    String.replace "https://" "" str
+                    --String.replace "https://" "" str
+                    str
 
                 Right _ ->
                     "bad block"
