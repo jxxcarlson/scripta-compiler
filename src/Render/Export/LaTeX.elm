@@ -51,7 +51,7 @@ export currentTime settings_ ast =
         ++ ("\n\\setcounter{section}{" ++ (counterValue ast |> zeroOrSome |> String.fromInt) ++ "}\n")
         ++ tableofcontents rawBlockNames
         ++ "\n\n"
-        ++ (rawExport settings_ ast |> Debug.log "@@@@ RAW @@@@")
+        ++ rawExport settings_ ast
         ++ "\n\n\\end{document}\n"
 
 
@@ -936,10 +936,10 @@ macro1 name arg =
     else
         case Dict.get name functionDict of
             Nothing ->
-                "\\" ++ name ++ "{" ++ mapChars2 (String.trimLeft arg) ++ "}"
+                "\\" ++ unalias name ++ "{" ++ mapChars2 (String.trimLeft arg) ++ "}"
 
-            Just realName ->
-                "\\" ++ realName ++ "{" ++ mapChars2 (String.trimLeft arg) ++ "}"
+            Just fName ->
+                "\\" ++ fName ++ "{" ++ mapChars2 (String.trimLeft arg) ++ "}"
 
 
 exportExprList : Settings -> List Expr -> String
@@ -965,13 +965,33 @@ exportExpr settings expr =
                         f settings exps_
 
                     Nothing ->
-                        "\\" ++ name ++ (List.map (encloseWithBraces << exportExpr settings) exps_ |> String.join "")
+                        "\\" ++ unalias name ++ (List.map (encloseWithBraces << exportExpr settings) exps_ |> String.join "")
 
         Text str _ ->
             mapChars2 str
 
         Verbatim name body _ ->
             renderVerbatim name body
+
+
+{-| Use this to unalias names
+-}
+unalias : String -> String
+unalias str =
+    case Dict.get str aliases of
+        Nothing ->
+            str
+
+        Just realName_ ->
+            realName_
+
+
+aliases : Dict String String
+aliases =
+    Dict.fromList
+        [ ( "i", "italic" )
+        , ( "b", "bold" )
+        ]
 
 
 encloseWithBraces : String -> String

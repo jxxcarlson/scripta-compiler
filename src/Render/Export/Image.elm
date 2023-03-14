@@ -21,7 +21,7 @@ exportBlock settings ((ExpressionBlock { content, args }) as block) =
         options =
             [ params.fractionalWidth, ",keepaspectratio" ] |> String.join ""
     in
-    exportCenteredFigure (normalizeUrl params.url) options params.caption
+    exportCenteredFigure params.url options params.caption
 
 
 fixWidth : String -> String
@@ -40,7 +40,7 @@ export s exprs =
             Render.Export.Util.getOneArg exprs |> String.words
 
         params =
-            imageParameters s exprs |> Debug.log "@@@@ PARAMS @@@@"
+            imageParameters s exprs
 
         options =
             [ params.width |> fixWidth, ",keepaspectratio" ] |> String.join ""
@@ -55,25 +55,6 @@ export s exprs =
 
             else
                 exportWrappedFigure params.placement url_ params.fractionalWidth params.caption
-
-
-normalizeUrl : String -> String
-normalizeUrl url =
-    if String.contains "i.ibb.co" url then
-        url
-
-    else
-        normalizeUrl_ url
-
-
-normalizeUrl_ : String -> String
-normalizeUrl_ url_ =
-    case url_ |> String.split "/" |> List.Extra.last of
-        Nothing ->
-            url_
-
-        Just url ->
-            url
 
 
 exportCenteredFigure url options caption =
@@ -107,7 +88,7 @@ imageParameters settings body =
             Compiler.ASTTools.exprListToStringList body |> List.map String.words |> List.concat
 
         url =
-            (List.head arguments |> Maybe.withDefault "no-image") |> Debug.log "@@@@ URL impararams @@@@"
+            List.head arguments |> Maybe.withDefault "no-image"
 
         remainingArguments =
             List.drop 1 arguments
@@ -200,8 +181,7 @@ imageParametersForBlock settings (ExpressionBlock { content, args, properties })
         url =
             case content of
                 Left str ->
-                    --String.replace "https://" "" str
-                    str |> Debug.log "@@@@ BLOCK IMG @@@@"
+                    str
 
                 Right _ ->
                     "bad block"

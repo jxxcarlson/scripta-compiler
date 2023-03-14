@@ -32,7 +32,7 @@ import Parser.Meta
 import Parser.Utility
 import Render.Color as Color
 import Render.Data
-import Render.Elm
+import Render.Expression
 import Render.Graphics
 import Render.Math
 import Render.Msg exposing (MarkupMsg(..))
@@ -129,7 +129,7 @@ paragraphContent : Int -> Accumulator -> Settings -> ExpressionBlock -> List (El
 paragraphContent count acc settings (ExpressionBlock { content }) =
     case content of
         Right exprs ->
-            List.map (Render.Elm.render count acc settings) exprs
+            List.map (Render.Expression.render count acc settings) exprs
 
         Left _ ->
             []
@@ -346,7 +346,7 @@ noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
     , outer = []
     , inherit = []
     , head = { format = [ Font.color (Element.rgb255 180 0 0) ], content = [ Element.text <| "No such block:" ++ (args |> String.join " ") ] }
-    , body = { format = [], content = List.map (Render.Elm.render count acc settings) (getExprs block) }
+    , body = { format = [], content = List.map (Render.Expression.render count acc settings) (getExprs block) }
     }
 
 
@@ -365,17 +365,17 @@ renderWithDefault default count acc settings exprs =
         [ Element.el [ Font.color Render.Settings.redColor, Font.size 14 ] (Element.text default) ]
 
     else
-        List.map (Render.Elm.render count acc settings) exprs
+        List.map (Render.Expression.render count acc settings) exprs
 
 
 renderWithDefault2 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault2 _ count acc settings exprs =
-    List.map (Render.Elm.render count acc settings) exprs
+    List.map (Render.Expression.render count acc settings) exprs
 
 
 renderWithDefault3 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault3 _ count acc settings exprs =
-    List.map (Render.Elm.render count acc settings) exprs
+    List.map (Render.Expression.render count acc settings) exprs
 
 
 

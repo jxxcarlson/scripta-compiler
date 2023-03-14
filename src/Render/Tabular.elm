@@ -7,7 +7,7 @@ import List.Extra
 import MicroLaTeX.Parser.Expression
 import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
-import Render.Elm
+import Render.Expression
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings exposing (Settings)
 import Render.Sync
@@ -81,7 +81,7 @@ render count acc settings ((ExpressionBlock { lineNumber, numberOfLines, args })
 
         renderer : Expr -> Element MarkupMsg
         renderer =
-            Render.Elm.render count acc settings
+            Render.Expression.render count acc settings
 
         tableCell : ( Int, Element.Attribute MarkupMsg ) -> List (Element MarkupMsg) -> Element MarkupMsg
         tableCell ( colWidth, fmt ) list =

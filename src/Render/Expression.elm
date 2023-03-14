@@ -1,4 +1,4 @@
-module Render.Elm exposing (render)
+module Render.Expression exposing (render)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
@@ -13,6 +13,7 @@ import Html
 import Html.Attributes
 import List.Extra
 import Maybe.Extra
+import MicroScheme.Interpreter
 import Parser.Expr exposing (Expr(..))
 import Parser.MathMacro
 import Render.Graphics
@@ -67,6 +68,7 @@ markupDict =
         [ ( "bibitem", \_ _ _ exprList -> bibitem exprList )
 
         -- STYLE
+        , ( "scheme", \g acc s exprList -> renderScheme g acc s exprList )
         , ( "strong", \g acc s exprList -> strong g acc s exprList )
         , ( "bold", \g acc s exprList -> strong g acc s exprList )
         , ( "textbf", \g acc s exprList -> strong g acc s exprList )
@@ -420,6 +422,15 @@ par _ _ _ _ =
 
 strong g acc s exprList =
     simpleElement [ Font.bold ] g acc s exprList
+
+
+renderScheme g acc s exprList =
+    let
+        inputText : String
+        inputText =
+            ASTTools.exprListToStringList exprList |> String.join " "
+    in
+    Element.text (MicroScheme.Interpreter.runProgram ";" inputText)
 
 
 var g acc s exprList =

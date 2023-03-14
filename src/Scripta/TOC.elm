@@ -12,7 +12,7 @@ import Parser.Block exposing (ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Parser.Forest exposing (Forest)
 import Render.Block
-import Render.Elm
+import Render.Expression
 import Render.Msg exposing (MarkupMsg(..))
 import Render.Settings
 import Render.Utility
@@ -61,7 +61,7 @@ viewTocItem count acc settings (ExpressionBlock { args, content, lineNumber, pro
 
                 label : Element MarkupMsg
                 label =
-                    Element.paragraph [ tocIndent args ] (sectionNumber :: List.map (Render.Elm.render count acc settings) exprs)
+                    Element.paragraph [ tocIndent args ] (sectionNumber :: List.map (Render.Expression.render count acc settings) exprs)
             in
             Element.el [ Events.onClick (SelectId id) ]
                 (Element.link [ Font.color (Element.rgb 0 0 0.8) ] { url = Render.Utility.internalLink id, label = label })
@@ -108,11 +108,11 @@ prepareTOC maximumLevel count acc settings ast =
 
         title =
             headings.title
-                |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ titleSize, idAttr ])
+                |> (List.map (Render.Expression.render count acc settings) >> Element.paragraph [ titleSize, idAttr ])
 
         subtitle =
             headings.subtitle
-                |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
+                |> (List.map (Render.Expression.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
 
         spaceBelow k =
             Element.el [ Element.paddingEach { bottom = k, top = 0, left = 0, right = 0 } ] (Element.text " ")
@@ -141,11 +141,11 @@ prepareFrontMatter count acc settings ast =
 
         title =
             headings.title
-                |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ titleSize, idAttr ])
+                |> (List.map (Render.Expression.render count acc settings) >> Element.paragraph [ titleSize, idAttr ])
 
         subtitle =
             headings.subtitle
-                |> (List.map (Render.Elm.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
+                |> (List.map (Render.Expression.render count acc settings) >> Element.paragraph [ subtitleSize, Font.color (Element.rgb 0.4 0.4 0.4) ])
     in
     title :: subtitle :: []
 

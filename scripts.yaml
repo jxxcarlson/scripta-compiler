@@ -30,3 +30,7 @@ scripts:
   # vendor: cp -r  /Users/carlson/dev/lamdera/bluesky/scripta-compiler/compiler/* ./compiler/
 
   ssh: ssh root@161.35.125.40
+
+  vendor:
+    - cp /Users/carlson/dev/lamdera/bluesky/elm-scheme/src/MicroScheme/*.elm src/MicroScheme/
+

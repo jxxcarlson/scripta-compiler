@@ -16,7 +16,7 @@ import Parser.Block exposing (BlockType(..), ExpressionBlock(..))
 import Parser.Expr exposing (Expr)
 import Render.Color as Color
 import Render.Data
-import Render.Elm
+import Render.Expression
 import Render.Graphics
 import Render.Helper
 import Render.IFrame
@@ -56,7 +56,7 @@ renderParagraph : Int -> Accumulator -> Settings -> ExpressionBlock -> Element M
 renderParagraph count acc settings (ExpressionBlock { name, indent, args, blockType, content, lineNumber, numberOfLines, id }) =
     case content of
         Right exprs ->
-            List.map (Render.Elm.render count acc settings) exprs
+            List.map (Render.Expression.render count acc settings) exprs
                 |> clickableParagraph lineNumber numberOfLines (selectedColor id settings)
                 |> indentParagraph indent
 
@@ -250,7 +250,7 @@ noSuchOrdinaryBlock : Int -> Accumulator -> Settings -> ExpressionBlock -> Eleme
 noSuchOrdinaryBlock count acc settings ((ExpressionBlock { args }) as block) =
     Element.column [ Element.spacing 4 ]
         [ Element.paragraph [ Font.color (Element.rgb255 180 0 0) ] [ Element.text <| "No such block:" ++ (args |> String.join " ") ]
-        , Element.paragraph [] (List.map (Render.Elm.render count acc settings) (Parser.Block.getExprs block))
+        , Element.paragraph [] (List.map (Render.Expression.render count acc settings) (Parser.Block.getExprs block))
         ]
 
 
@@ -269,12 +269,12 @@ renderWithDefaultWithSize size default count acc settings exprs =
         [ Element.el [ Font.color settings.redColor, Font.size size ] (Element.text default) ]
 
     else
-        List.map (Render.Elm.render count acc settings) exprs
+        List.map (Render.Expression.render count acc settings) exprs
 
 
 renderWithDefault2 : String -> Int -> Accumulator -> Settings -> List Expr -> List (Element MarkupMsg)
 renderWithDefault2 _ count acc settings exprs =
-    List.map (Render.Elm.render count acc settings) exprs
+    List.map (Render.Expression.render count acc settings) exprs
 
 
 
@@ -744,6 +744,13 @@ renderVerse : Int -> Accumulator -> Settings -> ExpressionBlock -> Element Marku
 renderVerse _ _ _ ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
     Element.column
         (verbatimBlockAttributes lineNumber numberOfLines [])
+        (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block))))
+
+
+renderVerse1 : Int -> Accumulator -> Settings -> ExpressionBlock -> Element MarkupMsg
+renderVerse1 _ _ _ ((ExpressionBlock { lineNumber, numberOfLines }) as block) =
+    Element.column
+        (verbatimBlockAttributes lineNumber numberOfLines [ Element.htmlAttribute (Html.Attributes.attribute "whitespace" "pre") ])
         (List.map (renderVerbatimLine "plain") (String.lines (String.trim (Render.Utility.getVerbatimContent block)))
             |> padFirst 9
         )
