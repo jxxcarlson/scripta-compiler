@@ -69,6 +69,7 @@ markupDict =
 
         -- STYLE
         , ( "scheme", \g acc s exprList -> renderScheme g acc s exprList )
+        , ( "button", \g acc s exprList -> renderButton g acc s exprList )
         , ( "strong", \g acc s exprList -> strong g acc s exprList )
         , ( "bold", \g acc s exprList -> strong g acc s exprList )
         , ( "textbf", \g acc s exprList -> strong g acc s exprList )
@@ -431,6 +432,41 @@ renderScheme g acc s exprList =
             ASTTools.exprListToStringList exprList |> String.join " "
     in
     Element.text (MicroScheme.Interpreter.runProgram ";" inputText)
+
+
+renderButton : a -> b -> c -> List Expr -> Element MarkupMsg
+renderButton _ _ _ exprList =
+    let
+        arguments : List String
+        arguments =
+            ASTTools.exprListToStringList exprList
+                |> String.join " "
+                |> String.split ","
+                |> List.map (\item -> String.trim item)
+                |> List.filter (\item -> item /= "")
+    in
+    case arguments of
+        [ labelText, rawMsg ] ->
+            case Dict.get rawMsg msgDict of
+                Nothing ->
+                    Input.button [] { onPress = Just MMNoOp, label = Element.text "Nothing (1)" }
+
+                Just msg ->
+                    Input.button
+                        [ Font.size 14
+                        , Font.color (Element.rgb 1 1 1)
+                        , Element.padding 8
+                        , Background.color (Element.rgb 0.1 0.1 0.9)
+                        ]
+                        { onPress = Just msg, label = Element.text labelText }
+
+        _ ->
+            Input.button [] { onPress = Just MMNoOp, label = Element.text "Nothing (2)" }
+
+
+msgDict : Dict String MarkupMsg
+msgDict =
+    Dict.fromList [ ( "CopyDocument", RequestCopyOfDocument ) ]
 
 
 var g acc s exprList =

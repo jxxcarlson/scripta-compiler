@@ -18,6 +18,8 @@ type MarkupMsg
     | GetPublicDocumentFromAuthor Handling String String
     | GetDocumentWithSlug Handling String
     | ProposeSolution SolutionState
+    | RequestCopyOfDocument
+    | MMNoOp
 
 
 {-| -}

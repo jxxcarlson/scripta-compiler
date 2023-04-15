@@ -87,7 +87,7 @@ parseIFrame str =
 
 
 allowedIFrameSrcList =
-    [ "https://www.desmos.com/calculator/", "https://q.uiver.app/" ]
+    [ "https://www.desmos.com/calculator/", "https://q.uiver.app/", "https://www.youtube.com/embed/" ]
 
 
 validSrc : String -> Bool
