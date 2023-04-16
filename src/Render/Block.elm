@@ -1,4 +1,9 @@
-module Render.Block exposing (render, renderVerbatimBlock)
+module Render.Block exposing
+    ( nonStandardOrdinaryBlocks
+    , nonstandardVerbatimBlocks
+    , render
+    , renderVerbatimBlock
+    )
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
@@ -202,6 +207,10 @@ blockDict =
         ]
 
 
+nonStandardOrdinaryBlocks =
+    [ "box", "set-key", "comment", "runninghead", "banner", "type", "setcounter", "q", "a" ]
+
+
 
 -- IMPORTANT NOTE: all of the verbatim block names listed below
 -- must be present in Parser.PrimitiveLaTeXBlock.verbatimNames
@@ -232,6 +241,10 @@ verbatimDict =
         , ( "include", renderNothing )
         , ( "iframe", Render.IFrame.render )
         ]
+
+
+nonstandardVerbatimBlocks =
+    [ "hide", "svg", "chart", "include", "iframe" ]
 
 
 
