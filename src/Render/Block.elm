@@ -1,6 +1,6 @@
 module Render.Block exposing
-    ( nonStandardOrdinaryBlocks
-    , nonstandardVerbatimBlocks
+    ( nonExportableOrdinaryBlocks
+    , nonExportableVerbatimBlocks
     , render
     , renderVerbatimBlock
     )
@@ -207,7 +207,7 @@ blockDict =
         ]
 
 
-nonStandardOrdinaryBlocks =
+nonExportableOrdinaryBlocks =
     [ "box", "set-key", "comment", "runninghead", "banner", "type", "setcounter", "q", "a" ]
 
 
@@ -243,7 +243,7 @@ verbatimDict =
         ]
 
 
-nonstandardVerbatimBlocks =
+nonExportableVerbatimBlocks =
     [ "hide", "svg", "chart", "include", "iframe" ]
 
 

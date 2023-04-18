@@ -19,6 +19,7 @@ type MarkupMsg
     | GetDocumentWithSlug Handling String
     | ProposeSolution SolutionState
     | RequestCopyOfDocument
+    | RequestToggleIndexSize
     | MMNoOp
 
 

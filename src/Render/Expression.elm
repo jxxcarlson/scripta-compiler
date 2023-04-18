@@ -1,4 +1,4 @@
-module Render.Expression exposing (render)
+module Render.Expression exposing (nonstandardElements, render)
 
 import Compiler.ASTTools as ASTTools
 import Compiler.Acc exposing (Accumulator)
@@ -169,6 +169,10 @@ verbatimDict =
         , ( "code", \_ _ s m str -> code s m str )
         , ( "math", \g a _ m str -> math g a m str )
         ]
+
+
+nonstandardElements =
+    [ "button" ]
 
 
 
@@ -466,7 +470,10 @@ renderButton _ _ _ exprList =
 
 msgDict : Dict String MarkupMsg
 msgDict =
-    Dict.fromList [ ( "CopyDocument", RequestCopyOfDocument ) ]
+    Dict.fromList
+        [ ( "CopyDocument", RequestCopyOfDocument )
+        , ( "ToggleIndex", RequestToggleIndexSize )
+        ]
 
 
 var g acc s exprList =
