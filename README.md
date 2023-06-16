@@ -9,6 +9,9 @@ is used in the apps described below.
 The Scripta project (compiler and apps) is pre-release software, but in pretty good shape.
 I've used it extensively, mostly for courses  and lecture notes. I welcome comments and suggestions.
 
+This project was partially supported by a grant from the Simons Foundation.  
+I wish to thank the Foundation for their generosity.
+
 ## Contact
 
 Jim Carlson: jxxcarlson at gmail, the Elm Slack,
