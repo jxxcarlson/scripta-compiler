@@ -12,6 +12,8 @@ I've used it extensively, mostly for courses  and lecture notes. I welcome comme
 This project was partially supported by a grant from the Simons Foundation.  
 I wish to thank the Foundation for their generosity.
 
+NOTE: I am now working on version 2 of the compiler.  It features a more modular design and a much simplifie API.
+
 ## Contact
 
 Jim Carlson: jxxcarlson at gmail, the Elm Slack,
